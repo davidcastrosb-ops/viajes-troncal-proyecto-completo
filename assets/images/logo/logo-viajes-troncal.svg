@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="220" viewBox="0 0 700 220">
+<rect width="700" height="220" rx="28" fill="#ffffff"/>
+<circle cx="96" cy="108" r="58" fill="#19c7c7"/>
+<path d="M65 116 C88 78 112 74 132 78 C111 90 103 103 95 127 C88 150 83 160 69 169 C74 150 75 136 65 116 Z" fill="#f4b24d"/>
+<text x="180" y="98" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" fill="#12343b">Viajes</text>
+<text x="182" y="156" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" fill="#19c7c7">Troncal</text>
+</svg>

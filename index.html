@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viajes Troncal</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <div class="top-links">
+        <a id="topPhone" href="#" target="_blank" rel="noopener noreferrer"></a>
+        <span>•</span>
+        <span id="brandTagline"></span>
+      </div>
+      <div class="social-links">
+        <a id="socialFacebook" href="#" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a id="socialInstagram" href="#" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a id="socialTikTok" href="#" target="_blank" rel="noopener noreferrer">TikTok</a>
+      </div>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container">
+      <a class="brand" href="#">
+        <img id="brandLogo" src="" alt="Viajes Troncal">
+      </a>
+      <nav class="nav">
+        <a href="#promociones">Promociones</a>
+        <a href="#destinos">Destinos</a>
+        <a href="#contacto">Solicita información</a>
+      </nav>
+      <a class="btn-header" href="#contacto">Cotizar ahora</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-media">
+      <img id="heroImage" src="" alt="Banner principal">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="container">
+      <div class="hero-copy">
+        <span class="hero-kicker">Tu viaje empieza aquí</span>
+        <h1 id="heroTitle"></h1>
+        <p id="heroSubtitle"></p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#promociones">Ver promociones</a>
+          <a class="btn btn-ghost" href="#destinos">Explorar destinos</a>
+        </div>
+      </div>
+
+      <div class="hero-form" id="contacto">
+        <h2>¿No está tu destino? Solicita más información</h2>
+        <p>Cuéntanos a dónde quieres ir y te ayudamos a encontrar la mejor opción para tu viaje.</p>
+
+        <form id="travelForm">
+          <div class="form-grid">
+            <div class="field full">
+              <label for="destino">Destino</label>
+              <select id="destino" name="destino"></select>
+            </div>
+
+            <div class="field">
+              <label for="adultos">Adultos</label>
+              <select id="adultos" name="adultos">
+                <option value="1">1 adulto</option>
+                <option value="2" selected>2 adultos</option>
+                <option value="3">3 adultos</option>
+                <option value="4">4 adultos</option>
+                <option value="5">5 adultos</option>
+                <option value="6">6 adultos</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="ninos">Niños</label>
+              <select id="ninos" name="ninos">
+                <option value="0" selected>0 niños</option>
+                <option value="1">1 niño</option>
+                <option value="2">2 niños</option>
+                <option value="3">3 niños</option>
+                <option value="4">4 niños</option>
+              </select>
+            </div>
+
+            <div id="edadesWrap" class="field full hidden">
+              <label>Edades de los niños</label>
+              <div class="age-wrap"></div>
+            </div>
+
+            <div class="field">
+              <label for="nombre">Nombre</label>
+              <input id="nombre" name="nombre" type="text" placeholder="Tu nombre">
+            </div>
+
+            <div class="field">
+              <label for="telefono">Teléfono</label>
+              <input id="telefono" name="telefono" type="tel" placeholder="Tu teléfono">
+            </div>
+
+            <div class="field full">
+              <label for="comentario">Comentario</label>
+              <textarea id="comentario" name="comentario" placeholder="Ejemplo: quiero hotel con alberca, cerca de la playa o todo incluido."></textarea>
+            </div>
+
+            <div class="field full">
+              <button class="btn btn-primary" type="submit">Solicitar información</button>
+              <div id="formStatus" class="form-note">Tu solicitud se guarda en Google Sheets y también se prepara para WhatsApp.</div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-light" id="promociones">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Promoción destacada</h2>
+          <p>La primera promo de tu archivo de links se muestra aquí automáticamente.</p>
+        </div>
+      </div>
+
+      <div class="banner-panel">
+        <img id="bannerPromoImagen" src="" alt="Promoción destacada">
+        <div class="banner-copy">
+          <h3 id="bannerPromoTitulo">Tu próxima escapada te está esperando</h3>
+          <p id="bannerPromoSubtitulo">Playas, ciudades, pueblos mágicos y promociones especiales para viajar por México.</p>
+          <div class="hero-actions">
+            <a id="bannerPromoBoton" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">Ver promoción</a>
+            <a class="btn btn-card-secondary" href="#contacto">Pedir más información</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="destinos">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Destinos para enamorarte de viajar</h2>
+          <p>Explora playas, escapadas relajadas, viajes premium y pueblos mágicos. Puedes cambiar todas las imágenes desde la carpeta assets cuando quieras.</p>
+        </div>
+        <div class="category-pills">
+          <button class="pill active" data-filter="all">Todos</button>
+          <button class="pill" data-filter="playa">Playa</button>
+          <button class="pill" data-filter="aventura">Aventura</button>
+          <button class="pill" data-filter="lujo">Lujo</button>
+          <button class="pill" data-filter="descanso">Descanso</button>
+          <button class="pill" data-filter="pueblo-magico">Pueblos mágicos</button>
+        </div>
+      </div>
+
+      <div id="destinationsGrid" class="dest-grid"></div>
+    </div>
+  </section>
+
+  <section class="section section-light">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Promociones activas</h2>
+          <p>Solo pegas links en un archivo y aquí se publican solas las tarjetas.</p>
+        </div>
+      </div>
+      <div id="promosGrid" class="promos-grid"></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <h4 id="brandName">Viajes Troncal</h4>
+        <p>Diseñamos escapadas, vacaciones y experiencias para que viajar se sienta emocionante desde el primer clic.</p>
+      </div>
+      <div>
+        <h4>Redes</h4>
+        <p><a id="footerFacebook" href="#" target="_blank" rel="noopener noreferrer">Facebook</a></p>
+        <p><a id="footerInstagram" href="#" target="_blank" rel="noopener noreferrer">Instagram</a></p>
+        <p><a id="footerTikTok" href="#" target="_blank" rel="noopener noreferrer">TikTok</a></p>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <p><a id="footerPhone" href="#" target="_blank" rel="noopener noreferrer"></a></p>
+        <p><a id="footerMail" href="#"></a></p>
+        <p class="small-muted">Puedes cambiar WhatsApp, colores, redes y textos desde los archivos del proyecto.</p>
+      </div>
+    </div>
+  </footer>
+
+  <a id="whatsFloat" class="whatsapp-float" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+
+  <div class="modal" id="galleryModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <strong id="modalTitle">Galería</strong>
+        <button id="galleryClose" class="modal-close">Cerrar</button>
+      </div>
+      <div class="modal-main">
+        <img id="modalMainImage" class="modal-main-image" src="" alt="">
+        <div class="modal-thumbs">
+          <div id="modalThumbs"></div>
+          <a id="modalWhatsapp" class="btn btn-card" href="#" target="_blank" rel="noopener noreferrer">Cotizar este destino</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/site.js"></script>
+</body>
+</html>

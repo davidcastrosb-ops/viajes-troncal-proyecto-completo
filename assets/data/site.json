@@ -1,0 +1,241 @@
+{
+  "brand": {
+    "name": "Viajes Troncal",
+    "tagline": "Paquetes, escapadas y promociones por México",
+    "logo": "assets/images/logo/logo-viajes-troncal.svg"
+  },
+  "contact": {
+    "whatsapp": "523329335952",
+    "phoneDisplay": "33 2933 5952",
+    "email": "hola@viajestroncal.com",
+    "sheetsEndpoint": "PEGA_AQUI_TU_URL_DE_GOOGLE_APPS_SCRIPT"
+  },
+  "social": {
+    "facebook": "https://www.facebook.com/",
+    "instagram": "https://www.instagram.com/",
+    "tiktok": "https://www.tiktok.com/"
+  },
+  "theme": {
+    "primary": "#18c7ca",
+    "secondary": "#f4b24d",
+    "dark": "#14333b",
+    "lightBg": "#f7fcfc"
+  },
+  "heroDefault": {
+    "title": "Viajes por México para disfrutar, descansar y vivir experiencias inolvidables",
+    "subtitle": "Cotiza promociones, escapadas románticas, viajes familiares y destinos de playa de forma rápida por WhatsApp.",
+    "image": "assets/images/banner/banner-principal.svg"
+  },
+  "destinations": [
+    {
+      "slug": "cancun",
+      "name": "Cancún",
+      "region": "Caribe Mexicano",
+      "category": "playa",
+      "summary": "Playas turquesa, hoteles todo incluido y ambiente vibrante.",
+      "images": [
+        "assets/images/destinos/cancun/1.svg",
+        "assets/images/destinos/cancun/2.svg",
+        "assets/images/destinos/cancun/3.svg",
+        "assets/images/destinos/cancun/4.svg"
+      ],
+      "sheetLabel": "Cancún"
+    },
+    {
+      "slug": "playa-del-carmen",
+      "name": "Playa del Carmen",
+      "region": "Caribe Mexicano",
+      "category": "playa",
+      "summary": "Arena blanca, quinta avenida y escapadas con mucho ambiente.",
+      "images": [
+        "assets/images/destinos/playa-del-carmen/1.svg",
+        "assets/images/destinos/playa-del-carmen/2.svg",
+        "assets/images/destinos/playa-del-carmen/3.svg",
+        "assets/images/destinos/playa-del-carmen/4.svg"
+      ],
+      "sheetLabel": "Playa del Carmen"
+    },
+    {
+      "slug": "tulum",
+      "name": "Tulum",
+      "region": "Caribe Mexicano",
+      "category": "playa",
+      "summary": "Ruinas, beach clubs y una vibra relajada eco-chic.",
+      "images": [
+        "assets/images/destinos/tulum/1.svg",
+        "assets/images/destinos/tulum/2.svg",
+        "assets/images/destinos/tulum/3.svg",
+        "assets/images/destinos/tulum/4.svg"
+      ],
+      "sheetLabel": "Tulum"
+    },
+    {
+      "slug": "cozumel",
+      "name": "Cozumel",
+      "region": "Caribe Mexicano",
+      "category": "playa",
+      "summary": "Mar cristalino, buceo y paseos ideales para desconectarte.",
+      "images": [
+        "assets/images/destinos/cozumel/1.svg",
+        "assets/images/destinos/cozumel/2.svg",
+        "assets/images/destinos/cozumel/3.svg",
+        "assets/images/destinos/cozumel/4.svg"
+      ],
+      "sheetLabel": "Cozumel"
+    },
+    {
+      "slug": "puerto-vallarta",
+      "name": "Puerto Vallarta",
+      "region": "Pacífico Dorado",
+      "category": "playa",
+      "summary": "Malecón, atardeceres y hoteles para parejas o familias.",
+      "images": [
+        "assets/images/destinos/puerto-vallarta/1.svg",
+        "assets/images/destinos/puerto-vallarta/2.svg",
+        "assets/images/destinos/puerto-vallarta/3.svg",
+        "assets/images/destinos/puerto-vallarta/4.svg"
+      ],
+      "sheetLabel": "Puerto Vallarta"
+    },
+    {
+      "slug": "nuevo-nayarit",
+      "name": "Nuevo Nayarit",
+      "region": "Pacífico Dorado",
+      "category": "playa",
+      "summary": "Resorts, mar tranquilo y experiencias premium frente a la playa.",
+      "images": [
+        "assets/images/destinos/nuevo-nayarit/1.svg",
+        "assets/images/destinos/nuevo-nayarit/2.svg",
+        "assets/images/destinos/nuevo-nayarit/3.svg",
+        "assets/images/destinos/nuevo-nayarit/4.svg"
+      ],
+      "sheetLabel": "Nuevo Nayarit"
+    },
+    {
+      "slug": "huatulco",
+      "name": "Huatulco",
+      "region": "Pacífico Sur",
+      "category": "playa",
+      "summary": "Bahías hermosas, aguas limpias y un viaje para relajarte de verdad.",
+      "images": [
+        "assets/images/destinos/huatulco/1.svg",
+        "assets/images/destinos/huatulco/2.svg",
+        "assets/images/destinos/huatulco/3.svg",
+        "assets/images/destinos/huatulco/4.svg"
+      ],
+      "sheetLabel": "Huatulco"
+    },
+    {
+      "slug": "puerto-escondido",
+      "name": "Puerto Escondido",
+      "region": "Pacífico Sur",
+      "category": "aventura",
+      "summary": "Surf, ambiente joven y playas para aventura o descanso.",
+      "images": [
+        "assets/images/destinos/puerto-escondido/1.svg",
+        "assets/images/destinos/puerto-escondido/2.svg",
+        "assets/images/destinos/puerto-escondido/3.svg",
+        "assets/images/destinos/puerto-escondido/4.svg"
+      ],
+      "sheetLabel": "Puerto Escondido"
+    },
+    {
+      "slug": "los-cabos",
+      "name": "Los Cabos",
+      "region": "Baja California Sur",
+      "category": "lujo",
+      "summary": "Escapadas premium, paisaje único y hoteles de gran nivel.",
+      "images": [
+        "assets/images/destinos/los-cabos/1.svg",
+        "assets/images/destinos/los-cabos/2.svg",
+        "assets/images/destinos/los-cabos/3.svg",
+        "assets/images/destinos/los-cabos/4.svg"
+      ],
+      "sheetLabel": "Los Cabos"
+    },
+    {
+      "slug": "la-paz",
+      "name": "La Paz",
+      "region": "Baja California Sur",
+      "category": "playa",
+      "summary": "Mar sereno, vistas increíbles y experiencias memorables.",
+      "images": [
+        "assets/images/destinos/la-paz/1.svg",
+        "assets/images/destinos/la-paz/2.svg",
+        "assets/images/destinos/la-paz/3.svg",
+        "assets/images/destinos/la-paz/4.svg"
+      ],
+      "sheetLabel": "La Paz"
+    },
+    {
+      "slug": "loreto",
+      "name": "Loreto",
+      "region": "Baja California Sur",
+      "category": "descanso",
+      "summary": "Historia, mar y una sensación de paz total.",
+      "images": [
+        "assets/images/destinos/loreto/1.svg",
+        "assets/images/destinos/loreto/2.svg",
+        "assets/images/destinos/loreto/3.svg",
+        "assets/images/destinos/loreto/4.svg"
+      ],
+      "sheetLabel": "Loreto"
+    },
+    {
+      "slug": "acapulco",
+      "name": "Acapulco",
+      "region": "Tradicionales",
+      "category": "playa",
+      "summary": "Un clásico para escaparte con gran energía y buena comida.",
+      "images": [
+        "assets/images/destinos/acapulco/1.svg",
+        "assets/images/destinos/acapulco/2.svg",
+        "assets/images/destinos/acapulco/3.svg",
+        "assets/images/destinos/acapulco/4.svg"
+      ],
+      "sheetLabel": "Acapulco"
+    },
+    {
+      "slug": "mazatlan",
+      "name": "Mazatlán",
+      "region": "Tradicionales",
+      "category": "playa",
+      "summary": "Malecón, mar y excelente ambiente para toda la familia.",
+      "images": [
+        "assets/images/destinos/mazatlan/1.svg",
+        "assets/images/destinos/mazatlan/2.svg",
+        "assets/images/destinos/mazatlan/3.svg",
+        "assets/images/destinos/mazatlan/4.svg"
+      ],
+      "sheetLabel": "Mazatlán"
+    },
+    {
+      "slug": "ixtapa-zihuatanejo",
+      "name": "Ixtapa Zihuatanejo",
+      "region": "Tradicionales",
+      "category": "playa",
+      "summary": "Dos estilos en un solo viaje: descanso y ambiente costero.",
+      "images": [
+        "assets/images/destinos/ixtapa-zihuatanejo/1.svg",
+        "assets/images/destinos/ixtapa-zihuatanejo/2.svg",
+        "assets/images/destinos/ixtapa-zihuatanejo/3.svg",
+        "assets/images/destinos/ixtapa-zihuatanejo/4.svg"
+      ],
+      "sheetLabel": "Ixtapa Zihuatanejo"
+    },
+    {
+      "slug": "pueblos-magicos-jalisco",
+      "name": "Pueblos Mágicos de Jalisco",
+      "region": "Occidente",
+      "category": "pueblo-magico",
+      "summary": "Escápate a rincones llenos de tradición, naturaleza y encanto.",
+      "images": [
+        "assets/images/destinos/pueblos-magicos-jalisco/1.svg",
+        "assets/images/destinos/pueblos-magicos-jalisco/2.svg",
+        "assets/images/destinos/pueblos-magicos-jalisco/3.svg",
+        "assets/images/destinos/pueblos-magicos-jalisco/4.svg"
+      ],
+      "sheetLabel": "Pueblos Mágicos de Jalisco"
+    }
+  ]
+}

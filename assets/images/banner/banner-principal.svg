@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="980" viewBox="0 0 1920 980">
+<defs>
+<linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0%" stop-color="#1fc9d6"/>
+<stop offset="55%" stop-color="#1d7fd7"/>
+<stop offset="100%" stop-color="#f6b24a"/>
+</linearGradient>
+</defs>
+<rect width="1920" height="980" fill="url(#g)"/>
+<circle cx="1550" cy="180" r="110" fill="rgba(255,255,255,.18)"/>
+<circle cx="1720" cy="270" r="45" fill="rgba(255,255,255,.20)"/>
+<path d="M0 760 C250 680 420 840 700 760 C980 680 1120 890 1410 790 C1630 715 1760 760 1920 700 L1920 980 L0 980 Z" fill="rgba(255,255,255,.14)"/>
+<path d="M0 820 C280 720 470 900 720 830 C980 760 1210 930 1460 850 C1680 790 1780 830 1920 790 L1920 980 L0 980 Z" fill="rgba(255,255,255,.18)"/>
+<text x="110" y="300" font-family="Arial, Helvetica, sans-serif" font-size="96" font-weight="700" fill="white">Tu próxima escapada te está esperando</text>
+<text x="110" y="390" font-family="Arial, Helvetica, sans-serif" font-size="36" fill="white">Playas, ciudades, pueblos mágicos y promociones listas para cotizar.</text>
+<text x="110" y="470" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="white" opacity=".9">Viajes Troncal • Paquetes, escapadas y promociones por México</text>
+</svg>

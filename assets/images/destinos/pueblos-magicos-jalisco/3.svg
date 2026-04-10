@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0%" stop-color="#f6b24a"/><stop offset="100%" stop-color="#22c1c3"/></linearGradient></defs>
+<rect width="1200" height="800" fill="url(#g)"/>
+<circle cx="980" cy="160" r="120" fill="rgba(255,255,255,.16)"/>
+<circle cx="860" cy="270" r="50" fill="rgba(255,255,255,.14)"/>
+<path d="M0 640 C180 580 280 690 470 640 C640 595 810 740 1000 670 C1080 640 1150 645 1200 630 L1200 800 L0 800 Z" fill="rgba(255,255,255,.16)"/>
+<text x="60" y="110" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="700" fill="white">Pueblos Mágicos de Jalisco 3</text>
+<text x="60" y="170" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="white">Imagen de muestra editable desde la carpeta assets</text>
+</svg>
