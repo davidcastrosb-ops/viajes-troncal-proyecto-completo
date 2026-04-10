@@ -1,23 +1,19 @@
+
 PROYECTO LIMPIO - VIAJES TRONCAL
 
-Este ZIP ya viene limpio para subir:
+Ya viene listo para subir:
 - sin vercel.json
 - con api/preview.js
 - con package.json para Node 20
 - con promociones automáticas por links
-- con formulario para Google Sheets + WhatsApp
+- con el link de ejemplo:
+  https://mx.travelpromomaker.com/promomaker/contact/45981/copy
 
 ARCHIVOS QUE VAS A EDITAR NORMALMENTE
 
 1) assets/data/promos.json
 Ahí pegas solo tus links de promociones.
 Lo abres con clic derecho > Abrir con > Bloc de notas
-
-Ejemplo:
-[
-  "https://mx.travelpromomaker.com/promomaker/contact/45921/copy",
-  "https://mx.travelpromomaker.com/promomaker/contact/99999/copy"
-]
 
 2) assets/data/site.json
 Ahí cambias:

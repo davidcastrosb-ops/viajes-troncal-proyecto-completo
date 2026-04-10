@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="220" viewBox="0 0 720 220"><rect width="720" height="220" fill="white"/><circle cx="90" cy="90" r="48" fill="#18c7ca"/><path d="M66 98 C84 66 112 58 132 62 C116 75 108 87 100 110 C93 130 86 142 73 150 C76 131 76 115 66 98 Z" fill="#f4b24d"/><text x="160" y="95" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#f4b24d">Viajes</text><text x="160" y="155" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#18c7ca">Troncal</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="220" viewBox="0 0 720 220">
+<rect width="720" height="220" fill="white"/>
+<circle cx="90" cy="90" r="48" fill="#18c7ca"/>
+<path d="M66 98 C84 66 112 58 132 62 C116 75 108 87 100 110 C93 130 86 142 73 150 C76 131 76 115 66 98 Z" fill="#f4b24d"/>
+<text x="160" y="95" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#f4b24d">Viajes</text>
+<text x="160" y="155" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#18c7ca">Troncal</text>
+</svg>
