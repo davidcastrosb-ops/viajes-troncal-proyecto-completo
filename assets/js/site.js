@@ -6,7 +6,6 @@ async function loadJSON(path){
   if(!r.ok) throw new Error('No se pudo cargar ' + path);
   return r.json();
 }
-
 function setText(id, text){ const el = document.getElementById(id); if(el) el.textContent = text || ''; }
 function setHref(id, href){ const el = document.getElementById(id); if(el) el.href = href || '#'; }
 function setSrc(id, src, alt=''){ const el = document.getElementById(id); if(el){ el.src = src || ''; if(alt) el.alt = alt; } }
@@ -36,69 +35,29 @@ function applyConfig(){
   setSrc('heroImage', SITE.hero.image, SITE.hero.title);
   setText('heroTitle', SITE.hero.title);
   setText('heroSubtitle', SITE.hero.subtitle);
-
-  const select = document.getElementById('destino');
-  select.innerHTML = '<option value="">Selecciona un destino</option>' +
-    SITE.destinations.map(d => `<option value="${d.slug}">${d.name}</option>`).join('');
 }
 
-function destinationBySlug(slug){
-  return SITE.destinations.find(d => d.slug === slug);
-}
-
-function updateHeroForDestination(slug){
-  const d = destinationBySlug(slug);
-  if(!d){
-    setSrc('heroImage', SITE.hero.image, SITE.hero.title);
-    setText('heroTitle', SITE.hero.title);
-    setText('heroSubtitle', SITE.hero.subtitle);
-    return;
-  }
-  setSrc('heroImage', d.images[0], d.name);
-  setText('heroTitle', d.name);
-  setText('heroSubtitle', d.summary);
-}
-
-function renderDestinations(){
-  const grid = document.getElementById('destinationsGrid');
-  grid.innerHTML = SITE.destinations.map(d => {
-    const msg = encodeURIComponent(`Hola, quiero información de ${d.name}. Vi la ficha en la landing y me gustaría cotizar.`);
-    return `
-      <article class="card">
-        <img src="${d.images[0]}" alt="${d.name}">
-        <div class="card-body">
-          <h3>${d.name}</h3>
-          <p>${d.summary}</p>
-          <div class="actions">
-            <a class="btn btn-soft" href="${d.images[0]}" target="_blank" rel="noopener noreferrer">Ver imagen</a>
-            <a class="btn btn-primary" href="https://wa.me/${SITE.contact.whatsapp}?text=${msg}" target="_blank" rel="noopener noreferrer">Cotizar por WhatsApp</a>
-          </div>
-        </div>
-      </article>
-    `;
-  }).join('');
-}
-
-async function loadPromos(){
+async function loadPromosIntoCards(){
   const links = await loadJSON('assets/data/promos.json');
-  const grid = document.getElementById('promosGrid');
-  let first = null;
+  const grid = document.getElementById('promosCards');
+  grid.innerHTML = '';
 
   for(const entry of links){
     const link = typeof entry === 'string' ? entry : entry.url;
     if(!link) continue;
+
     try{
       const r = await fetch('/api/preview?url=' + encodeURIComponent(link));
       const meta = await r.json();
-      const title = meta.title || 'Promoción de viaje';
+      const title = meta.title && meta.title !== 'PromoMaker' ? meta.title : 'Promoción especial';
       const desc = meta.description || 'Descubre esta promoción y cotiza por WhatsApp.';
       const image = meta.image || SITE.hero.image;
-      if(!first) first = {title, desc, image, link};
       const wa = encodeURIComponent(`Hola, quiero información de esta promoción:\n${title}\n${link}`);
+
       grid.insertAdjacentHTML('beforeend', `
-        <article class="promo-card">
+        <article class="card">
           <img src="${image}" alt="${title}">
-          <div class="promo-body">
+          <div class="card-body">
             <h3>${title}</h3>
             <p>${desc}</p>
             <div class="actions">
@@ -111,13 +70,6 @@ async function loadPromos(){
     }catch(e){
       console.error(e);
     }
-  }
-
-  if(first){
-    setSrc('promoBannerImage', first.image, first.title);
-    setText('promoBannerTitle', first.title);
-    setText('promoBannerText', first.desc);
-    setHref('promoBannerBtn', first.link);
   }
 }
 
@@ -138,15 +90,10 @@ async function saveToSheets(data){
 
 function setupForm(){
   const form = document.getElementById('travelForm');
-  const destino = document.getElementById('destino');
-
-  destino.addEventListener('change', () => updateHeroForDestination(destino.value));
-
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const d = destinationBySlug(destino.value);
     const data = {
-      destination: d ? d.name : 'No especificado',
+      destination: document.getElementById('destino').value || 'No especificado',
       adults: document.getElementById('adultos').value,
       children: document.getElementById('ninos').value,
       name: document.getElementById('nombre').value,
@@ -168,8 +115,7 @@ function setupForm(){
 async function init(){
   SITE = await loadJSON('assets/data/site.json');
   applyConfig();
-  renderDestinations();
   setupForm();
-  loadPromos();
+  loadPromosIntoCards();
 }
 document.addEventListener('DOMContentLoaded', init);

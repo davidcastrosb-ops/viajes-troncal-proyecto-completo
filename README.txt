@@ -1,37 +1,24 @@
 
-PROYECTO LIMPIO - VIAJES TRONCAL
+VERSIÓN V3 - FICHAS DE PROMOS
 
-Ya viene listo para subir:
-- sin vercel.json
-- con api/preview.js
-- con package.json para Node 20
-- con promociones automáticas por links
-- con el link de ejemplo:
+Esta versión ya hace esto:
+- cada link del archivo promos.json se convierte en una ficha/tarjeta
+- no usa la promo como bloque ancho abajo
+- usa la promo de ejemplo:
   https://mx.travelpromomaker.com/promomaker/contact/45981/copy
 
-ARCHIVOS QUE VAS A EDITAR NORMALMENTE
+Para agregar más promos:
+abre assets/data/promos.json con Bloc de notas
+y agrega más links así:
 
-1) assets/data/promos.json
-Ahí pegas solo tus links de promociones.
-Lo abres con clic derecho > Abrir con > Bloc de notas
+[
+  "https://mx.travelpromomaker.com/promomaker/contact/45981/copy",
+  "https://mx.travelpromomaker.com/promomaker/contact/OTRO_LINK/copy"
+]
 
-2) assets/data/site.json
-Ahí cambias:
-- WhatsApp
-- redes
-- colores
-- logo
-- banner
-- endpoint de Google Sheets
-
-Google Sheets:
-en assets/data/site.json busca:
-"sheetsEndpoint": "PEGA_AQUI_TU_URL_DE_GOOGLE_APPS_SCRIPT"
-y reemplázalo por tu URL
-
-Subir a GitHub y Vercel:
-1. Borra de tu repo actual todo lo viejo
-2. Copia todo lo de este ZIP
-3. Commit
-4. Push
+Subir:
+1. borra lo viejo del repo
+2. copia todo este ZIP
+3. commit
+4. push
 5. Vercel redeploya

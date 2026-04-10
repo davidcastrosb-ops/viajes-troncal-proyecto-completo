@@ -20,7 +20,6 @@
       <a class="brand" href="#"><img id="brandLogo" src="" alt="Viajes Troncal"></a>
       <nav class="nav">
         <a href="#promociones">Promociones</a>
-        <a href="#destinos">Destinos</a>
         <a href="#contacto">Solicita información</a>
       </nav>
       <a class="btn-header" href="#contacto">Cotizar ahora</a>
@@ -39,7 +38,7 @@
         <p id="heroSubtitle"></p>
         <div class="hero-actions">
           <a class="btn btn-secondary" href="#promociones">Ver promociones</a>
-          <a class="btn btn-soft" href="#destinos">Explorar destinos</a>
+          <a class="btn btn-soft" href="#contacto">Solicita información</a>
         </div>
       </div>
 
@@ -49,12 +48,12 @@
         <form id="travelForm">
           <div class="form-grid">
             <div class="field full">
-              <label for="destino">Destino</label>
-              <select id="destino" name="destino"></select>
+              <label for="destino">Destino o ciudad que quieres</label>
+              <input id="destino" type="text" placeholder="Ejemplo: Cancún, Vallarta, Tulum...">
             </div>
             <div class="field">
               <label for="adultos">Adultos</label>
-              <select id="adultos" name="adultos">
+              <select id="adultos">
                 <option value="1">1 adulto</option>
                 <option value="2" selected>2 adultos</option>
                 <option value="3">3 adultos</option>
@@ -63,7 +62,7 @@
             </div>
             <div class="field">
               <label for="ninos">Niños</label>
-              <select id="ninos" name="ninos">
+              <select id="ninos">
                 <option value="0" selected>0 niños</option>
                 <option value="1">1 niño</option>
                 <option value="2">2 niños</option>
@@ -96,45 +95,11 @@
     <div class="container">
       <div class="section-head">
         <div>
-          <h2>Promoción destacada</h2>
-          <p>La primera promo de tu archivo de links se muestra aquí automáticamente.</p>
-        </div>
-      </div>
-      <div class="banner-grid">
-        <img id="promoBannerImage" src="assets/images/banner/banner-principal.svg" alt="Promoción destacada">
-        <div class="banner-copy">
-          <h3 id="promoBannerTitle">Tu próxima escapada te está esperando</h3>
-          <p id="promoBannerText">Playas, ciudades, pueblos mágicos y promociones especiales para viajar por México.</p>
-          <div class="actions">
-            <a id="promoBannerBtn" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">Ver promoción</a>
-            <a class="btn btn-soft" href="#contacto">Pedir más información</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="destinos">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2>Destinos para enamorarte de viajar</h2>
-          <p>Explora playas, ciudades y pueblos mágicos. Luego solo reemplaza tus fotos reales dentro de la carpeta assets.</p>
-        </div>
-      </div>
-      <div id="destinationsGrid" class="grid"></div>
-    </div>
-  </section>
-
-  <section class="section section-light">
-    <div class="container">
-      <div class="section-head">
-        <div>
           <h2>Promociones activas</h2>
-          <p>Aquí se publican las promos que agregues en el archivo de links.</p>
+          <p>Cada link que agregues en el archivo de promociones se convierte en una ficha como estas.</p>
         </div>
       </div>
-      <div id="promosGrid" class="grid"></div>
+      <div id="promosCards" class="grid"></div>
     </div>
   </section>
 
