@@ -1,47 +1,47 @@
-VIAJES TRONCAL - LANDING PREMIUM + KOMMO
+VIAJES TRONCAL - LANDING PREMIUM CON JOTFORM + KOMMO
 
-Esta versión usa un formulario propio dentro de la landing, NO abre Jotform en la página.
-El formulario envía la información al webhook de Make y Make la manda a Kommo como lead + nota.
+Esta versión usa la landing como portada bonita y el formulario real de Jotform incrustado dentro de la página.
 
-FLUJO:
-Cliente llena formulario en viajes.3dhomes.com.mx
-→ webhook de Make
-→ Kommo / embudo Viajes Troncal
-→ nota con datos del viaje
+Flujo confirmado:
+Landing viajes.3dhomes.com.mx
+→ Jotform incrustado
+→ Make
+→ Kommo
+→ Lead + nota con datos del viaje
 
 IMPORTANTE:
-- El botón principal de la portada baja al formulario dentro de la misma página.
-- Ya no aparece el botón extra "Abrir formulario" para no confundir al cliente.
-- Jotform queda solo como respaldo externo si lo necesitas; el formulario bonito de la landing es el principal.
+No se usa formulario propio de la landing para mandar datos. Esto evita errores. El formulario visible es el de Jotform que ya quedó conectado a Make y Kommo.
 
-CAMBIAR PORTADA:
+FORMULARIO JOTFORM:
+https://form.jotform.com/261127730314044
+
+PARA CAMBIAR LA PORTADA:
 Opción fácil:
-1. Reemplaza la imagen assets/images/portadas/hero-viajes-troncal.jpg
-2. Usa el mismo nombre: hero-viajes-troncal.jpg
-3. Haz commit y push desde GitHub Desktop.
+1. Entra a assets/images/portadas/
+2. Reemplaza hero-viajes-troncal.jpg por otra imagen con el mismo nombre.
+3. Sube cambios a GitHub Desktop y haz Push.
+4. Vercel actualizará el sitio.
 
-Opción por temporada:
-1. Sube otra imagen en assets/images/portadas/
-2. Edita assets/data/site.json
-3. Cambia la línea:
+Opción ordenada:
+1. Agrega otra imagen en assets/images/portadas/, por ejemplo navidad.jpg
+2. Abre assets/data/site.json
+3. Cambia esta línea:
    "image": "assets/images/portadas/hero-viajes-troncal.jpg"
-   por ejemplo:
+   por:
    "image": "assets/images/portadas/navidad.jpg"
+4. Guarda, commit y push.
 
-CONFIGURACIÓN PRINCIPAL:
-Archivo: assets/data/site.json
-Ahí puedes cambiar:
-- WhatsApp
-- correo
-- redes sociales
-- imagen de portada
-- webhook de Make
-- link de Jotform de respaldo
+PARA CAMBIAR WHATSAPP:
+Abre assets/data/site.json y cambia:
+"whatsapp": "523329335952"
 
-SUBIR A VERCEL:
+PARA CAMBIAR EL FORMULARIO:
+Abre assets/data/site.json y cambia:
+"jotformUrl": "https://form.jotform.com/261127730314044"
+
+SUBIR A GITHUB / VERCEL:
 1. Descomprime este ZIP.
-2. Copia los archivos al repositorio de viajes.3dhomes.com.mx.
-3. Abre GitHub Desktop.
-4. Commit.
-5. Push origin.
-6. Vercel actualizará automáticamente.
+2. Copia todo a la carpeta del proyecto conectado a Vercel.
+3. En GitHub Desktop: Commit.
+4. Push origin.
+5. Vercel redeploya automáticamente.

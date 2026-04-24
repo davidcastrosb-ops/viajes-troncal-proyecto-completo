@@ -1,13 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="220" viewBox="0 0 720 220" role="img" aria-label="Viajes Troncal">
-<defs>
-  <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#09A8B5"/><stop offset="1" stop-color="#007D8C"/></linearGradient>
-</defs>
-<circle cx="102" cy="106" r="70" fill="#fff" opacity=".96"/>
-<circle cx="102" cy="106" r="64" fill="url(#sea)"/>
-<path d="M48 105c36-16 65-14 108 2v22c-42-18-73-20-108-2z" fill="#fff" opacity=".95"/>
-<path d="M54 135c34-16 70-15 101 1v17c-34-14-68-15-101 2z" fill="#fff" opacity=".9"/>
-<path d="M52 94h100c-12-30-36-49-67-48-17 1-30 8-42 20 18-2 34 5 45 17-12-3-24-1-36 11z" fill="#D9A441"/>
-<path d="M70 72h68" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".8"/>
-<text x="190" y="93" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="700" fill="#078B98">Viajes</text>
-<text x="190" y="160" font-family="Georgia, 'Times New Roman', serif" font-size="78" font-weight="700" fill="#006F7D">Troncal</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="220" viewBox="0 0 720 220">
+<rect width="720" height="220" fill="white"/>
+<circle cx="90" cy="90" r="48" fill="#18c7ca"/>
+<path d="M66 98 C84 66 112 58 132 62 C116 75 108 87 100 110 C93 130 86 142 73 150 C76 131 76 115 66 98 Z" fill="#f4b24d"/>
+<text x="160" y="95" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#f4b24d">Viajes</text>
+<text x="160" y="155" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#18c7ca">Troncal</text>
 </svg>

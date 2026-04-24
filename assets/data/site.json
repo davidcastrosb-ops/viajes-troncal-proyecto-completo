@@ -1,4 +1,7 @@
 {
+  "meta": {
+    "title": "Viajes Troncal | Cotiza tu viaje"
+  },
   "brand": {
     "name": "Viajes Troncal",
     "logo": "assets/images/logo/logo-viajes-troncal.svg"
@@ -8,16 +11,15 @@
     "phoneDisplay": "33 2933 5952",
     "email": "hola@viajestroncal.com"
   },
-  "integrations": {
-    "makeWebhookUrl": "https://hook.us2.make.com/70w5gluf8nge97fnalaj",
+  "forms": {
     "jotformUrl": "https://form.jotform.com/261127730314044"
   },
   "theme": {
-    "primary": "#079EAA",
-    "primaryDark": "#006F7D",
-    "secondary": "#D9A441",
-    "dark": "#08233D",
-    "lightBg": "#F1FBFC"
+    "primary": "#00a9b7",
+    "primaryDark": "#008997",
+    "gold": "#d9a441",
+    "navy": "#062b49",
+    "soft": "#f3fbfc"
   },
   "social": {
     "facebook": "https://www.facebook.com/",
@@ -25,9 +27,10 @@
     "tiktok": "https://www.tiktok.com/"
   },
   "hero": {
+    "kicker": "🌴 Viajes grupales, familiares y personalizados",
     "title": "Cotiza tu viaje",
-    "script": "con nosotros",
-    "subtitle": "Viajes grupales, familiares y personalizados",
+    "accent": "con nosotros",
+    "subtitle": "Cuéntanos tu destino, fechas y número de viajeros. Preparamos una cotización personalizada y te contactamos por WhatsApp.",
     "image": "assets/images/portadas/hero-viajes-troncal.jpg"
   }
 }

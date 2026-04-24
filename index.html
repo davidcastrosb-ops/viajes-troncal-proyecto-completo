@@ -4,175 +4,134 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Viajes Troncal | Cotiza tu viaje</title>
-  <meta name="description" content="Cotiza viajes grupales, familiares y personalizados con Viajes Troncal. Solicita tu propuesta y recibe atención por WhatsApp." />
+  <meta name="description" content="Cotiza viajes grupales, familiares y personalizados con Viajes Troncal." />
+  <link rel="preconnect" href="https://form.jotform.com" />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="#inicio" aria-label="Viajes Troncal">
-      <img id="brandLogo" src="assets/images/logo/logo-viajes-troncal.svg" alt="Viajes Troncal" />
-    </a>
-    <nav class="nav" aria-label="Navegación principal">
-      <a href="#cotizar">Cotizar</a>
-      <a href="#promociones">Promociones</a>
-      <a href="#como-funciona">Cómo funciona</a>
-      <a href="#contacto">Contacto</a>
-    </nav>
-    <a id="headerWhatsapp" class="btn btn-outline" href="#" target="_blank" rel="noopener">WhatsApp</a>
+    <div class="container header-inner">
+      <a class="brand" href="#inicio" aria-label="Viajes Troncal">
+        <img id="brandLogo" src="assets/images/logo/logo-viajes-troncal.svg" alt="Viajes Troncal" />
+      </a>
+      <nav class="nav" aria-label="Navegación principal">
+        <a href="#cotizar">Cotizar</a>
+        <a href="#promociones">Promociones</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+      <a id="headerWhatsapp" class="btn btn-outline" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    </div>
   </header>
 
-  <main id="inicio" class="page-shell">
-    <section class="quote-hero" id="cotizar">
-      <div class="hero-panel">
-        <img id="heroImage" class="hero-bg" src="assets/images/portadas/hero-viajes-troncal.jpg" alt="Destino de viaje tropical" />
-        <div class="hero-shade"></div>
-        <div class="hero-content">
-          <img class="hero-logo" src="assets/images/logo/logo-viajes-troncal.svg" alt="Viajes Troncal" />
-          <p class="eyebrow">🌴 Viajes grupales, familiares y personalizados</p>
-          <h1><span id="heroTitle">Cotiza tu viaje</span><em id="heroScript">con nosotros</em></h1>
-          <p id="heroSubtitle" class="hero-subtitle">Cuéntanos tu destino, fechas y número de viajeros. Te preparamos una cotización personalizada.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#formulario-viaje">✈ Solicita tu viaje personalizado</a>
-          </div>
-        </div>
-        <div class="benefit-bar" id="benefitBar">
-          <div><span>🛡️</span>Seguridad<br>y confianza</div>
-          <div><span>🎧</span>Atención<br>personalizada</div>
-          <div><span>🏅</span>Mejores precios<br>garantizados</div>
-          <div><span>📸</span>Experiencias<br>inolvidables</div>
-        </div>
-      </div>
-
-      <aside class="form-panel" id="formulario-viaje" aria-labelledby="formTitle">
-        <div class="form-heading">
-          <p class="form-kicker">Solicitud de cotización</p>
-          <h2 id="formTitle">Cuéntanos tu idea de viaje</h2>
-          <p>Esta solicitud llega directo a nuestro seguimiento para responderte por WhatsApp.</p>
-        </div>
-
-        <form id="travelForm" class="travel-form" autocomplete="on">
-          <div class="form-row two">
-            <label>Nombre completo
-              <input name="nombre" id="nombre" type="text" placeholder="Ej. Juan Pérez García" required />
-            </label>
-            <label>WhatsApp
-              <input name="whatsapp" id="whatsapp" type="tel" placeholder="Ej. 33 1234 5678" required />
-            </label>
-          </div>
-          <label>Correo electrónico
-            <input name="email" id="email" type="email" placeholder="Ej. juan.perez@email.com" />
-          </label>
-          <div class="form-row two">
-            <label>Destino deseado
-              <input name="destino" id="destino" type="text" placeholder="Ej. Cancún, Riviera Maya" required />
-            </label>
-            <label>Ciudad de salida
-              <input name="salida" id="salida" type="text" placeholder="Ej. Guadalajara" required />
-            </label>
-          </div>
-          <div class="form-row two">
-            <label>Fecha tentativa de salida
-              <input name="fechaSalida" id="fechaSalida" type="date" />
-            </label>
-            <label>Fecha tentativa de regreso
-              <input name="fechaRegreso" id="fechaRegreso" type="date" />
-            </label>
-          </div>
-          <div class="form-row two align-start">
-            <label>Número de personas
-              <select name="personas" id="personas" required>
-                <option value="">Selecciona</option>
-                <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-                <option>6 a 10</option><option>11 a 20</option><option>21 a 40</option><option>Más de 40</option>
-              </select>
-            </label>
-            <fieldset class="chips-field">
-              <legend>Tipo de viaje</legend>
-              <div class="chips compact">
-                <label><input type="radio" name="tipoViaje" value="Familiar" checked><span>👨‍👩‍👧 Familiar</span></label>
-                <label><input type="radio" name="tipoViaje" value="Pareja"><span>♡ Pareja</span></label>
-                <label><input type="radio" name="tipoViaje" value="Grupo"><span>👥 Grupo</span></label>
-                <label><input type="radio" name="tipoViaje" value="Escolar"><span>🎓 Escolar</span></label>
-              </div>
-            </fieldset>
-          </div>
-          <fieldset class="chips-field full">
-            <legend>¿Qué necesitas incluir?</legend>
-            <div class="chips">
-              <label><input type="checkbox" name="servicios" value="Transporte"><span>🚌 Transporte</span></label>
-              <label><input type="checkbox" name="servicios" value="Hotel"><span>🏨 Hotel</span></label>
-              <label><input type="checkbox" name="servicios" value="Tours"><span>📷 Tours</span></label>
-              <label><input type="checkbox" name="servicios" value="Alimentos"><span>🍽️ Alimentos</span></label>
-              <label><input type="checkbox" name="servicios" value="Seguro"><span>🛡️ Seguro</span></label>
+  <main id="inicio">
+    <section class="hero-section" id="cotizar">
+      <div class="container hero-grid">
+        <aside class="hero-card">
+          <img id="heroImage" class="hero-bg" src="assets/images/portadas/hero-viajes-troncal.jpg" alt="Destino turístico" />
+          <div class="hero-shade"></div>
+          <div class="hero-content">
+            <img id="heroLogo" class="hero-logo" src="assets/images/logo/logo-viajes-troncal.svg" alt="Viajes Troncal" />
+            <span id="heroKicker" class="pill">🌴 Viajes grupales, familiares y personalizados</span>
+            <h1><span id="heroTitle">Cotiza tu viaje</span><em id="heroAccent">con nosotros</em></h1>
+            <p id="heroSubtitle">Cuéntanos tu destino, fechas y número de viajeros. Preparamos una cotización personalizada y te contactamos por WhatsApp.</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#jotform-frame">✈ Solicita tu viaje personalizado</a>
+              <a id="heroWhatsapp" class="btn btn-glass" href="#" target="_blank" rel="noopener noreferrer">Hablar por WhatsApp</a>
             </div>
-          </fieldset>
-          <label>Presupuesto aproximado por persona
-            <select name="presupuesto" id="presupuesto">
-              <option value="">Selecciona un rango</option>
-              <option>Menos de $2,000</option>
-              <option>$2,000 a $4,000</option>
-              <option>$4,000 a $7,000</option>
-              <option>$7,000 a $10,000</option>
-              <option>Más de $10,000</option>
-              <option>Aún no sé</option>
-            </select>
-          </label>
-          <label>Comentarios adicionales
-            <textarea name="comentarios" id="comentarios" placeholder="Cuéntanos más sobre tu viaje ideal, actividades que te interesan, edades de pasajeros o requerimientos especiales."></textarea>
-          </label>
-          <button class="btn btn-submit" type="submit">✈ Enviar solicitud</button>
-          <p id="formStatus" class="form-status">💬 Te contactaremos por WhatsApp con una cotización personalizada.</p>
-        </form>
-      </aside>
-    </section>
+          </div>
+          <div class="benefit-strip" aria-label="Beneficios">
+            <div><strong>🛡️</strong><span>Seguridad<br />y confianza</span></div>
+            <div><strong>🎧</strong><span>Atención<br />personalizada</span></div>
+            <div><strong>🏅</strong><span>Mejores precios<br />garantizados</span></div>
+            <div><strong>📸</strong><span>Experiencias<br />inolvidables</span></div>
+          </div>
+        </aside>
 
-    <section class="section" id="como-funciona">
-      <div class="section-head centered">
-        <p class="section-kicker">Así de fácil</p>
-        <h2>Tu cotización en 4 pasos</h2>
-        <p>No necesitas tener todo decidido. Con una idea general podemos ayudarte a construir la mejor opción para tu grupo.</p>
-      </div>
-      <div class="steps-grid">
-        <article><span>1</span><h3>Nos cuentas tu idea</h3><p>Destino, fechas, número de personas y servicios que quieres incluir.</p></article>
-        <article><span>2</span><h3>Revisamos opciones</h3><p>Buscamos alternativas de transporte, hotel, tours o paquete completo.</p></article>
-        <article><span>3</span><h3>Te cotizamos</h3><p>Recibes una propuesta personalizada por WhatsApp.</p></article>
-        <article><span>4</span><h3>Apartas tu viaje</h3><p>Confirmamos lugares, pagos, itinerario y detalles importantes.</p></article>
+        <section class="form-panel" aria-labelledby="formTitle">
+          <div class="form-heading">
+            <span class="eyebrow">Cotización personalizada</span>
+            <h2 id="formTitle">Solicita tu viaje</h2>
+            <p>Este formulario está conectado al seguimiento de Viajes Troncal. Al enviarlo, tu solicitud llega a Kommo para responderte por WhatsApp.</p>
+          </div>
+
+          <div class="jotform-shell">
+            <iframe
+              id="jotform-frame"
+              title="Cotiza tu viaje con Viajes Troncal"
+              src="https://form.jotform.com/261127730314044"
+              allow="geolocation; microphone; camera"
+              loading="lazy">
+            </iframe>
+          </div>
+          <p class="form-fallback">Si el formulario no carga, <a id="jotformLink" href="https://form.jotform.com/261127730314044" target="_blank" rel="noopener noreferrer">ábrelo aquí</a>.</p>
+        </section>
       </div>
     </section>
 
-    <section class="section section-light" id="promociones">
-      <div class="section-head">
-        <div>
-          <p class="section-kicker">Ofertas y salidas</p>
-          <h2>Promociones activas</h2>
-          <p>Agrega tus links de promociones en <strong>assets/data/promos.json</strong> y se mostrarán aquí como fichas.</p>
+    <section class="section section-light" id="como-funciona">
+      <div class="container">
+        <div class="section-head center">
+          <span class="eyebrow">Así de fácil</span>
+          <h2>Tu cotización en 4 pasos</h2>
+          <p>No necesitas tener todo decidido. Con una idea general podemos ayudarte a construir la mejor opción para tu grupo.</p>
+        </div>
+        <div class="steps-grid">
+          <article><b>1</b><h3>Nos cuentas tu idea</h3><p>Destino, fechas, número de personas y servicios que quieres incluir.</p></article>
+          <article><b>2</b><h3>Revisamos opciones</h3><p>Buscamos alternativas de transporte, hotel, tours o paquete completo.</p></article>
+          <article><b>3</b><h3>Te cotizamos</h3><p>Recibes una propuesta personalizada por WhatsApp.</p></article>
+          <article><b>4</b><h3>Apartas tu viaje</h3><p>Confirmamos lugares, pagos, itinerario y detalles importantes.</p></article>
         </div>
       </div>
-      <div id="promosCards" class="grid"></div>
+    </section>
+
+    <section class="section" id="promociones">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Ofertas y salidas</span>
+            <h2>Promociones activas</h2>
+            <p>Cada link que agregues en el archivo de promociones se convierte en una ficha para cotizar por WhatsApp.</p>
+          </div>
+        </div>
+        <div id="promosCards" class="promo-grid"></div>
+      </div>
+    </section>
+
+    <section class="section cta-section" id="contacto">
+      <div class="container cta-card">
+        <div>
+          <span class="eyebrow">Viajes Troncal</span>
+          <h2>¿Tienes un grupo o una fecha especial?</h2>
+          <p>Cuéntanos tu idea y armamos una propuesta a la medida. También podemos ayudarte con transporte, hotel, tours y alimentos.</p>
+        </div>
+        <a class="btn btn-primary" href="#jotform-frame">Cotizar mi viaje</a>
+      </div>
     </section>
   </main>
 
-  <footer class="footer" id="contacto">
-    <div class="footer-grid">
+  <footer class="footer">
+    <div class="container footer-grid">
       <div>
         <img class="footer-logo" src="assets/images/logo/logo-viajes-troncal.svg" alt="Viajes Troncal" />
-        <p>Diseñamos escapadas, vacaciones y experiencias para que viajar se sienta emocionante desde el primer clic.</p>
+        <p>Viajes grupales, familiares y personalizados para vivir experiencias inolvidables.</p>
       </div>
       <div>
         <h4>Redes</h4>
-        <a id="socialFacebook" href="#" target="_blank" rel="noopener">Facebook</a>
-        <a id="socialInstagram" href="#" target="_blank" rel="noopener">Instagram</a>
-        <a id="socialTikTok" href="#" target="_blank" rel="noopener">TikTok</a>
+        <p><a id="socialFacebook" href="#" target="_blank" rel="noopener noreferrer">Facebook</a></p>
+        <p><a id="socialInstagram" href="#" target="_blank" rel="noopener noreferrer">Instagram</a></p>
+        <p><a id="socialTikTok" href="#" target="_blank" rel="noopener noreferrer">TikTok</a></p>
       </div>
       <div>
         <h4>Contacto</h4>
-        <a id="footerPhone" href="#" target="_blank" rel="noopener"></a>
-        <a id="footerMail" href="#"></a>
+        <p><a id="footerWhatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a></p>
+        <p><a id="footerMail" href="#">Correo</a></p>
       </div>
     </div>
   </footer>
 
-  <a id="whatsFloat" class="whatsapp-float" href="#" target="_blank" rel="noopener">💬 WhatsApp</a>
+  <a id="whatsFloat" class="whatsapp-float" href="#" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
+
   <script src="assets/js/site.js"></script>
 </body>
 </html>
