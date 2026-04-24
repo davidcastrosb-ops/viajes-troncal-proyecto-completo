@@ -1,58 +1,47 @@
-VIAJES TRONCAL — LANDING PREMIUM + KOMMO
+VIAJES TRONCAL - LANDING PREMIUM + KOMMO
 
-Esta versión ya trae:
-- Diseño tipo agencia premium tropical.
-- Formulario bonito en la landing.
-- Envío directo al webhook de Make que crea lead + nota en Kommo.
-- Botón flotante de WhatsApp.
-- Portada editable por temporada.
-- Sección de promociones desde assets/data/promos.json.
-- Mockup de referencia guardado en assets/images/referencia/mockup-viajes-troncal.png
+Esta versión usa un formulario propio dentro de la landing, NO abre Jotform en la página.
+El formulario envía la información al webhook de Make y Make la manda a Kommo como lead + nota.
 
-ARCHIVO IMPORTANTE PARA CAMBIOS RÁPIDOS:
-assets/data/site.json
+FLUJO:
+Cliente llena formulario en viajes.3dhomes.com.mx
+→ webhook de Make
+→ Kommo / embudo Viajes Troncal
+→ nota con datos del viaje
 
+IMPORTANTE:
+- El botón principal de la portada baja al formulario dentro de la misma página.
+- Ya no aparece el botón extra "Abrir formulario" para no confundir al cliente.
+- Jotform queda solo como respaldo externo si lo necesitas; el formulario bonito de la landing es el principal.
+
+CAMBIAR PORTADA:
+Opción fácil:
+1. Reemplaza la imagen assets/images/portadas/hero-viajes-troncal.jpg
+2. Usa el mismo nombre: hero-viajes-troncal.jpg
+3. Haz commit y push desde GitHub Desktop.
+
+Opción por temporada:
+1. Sube otra imagen en assets/images/portadas/
+2. Edita assets/data/site.json
+3. Cambia la línea:
+   "image": "assets/images/portadas/hero-viajes-troncal.jpg"
+   por ejemplo:
+   "image": "assets/images/portadas/navidad.jpg"
+
+CONFIGURACIÓN PRINCIPAL:
+Archivo: assets/data/site.json
 Ahí puedes cambiar:
 - WhatsApp
 - correo
 - redes sociales
 - imagen de portada
-- URL de Make
-- URL del formulario Jotform de respaldo
+- webhook de Make
+- link de Jotform de respaldo
 
-CAMBIAR PORTADA:
-1. Guarda tu nueva imagen en:
-   assets/images/portadas/
-2. Abre assets/data/site.json
-3. Cambia esta línea:
-   "image": "assets/images/portadas/hero-viajes-troncal.jpg"
-   por ejemplo:
-   "image": "assets/images/portadas/navidad.jpg"
-4. Sube cambios con GitHub Desktop.
-5. Vercel actualizará la página.
-
-IMPORTANTE SOBRE KOMMO:
-El formulario de esta landing manda directo al webhook de Make configurado en:
-assets/data/site.json → integrations → makeWebhookUrl
-
-Si cambias el escenario de Make o creas otro webhook, reemplaza esa URL.
-
-FORMULARIO JOTFORM DE RESPALDO:
-https://form.jotform.com/261127730314044
-
-PROMOCIONES:
-Para agregar promos edita:
-assets/data/promos.json
-
-Ejemplo:
-[
-  "https://mx.travelpromomaker.com/promomaker/contact/45981/copy",
-  "https://otro-link-de-promocion.com"
-]
-
-SUBIR A GITHUB + VERCEL:
+SUBIR A VERCEL:
 1. Descomprime este ZIP.
-2. Copia todo dentro de la carpeta de tu repo de viajes.
-3. En GitHub Desktop: Commit to main.
-4. Push origin.
-5. Vercel redeploya solo.
+2. Copia los archivos al repositorio de viajes.3dhomes.com.mx.
+3. Abre GitHub Desktop.
+4. Commit.
+5. Push origin.
+6. Vercel actualizará automáticamente.
