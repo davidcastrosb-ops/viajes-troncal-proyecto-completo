@@ -55,18 +55,21 @@ function buildPretty(data){
 
 async function sendToMake(data){
   const url = SITE.integrations && SITE.integrations.makeWebhookUrl;
-  if(!url || url.includes('PEGA_AQUI')) throw new Error('Falta configurar makeWebhookUrl en assets/data/site.json');
-  const payload = new URLSearchParams();
-  payload.set('action','');
-  payload.set('webhookURL', url);
-  payload.set('username','landing-viajes-troncal');
-  payload.set('formID','landing-viajes-troncal');
-  payload.set('type','WEB');
-  payload.set('formTitle','Cotiza tu viaje con Viajes Troncal');
-  payload.set('submissionID', String(Date.now()));
-  payload.set('pretty', buildPretty(data));
-  payload.set('rawRequest', JSON.stringify(data));
-  await fetch(url, {method:'POST', mode:'no-cors', body:payload});
+  if(!url || url.includes("PEGA_AQUI")) throw new Error("Falta configurar makeWebhookUrl en assets/data/site.json");
+
+  // Envio seguro via endpoint de Vercel.
+  // Landing -> /api/lead -> Make -> Kommo
+  const response = await fetch("/api/lead", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({...data, makeWebhookUrl: url, pretty: buildPretty(data)})
+  });
+
+  let result = {};
+  try { result = await response.json(); } catch(e) {}
+  if(!response.ok || !result.ok){
+    throw new Error(result.error || "No se pudo enviar la solicitud a Kommo");
+  }
 }
 
 function setupForm(){
