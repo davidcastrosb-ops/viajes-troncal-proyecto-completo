@@ -1,24 +1,58 @@
+VIAJES TRONCAL — LANDING PREMIUM + KOMMO
 
-VERSIÓN V3 - FICHAS DE PROMOS
+Esta versión ya trae:
+- Diseño tipo agencia premium tropical.
+- Formulario bonito en la landing.
+- Envío directo al webhook de Make que crea lead + nota en Kommo.
+- Botón flotante de WhatsApp.
+- Portada editable por temporada.
+- Sección de promociones desde assets/data/promos.json.
+- Mockup de referencia guardado en assets/images/referencia/mockup-viajes-troncal.png
 
-Esta versión ya hace esto:
-- cada link del archivo promos.json se convierte en una ficha/tarjeta
-- no usa la promo como bloque ancho abajo
-- usa la promo de ejemplo:
-  https://mx.travelpromomaker.com/promomaker/contact/45981/copy
+ARCHIVO IMPORTANTE PARA CAMBIOS RÁPIDOS:
+assets/data/site.json
 
-Para agregar más promos:
-abre assets/data/promos.json con Bloc de notas
-y agrega más links así:
+Ahí puedes cambiar:
+- WhatsApp
+- correo
+- redes sociales
+- imagen de portada
+- URL de Make
+- URL del formulario Jotform de respaldo
 
+CAMBIAR PORTADA:
+1. Guarda tu nueva imagen en:
+   assets/images/portadas/
+2. Abre assets/data/site.json
+3. Cambia esta línea:
+   "image": "assets/images/portadas/hero-viajes-troncal.jpg"
+   por ejemplo:
+   "image": "assets/images/portadas/navidad.jpg"
+4. Sube cambios con GitHub Desktop.
+5. Vercel actualizará la página.
+
+IMPORTANTE SOBRE KOMMO:
+El formulario de esta landing manda directo al webhook de Make configurado en:
+assets/data/site.json → integrations → makeWebhookUrl
+
+Si cambias el escenario de Make o creas otro webhook, reemplaza esa URL.
+
+FORMULARIO JOTFORM DE RESPALDO:
+https://form.jotform.com/261127730314044
+
+PROMOCIONES:
+Para agregar promos edita:
+assets/data/promos.json
+
+Ejemplo:
 [
   "https://mx.travelpromomaker.com/promomaker/contact/45981/copy",
-  "https://mx.travelpromomaker.com/promomaker/contact/OTRO_LINK/copy"
+  "https://otro-link-de-promocion.com"
 ]
 
-Subir:
-1. borra lo viejo del repo
-2. copia todo este ZIP
-3. commit
-4. push
-5. Vercel redeploya
+SUBIR A GITHUB + VERCEL:
+1. Descomprime este ZIP.
+2. Copia todo dentro de la carpeta de tu repo de viajes.
+3. En GitHub Desktop: Commit to main.
+4. Push origin.
+5. Vercel redeploya solo.

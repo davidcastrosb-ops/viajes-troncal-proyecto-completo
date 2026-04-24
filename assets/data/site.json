@@ -6,14 +6,18 @@
   "contact": {
     "whatsapp": "523329335952",
     "phoneDisplay": "33 2933 5952",
-    "email": "hola@viajestroncal.com",
-    "sheetsEndpoint": "PEGA_AQUI_TU_URL_DE_GOOGLE_APPS_SCRIPT"
+    "email": "hola@viajestroncal.com"
+  },
+  "integrations": {
+    "makeWebhookUrl": "https://hook.us2.make.com/70w5gluf8nge97fnalaj",
+    "jotformUrl": "https://form.jotform.com/261127730314044"
   },
   "theme": {
-    "primary": "#18c7ca",
-    "secondary": "#f4b24d",
-    "dark": "#14333b",
-    "lightBg": "#f7fcfc"
+    "primary": "#079EAA",
+    "primaryDark": "#006F7D",
+    "secondary": "#D9A441",
+    "dark": "#08233D",
+    "lightBg": "#F1FBFC"
   },
   "social": {
     "facebook": "https://www.facebook.com/",
@@ -21,8 +25,9 @@
     "tiktok": "https://www.tiktok.com/"
   },
   "hero": {
-    "title": "Viajes por México para disfrutar, descansar y vivir experiencias inolvidables",
-    "subtitle": "Cotiza promociones, escapadas románticas, viajes familiares y destinos de playa de forma rápida por WhatsApp.",
-    "image": "assets/images/banner/banner-principal.svg"
+    "title": "Cotiza tu viaje",
+    "script": "con nosotros",
+    "subtitle": "Viajes grupales, familiares y personalizados",
+    "image": "assets/images/portadas/hero-viajes-troncal.jpg"
   }
 }
