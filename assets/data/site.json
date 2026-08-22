@@ -1,25 +1,27 @@
 {
   "meta": {
-    "title": "Viajes Troncal | Cotiza tu viaje"
+    "title": "Trhoncal Travel | Destinos, inspiración y cotización",
+    "description": "Guías de viaje con información verificable, destinos seleccionados y cotización personalizada con Trhoncal Travel."
   },
   "brand": {
-    "name": "Viajes Troncal",
-    "logo": "assets/images/logo/logo-viajes-troncal.svg"
+    "name": "Trhoncal Travel",
+    "logo": "assets/images/logo/logo-trhoncal-travel-oficial.png",
+    "logoStatus": "pending-binary-import-from-approved-2026-08-22-asset"
   },
   "contact": {
     "whatsapp": "523329335952",
     "phoneDisplay": "33 2933 5952",
-    "email": "hola@viajestroncal.com"
+    "email": "viajestroncal@gmail.com"
   },
   "forms": {
     "jotformUrl": "https://form.jotform.com/261127730314044"
   },
   "theme": {
-    "primary": "#00a9b7",
-    "primaryDark": "#008997",
-    "gold": "#d9a441",
-    "navy": "#062b49",
-    "soft": "#f3fbfc"
+    "primary": "#063F53",
+    "primaryDark": "#032E3E",
+    "gold": "#D8AF58",
+    "navy": "#063F53",
+    "soft": "#F7F4ED"
   },
   "social": {
     "facebook": "https://www.facebook.com/",
@@ -27,10 +29,10 @@
     "tiktok": "https://www.tiktok.com/"
   },
   "hero": {
-    "kicker": "🌴 Viajes grupales, familiares y personalizados",
-    "title": "Cotiza tu viaje",
-    "accent": "con nosotros",
-    "subtitle": "Cuéntanos tu destino, fechas y número de viajeros. Preparamos una cotización personalizada y te contactamos por WhatsApp.",
+    "kicker": "Destinos con información que sí puedes verificar",
+    "title": "Viaja con más contexto",
+    "accent": "y mejor asesoría",
+    "subtitle": "Explora destinos con fuentes oficiales, ideas para armar tu viaje y ofertas que siempre reconfirmamos antes de cotizar.",
     "image": "assets/images/portadas/hero-viajes-troncal.jpg"
   }
 }
