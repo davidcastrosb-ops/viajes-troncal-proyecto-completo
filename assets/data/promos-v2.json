@@ -1,0 +1,51 @@
+{
+  "version": "0.1",
+  "updatedAt": "2026-08-22",
+  "offers": [
+    {
+      "id": "OFF-PA-001",
+      "provider": "PriceAgencies / Travel Promo Maker",
+      "destination": "Rincón de Guayabitos",
+      "title": "Decameron Isla Coral Guayabitos",
+      "days": 4,
+      "nights": 3,
+      "plan": "Todo incluido",
+      "priceMXN": 9011,
+      "priceUnit": "total",
+      "publicable": false,
+      "status": "needs-reconfirmation",
+      "verifiedAt": "2026-08-22",
+      "notes": "Precio observado en captura del portal. Falta reconfirmar vigencia, fechas y condiciones antes de publicar."
+    },
+    {
+      "id": "OFF-PA-002",
+      "provider": "PriceAgencies / Travel Promo Maker",
+      "destination": "Rincón de Guayabitos",
+      "title": "Decameron Los Cocos",
+      "days": 4,
+      "nights": 3,
+      "plan": "Todo incluido",
+      "priceMXN": 9820,
+      "priceUnit": "total",
+      "publicable": false,
+      "status": "needs-reconfirmation",
+      "verifiedAt": "2026-08-22",
+      "notes": "Precio observado en captura del portal. Falta reconfirmar vigencia, fechas y condiciones antes de publicar."
+    },
+    {
+      "id": "OFF-PA-003",
+      "provider": "PriceAgencies / Travel Promo Maker",
+      "destination": "Bahías de Huatulco",
+      "title": "Dreams Huatulco Resort & Spa",
+      "days": 5,
+      "nights": 4,
+      "plan": "Todo incluido",
+      "priceMXN": 12943,
+      "priceUnit": "por persona",
+      "publicable": false,
+      "status": "needs-reconfirmation",
+      "verifiedAt": "2026-08-22",
+      "notes": "Precio observado en captura del portal. Falta reconfirmar vigencia, ocupación y condiciones antes de publicar."
+    }
+  ]
+}
