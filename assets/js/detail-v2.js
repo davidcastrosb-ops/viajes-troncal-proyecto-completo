@@ -22,8 +22,9 @@
     const sources=sourceRows(d);
     const sourceHtml=sources.length?sources.map(s=>`<div class="detail-source"><div><b>${esc(s.organization)} — ${esc(s.title)}</b><span>Verificada ${esc(s.verifiedAt||'')} · ${esc(s.note||'')}</span></div><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a></div>`).join(''):'<p>Las fuentes de esta ficha están en proceso de publicación.</p>';
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero cotizar un viaje a ${d.name} con Trhoncal Travel.`):'#cotizar';
+    const photo=d.mainImage?`<div class="detail-photo"><img src="${esc(d.mainImage)}" alt="${esc(d.imageAlt||d.name)}"><div class="detail-photo-caption">${d.imageCredit?`<span>${esc(d.imageCredit)}</span>`:''}${d.imageLicense?`<small>${esc(d.imageLicense)}</small>`:''}</div></div>`:'';
     holder.innerHTML=`
-      <header class="detail-header"><button class="detail-close" type="button" aria-label="Cerrar">×</button><span class="eyebrow">${esc(d.state)} · ${esc(d.country)}${d.puebloMagico?' · Pueblo Mágico':''}</span><h2 id="detailTitle">${esc(d.name)}</h2><p>${esc(d.summary||'')}</p></header>
+      <header class="detail-header ${d.mainImage?'with-photo':''}"><button class="detail-close" type="button" aria-label="Cerrar">×</button>${photo}<div class="detail-header-copy"><span class="eyebrow">${esc(d.state)} · ${esc(d.country)}${d.puebloMagico?' · Pueblo Mágico':''}</span><h2 id="detailTitle">${esc(d.name)}</h2><p>${esc(d.summary||'')}</p></div></header>
       <div class="detail-body">
         <div class="detail-summary-grid"><div class="detail-stat"><small>Estancia sugerida</small><b>${esc(d.recommendedStay||'Por definir')}</b></div><div class="detail-stat"><small>Tipo de viaje</small><b>${esc((d.segments||[]).slice(0,4).join(' · ')||d.type||'Por definir')}</b></div><div class="detail-stat"><small>Última verificación</small><b>${esc(d.lastVerified||'En revisión')}</b></div></div>
         <div class="detail-columns">
