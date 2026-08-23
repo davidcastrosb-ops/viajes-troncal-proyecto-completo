@@ -1,12 +1,12 @@
 {
   "meta": {
     "title": "Trhoncal Travel | Destinos, inspiración y cotización",
-    "description": "Guías de viaje con información verificable, destinos seleccionados y cotización personalizada con Trhoncal Travel."
+    "description": "Destinos con información verificable, contexto útil y cotización personalizada con Trhoncal Travel."
   },
   "brand": {
     "name": "Trhoncal Travel",
-    "logo": "assets/images/logo/logo-trhoncal-travel-oficial.png",
-    "logoStatus": "pending-binary-import-from-approved-2026-08-22-asset"
+    "logo": "assets/images/trhoncal-travel-logo.svg",
+    "logoStatus": "approved-official-asset"
   },
   "contact": {
     "whatsapp": "523329335952",
@@ -22,11 +22,11 @@
     "localDestinations": "assets/data/destinations.json",
     "localSources": "assets/data/sources.json",
     "localOffers": "assets/data/promos.json",
-    "rule": "The website requests /api/master first. Vercel proxies the private Master Sheet Apps Script endpoint. Local files remain development fallback only until the endpoint is deployed."
+    "rule": "The website requests /api/master first. Apps Script filters what is public from the Master Sheet; local files are development fallback only."
   },
   "hosting": {
     "initialHost": "viajes.trhoncalhomes.com.mx",
-    "finalDomain": "pending",
+    "finalDomain": "pending-until-agency-generates-revenue",
     "migrationRule": "Keep relative routes so the site can migrate later with one-to-one 301 redirects."
   },
   "theme": {
@@ -37,15 +37,15 @@
     "soft": "#F7F4ED"
   },
   "social": {
-    "facebook": "https://www.facebook.com/",
-    "instagram": "https://www.instagram.com/",
-    "tiktok": "https://www.tiktok.com/"
+    "facebook": "",
+    "instagram": "",
+    "tiktok": ""
   },
   "hero": {
-    "kicker": "Destinos con información que sí puedes verificar",
-    "title": "Viaja con más contexto",
-    "accent": "y mejor asesoría",
-    "subtitle": "Explora destinos con fuentes oficiales, ideas para armar tu viaje y ofertas que siempre reconfirmamos antes de cotizar.",
-    "image": "assets/images/portadas/hero-viajes-troncal.jpg"
+    "kicker": "Viajar mejor empieza antes de comprar",
+    "title": "Descubre el viaje",
+    "accent": "antes de reservarlo",
+    "subtitle": "Destinos investigados con fuentes oficiales, contexto útil para decidir y asesoría para convertir la idea en un viaje real.",
+    "image": ""
   }
 }
