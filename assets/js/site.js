@@ -28,7 +28,6 @@ function applyConfig(){
   document.title=SITE.meta?.title||'Trhoncal Travel';
   const desc=document.querySelector('meta[name="description"]');
   if(desc&&SITE.meta?.description)desc.setAttribute('content',SITE.meta.description);
-  setSrc('heroImage',SITE.hero?.image,SITE.hero?.title);
   setText('heroKicker',SITE.hero?.kicker);
   setText('heroTitle',SITE.hero?.title);
   setText('heroAccent',SITE.hero?.accent);
@@ -50,10 +49,6 @@ async function loadPublicData(){
     try{
       const payload=await loadJSON(endpoint);
       return {
-        // The Apps Script endpoint is the publication gate. It only emits
-        // destinations with Mostrar_Web=Sí and offers that already satisfy
-        // all publishability/price/expiry rules. Mark those rows as trusted
-        // so the browser does not apply a second, contradictory visibility gate.
         destinations:(Array.isArray(payload.destinations)?payload.destinations:[]).map(d=>({...d,_fromMaster:true})),
         sources:Array.isArray(payload.sources)?payload.sources:[],
         offers:(Array.isArray(payload.offers)?payload.offers:[]).map(o=>({...o,_fromMaster:true})),
@@ -70,8 +65,6 @@ async function loadPublicData(){
     loadJSON(SITE.data?.localOffers||'assets/data/promos.json')
   ]);
   return {
-    // Local files are development fallback only. They must never become
-    // public merely because the Master endpoint is unavailable.
     destinations:(destinations.destinations||[]).map(d=>({...d,_fromMaster:false})),
     sources:sources.sources||[],
     offers:(Array.isArray(offers)?offers:offers.offers||[]).map(o=>({...o,_fromMaster:false})),
@@ -106,6 +99,12 @@ function matchesFilter(d,filter){
   return true;
 }
 
+function destinationImage(d){
+  if(!d.mainImage)return '';
+  const credit=d.imageCredit?`<span class="destination-image-credit">${escapeHTML(d.imageCredit)}</span>`:'';
+  return `<div class="destination-image"><img src="${escapeHTML(d.mainImage)}" alt="${escapeHTML(d.imageAlt||d.name)}" loading="lazy">${credit}</div>`;
+}
+
 function renderDestinations(filter='Todos'){
   const grid=document.getElementById('destinationGrid');if(!grid)return;
   const rows=DESTINATIONS.filter(isDestinationVisible).filter(d=>matchesFilter(d,filter));
@@ -118,12 +117,15 @@ function renderDestinations(filter='Todos'){
   grid.innerHTML=rows.map(d=>{
     const rec=(d.recognitions||[]).slice(0,2).map(r=>`<span class="tag">${escapeHTML(r)}</span>`).join('');
     const magic=d.puebloMagico?'<span class="tag">Pueblo Mágico</span>':'';
-    return `<article class="destination-card">
-      <div class="topline"><span class="eyebrow">${escapeHTML(d.state)} · ${escapeHTML(d.country)}</span><span class="meta">Verificado ${escapeHTML(d.lastVerified||'')}</span></div>
-      <h3>${escapeHTML(d.name)}</h3>
-      <p>${escapeHTML(d.summary)}</p>
-      <div class="recognitions">${magic}${rec}</div>
-      <div class="card-foot"><span>${escapeHTML(d.recommendedStay||'Duración por definir')}</span><a href="#cotizar" data-destination="${escapeHTML(d.name)}">Quiero cotizar →</a></div>
+    return `<article class="destination-card ${d.mainImage?'has-image':''}">
+      ${destinationImage(d)}
+      <div class="destination-card-content">
+        <div class="topline"><span class="eyebrow">${escapeHTML(d.state)} · ${escapeHTML(d.country)}</span><span class="meta">Verificado ${escapeHTML(d.lastVerified||'')}</span></div>
+        <h3>${escapeHTML(d.name)}</h3>
+        <p>${escapeHTML(d.summary)}</p>
+        <div class="recognitions">${magic}${rec}</div>
+        <div class="card-foot"><span>${escapeHTML(d.recommendedStay||'Duración por definir')}</span><a href="#cotizar" data-destination="${escapeHTML(d.name)}">Quiero cotizar →</a></div>
+      </div>
     </article>`;
   }).join('');
   grid.querySelectorAll('[data-destination]').forEach(a=>a.addEventListener('click',()=>{
@@ -151,8 +153,6 @@ function toDate(value){
 }
 
 function isOfferVisible(o){
-  // Master already enforces Mostrar_Web + Publicable + Vigente + confirmed
-  // price + non-expired date before an offer reaches the browser.
   if(o && o._fromMaster===true) return true;
   if(!o || o.mostrarWeb!==true || o.publicable!==true)return false;
   if(!o.lastPriceConfirmation && !o.ultimaConfirmacionPrecio)return false;
@@ -174,7 +174,7 @@ function renderOffers(){
   publishable.forEach(entry=>{
     const title=escapeHTML(entry.title||'Promoción especial');
     const desc=escapeHTML(entry.description||'Cotiza disponibilidad y condiciones vigentes.');
-    const image=escapeHTML(entry.image||SITE.hero.image||'');
+    const image=escapeHTML(entry.image||'');
     const price=entry.price?`<div class="promo-price">${escapeHTML(entry.price)}</div>`:'';
     const wa=whatsappLink(`Hola, quiero información de la promoción: ${entry.title||'viaje'}.`);
     grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}">`:''}<h3>${title}</h3>${price}<p>${desc}</p><div class="promo-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar con Trhoncal</a></div></article>`);
