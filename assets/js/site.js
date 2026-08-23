@@ -50,9 +50,13 @@ async function loadPublicData(){
     try{
       const payload=await loadJSON(endpoint);
       return {
-        destinations:Array.isArray(payload.destinations)?payload.destinations:[],
+        // The Apps Script endpoint is the publication gate. It only emits
+        // destinations with Mostrar_Web=Sí and offers that already satisfy
+        // all publishability/price/expiry rules. Mark those rows as trusted
+        // so the browser does not apply a second, contradictory visibility gate.
+        destinations:(Array.isArray(payload.destinations)?payload.destinations:[]).map(d=>({...d,_fromMaster:true})),
         sources:Array.isArray(payload.sources)?payload.sources:[],
-        offers:Array.isArray(payload.offers)?payload.offers:[],
+        offers:(Array.isArray(payload.offers)?payload.offers:[]).map(o=>({...o,_fromMaster:true})),
         source:'master'
       };
     }catch(error){
@@ -66,15 +70,18 @@ async function loadPublicData(){
     loadJSON(SITE.data?.localOffers||'assets/data/promos.json')
   ]);
   return {
-    destinations:destinations.destinations||[],
+    // Local files are development fallback only. They must never become
+    // public merely because the Master endpoint is unavailable.
+    destinations:(destinations.destinations||[]).map(d=>({...d,_fromMaster:false})),
     sources:sources.sources||[],
-    offers:Array.isArray(offers)?offers:offers.offers||[],
+    offers:(Array.isArray(offers)?offers:offers.offers||[]).map(o=>({...o,_fromMaster:false})),
     source:'local'
   };
 }
 
 function isDestinationVisible(d){
   const validStatus=['verified','verified-initial','approved','published'].includes(d.status);
+  if(d._fromMaster===true) return validStatus;
   return validStatus && d.mostrarWeb===true;
 }
 
@@ -123,7 +130,7 @@ function renderDestinations(filter='Todos'){
     const name=a.dataset.destination;
     setHref('headerWhatsapp',whatsappLink(`Hola, quiero cotizar un viaje a ${name} con Trhoncal Travel.`));
   }));
-  setText('verifiedCount',`${rows.length} destinos públicos`);
+  setText('verifiedCount',`${rows.length} ${rows.length===1?'destino público':'destinos públicos'}`);
 }
 
 function renderSourceSummary(){
@@ -144,6 +151,9 @@ function toDate(value){
 }
 
 function isOfferVisible(o){
+  // Master already enforces Mostrar_Web + Publicable + Vigente + confirmed
+  // price + non-expired date before an offer reaches the browser.
+  if(o && o._fromMaster===true) return true;
   if(!o || o.mostrarWeb!==true || o.publicable!==true)return false;
   if(!o.lastPriceConfirmation && !o.ultimaConfirmacionPrecio)return false;
   const status=String(o.status||'').toLowerCase();
