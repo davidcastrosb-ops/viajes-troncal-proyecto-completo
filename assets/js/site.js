@@ -73,7 +73,10 @@ async function loadPublicData(){
   };
 }
 
-function normalizedStatus(d){return ['verified','verified-initial','approved','published'].includes(d.status)}
+function isDestinationVisible(d){
+  const validStatus=['verified','verified-initial','approved','published'].includes(d.status);
+  return validStatus && d.mostrarWeb===true;
+}
 
 function renderFilters(){
   const holder=document.getElementById('destinationFilters');
@@ -98,8 +101,13 @@ function matchesFilter(d,filter){
 
 function renderDestinations(filter='Todos'){
   const grid=document.getElementById('destinationGrid');if(!grid)return;
-  const rows=DESTINATIONS.filter(normalizedStatus).filter(d=>matchesFilter(d,filter));
-  if(!rows.length){grid.innerHTML='<div class="empty-state">No hay destinos publicados para este filtro todavía.</div>';return}
+  const rows=DESTINATIONS.filter(isDestinationVisible).filter(d=>matchesFilter(d,filter));
+  if(!rows.length){
+    grid.innerHTML='<div class="empty-state">Todavía no hay destinos activados para mostrar. Se publicarán desde el Archivo Maestro cuando David los autorice.</div>';
+    setText('verifiedCount','0 destinos públicos');
+    return;
+  }
+  rows.sort((a,b)=>(a.ordenHome??9999)-(b.ordenHome??9999));
   grid.innerHTML=rows.map(d=>{
     const rec=(d.recognitions||[]).slice(0,2).map(r=>`<span class="tag">${escapeHTML(r)}</span>`).join('');
     const magic=d.puebloMagico?'<span class="tag">Pueblo Mágico</span>':'';
@@ -115,7 +123,7 @@ function renderDestinations(filter='Todos'){
     const name=a.dataset.destination;
     setHref('headerWhatsapp',whatsappLink(`Hola, quiero cotizar un viaje a ${name} con Trhoncal Travel.`));
   }));
-  setText('verifiedCount',`${rows.length} destinos`);
+  setText('verifiedCount',`${rows.length} destinos públicos`);
 }
 
 function renderSourceSummary(){
@@ -124,17 +132,33 @@ function renderSourceSummary(){
     ['Turismo oficial','Secretarías estatales, FONATUR y organismos oficiales de promoción.'],
     ['Patrimonio','INAH y UNESCO para historia, arqueología y reconocimientos.'],
     ['Naturaleza','CONANP y autoridades de áreas naturales protegidas.'],
-    ['Producto','PriceAgencies y otros proveedores solamente para precio, cupo y condiciones.']
+    ['Producto','PriceAgencies y otros proveedores solamente para precio, cupo, condiciones y materiales de difusión.']
   ];
   holder.innerHTML=groups.map(g=>`<div class="source-item"><b>${g[0]}</b><span>${g[1]}</span></div>`).join('');
 }
 
+function toDate(value){
+  if(!value)return null;
+  const d=new Date(value+'T23:59:59');
+  return Number.isNaN(d.getTime())?null:d;
+}
+
+function isOfferVisible(o){
+  if(!o || o.mostrarWeb!==true || o.publicable!==true)return false;
+  if(!o.lastPriceConfirmation && !o.ultimaConfirmacionPrecio)return false;
+  const status=String(o.status||'').toLowerCase();
+  if(['expired','expirada','suspended','suspendida'].includes(status))return false;
+  const expiry=toDate(o.expiresAt||o.fechaExpiracionWeb);
+  if(expiry && expiry < new Date())return false;
+  return true;
+}
+
 function renderOffers(){
   const grid=document.getElementById('promosCards');if(!grid)return;
-  const publishable=OFFERS.filter(x=>x&&x.publicable===true);
+  const publishable=OFFERS.filter(isOfferVisible).sort((a,b)=>(a.ordenWeb??9999)-(b.ordenWeb??9999));
   grid.innerHTML='';
   if(!publishable.length){
-    grid.innerHTML=`<article class="promo-card"><h3>Ofertas en validación</h3><p>Las promociones solo aparecen cuando están activadas desde el Archivo Maestro y tienen precio/vigencia reconfirmados.</p><span class="promo-warning">Control desde Archivo Maestro</span></article>`;
+    grid.innerHTML=`<article class="promo-card"><h3>Sin ofertas publicadas por ahora</h3><p>Las promociones aparecerán aquí únicamente cuando David las cargue y active desde el Archivo Maestro con precio, vigencia y condiciones reconfirmadas.</p><span class="promo-warning">Control desde Archivo Maestro</span></article>`;
     return;
   }
   publishable.forEach(entry=>{
