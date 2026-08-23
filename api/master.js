@@ -4,13 +4,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const endpoint = process.env.TRHONCAL_MASTER_ENDPOINT;
-  if (!endpoint) {
-    return res.status(503).json({
-      error: 'Master endpoint not configured',
-      configured: false
-    });
-  }
+  const endpoint = process.env.TRHONCAL_MASTER_ENDPOINT ||
+    'https://script.google.com/macros/s/AKfycbxxpHTcKw5JI96QC9gXmEBpCOMEv1A5jYhOqNdsZXt-chMpnt3AnWTXohCTaEPaBwHu/exec';
 
   try {
     const response = await fetch(endpoint, {
