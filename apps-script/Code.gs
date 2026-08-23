@@ -91,6 +91,7 @@ function sheetObjects_(ss, name) {
 
 function publicDestination_(row, ficha) {
   const sourceIds = split_(ficha.Fuente_IDs || row.Fuente_principal_ID);
+  const imageAllowed = yes_(row.Permiso_uso_web) && !!text_(row.Imagen_principal_URL);
   return {
     id: text_(row.Destino_ID),
     slug: slug_(row.Nombre),
@@ -120,7 +121,14 @@ function publicDestination_(row, ficha) {
     recognitions: split_(ficha.Reconocimientos_verificados),
     worldRatingNote: text_(ficha.Calificación_mundial),
     lastVerified: dateText_(ficha.Última_verificación || row.Última_verificación),
-    sourceIds
+    sourceIds,
+    mainImage: imageAllowed ? text_(row.Imagen_principal_URL) : '',
+    imageAlt: imageAllowed ? (text_(row.Alt_imagen) || text_(row.Nombre)) : '',
+    imageCredit: imageAllowed ? text_(row.Credito_imagen) : '',
+    imageSource: imageAllowed ? text_(row.Fuente_imagen) : '',
+    imageLicense: imageAllowed ? text_(row.Tipo_licencia) : '',
+    imageRightsVerifiedAt: imageAllowed ? dateText_(row.Fecha_verificacion_derechos) : '',
+    gallery: imageAllowed ? split_(row.Galeria_URLs) : []
   };
 }
 
@@ -215,13 +223,12 @@ function dateText_(value) {
   if (!v) return '';
   const d = parseDate_(v);
   if (!d) return v;
-  return Utilities.formatDate(d, Session.getScriptTimeZone() || 'America/Mexico_City', 'yyyy-MM-dd');
+  return Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd');
 }
 
 function parseDate_(value) {
   if (value instanceof Date && !isNaN(value)) return value;
   const v = text_(value);
-  if (!v) return null;
   const iso = /^\d{4}-\d{2}-\d{2}$/;
   if (iso.test(v)) {
     const parts = v.split('-').map(Number);
@@ -236,6 +243,6 @@ function startToday_() {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
-function clearPublicCache() {
+function clearPublicCache_() {
   CacheService.getScriptCache().remove('public-payload-v1');
 }
