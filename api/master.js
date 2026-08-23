@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   }
 
   const endpoint = process.env.TRHONCAL_MASTER_ENDPOINT ||
-    'https://script.google.com/macros/s/AKfycbxxpHTcKw5JI96QC9gXmEBpCOMEv1A5jYhOqNdsZXt-chMpnt3AnWTXohCTaEPaBwHu/exec';
+    'https://script.google.com/macros/s/AKfycbxq6OxUnMWH004OKyspo7eAbI0GvJvwwDgSnfffSzn9amtKzOWqaDmtWUnrk52rz7U8/exec';
 
   // During validation we deliberately bypass every cache layer so changes
   // in Mostrar_Web can be observed immediately from the Master Sheet.
