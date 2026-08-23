@@ -1,47 +1,32 @@
-# Trhoncal Travel V2 — estado de construcción
+# Trhoncal Travel V2 — Estado actual
 
-Fecha: 2026-08-22
+Fecha de corte: 2026-08-23
 
-## Carril web
-- Rama: `feat/trhoncal-travel-knowledge-site-v2`
-- Home editorial-comercial en desarrollo.
-- Navegación separa destinos, inspiración, ofertas, fuentes y cotización.
-- Se conserva Jotform → Make → Kommo.
-- La marca pública ya es **Trhoncal Travel** en configuración.
-- Colores base: azul petróleo + dorado.
-- Host inicial previsto: `viajes.trhoncalhomes.com.mx`.
+## Ya operativo
+- Archivo Maestro convertido a Google Sheet nativo.
+- Spreadsheet ID: `1jVIIMyQuNseDidYkErYDd58Ha3yxJA9oFXleFPjmUJw`.
+- Apps Script desplegado por David como web app.
+- Endpoint Apps Script activo recibido:
+  `https://script.google.com/macros/s/AKfycbxxpHTcKw5JI96QC9gXmEBpCOMEv1A5jYhOqNdsZXt-chMpnt3AnWTXohCTaEPaBwHu/exec`
+- `api/master.js` apunta al endpoint Apps Script y mantiene `TRHONCAL_MASTER_ENDPOINT` como override opcional.
+- Frontend usa `/api/master` como fuente primaria y JSON local sólo como fallback de desarrollo.
+- Control editorial: `Mostrar_Web`, `Destacado_Home`, `Orden_Home`.
+- Control de ofertas: publicación sólo con autorización, estado vigente, confirmación de precio y no expiración.
+- Ofertas activas iniciales: 0.
+- Capturas de PriceAgencies: sólo demostración de herramientas del proveedor; no son ofertas.
+- Subdominio objetivo inicial: `viajes.trhoncalhomes.com.mx`.
 
-## Corrección de arquitectura
-- **No existe destino piloto fijo.**
-- Huatulco, Dreams, Decameron u otros elementos vistos en capturas de PriceAgencies fueron muestras del funcionamiento de Travel Promo Maker, no promociones aprobadas.
-- `assets/data/promos.json` queda vacío hasta que David cargue/autorice ofertas reales.
-- La plantilla de destino debe ser dinámica para cualquier destino que el Archivo Maestro active con `Mostrar_Web=Sí`.
+## Siguiente prueba
+1. Confirmar despliegue de Vercel de la rama.
+2. Confirmar que `/api/master` responda JSON.
+3. Con todos los controles en `No`, validar `destinations: []` y `offers: []`.
+4. Activar temporalmente un destino desde el Maestro con `Mostrar_Web = Sí`.
+5. Validar que aparece en la web y después regresar el control a `No`.
 
-## Carril de conocimiento
-- 15 destinos iniciales de México cuentan con verificación base.
-- Archivo Maestro v0.7: 51 fuentes registradas y control de publicación.
-- Las ofertas reales cargadas actualmente son: **0**.
-- PriceAgencies queda registrado como proveedor capaz de generar link, PDF, compartir por WhatsApp y correo.
-
-## Fuente de datos
-Primera etapa:
-`Google Sheets / Archivo Maestro → Apps Script JSON (solo lectura) → web`
-
-Sanity queda pospuesto.
-
-## Pendiente inmediato de desarrollo
-1. Importar el logotipo oficial aprobado como asset binario.
-2. Construir plantilla dinámica de destino sin hardcodear ninguno.
-3. Conectar visibilidad de destinos a `Mostrar_Web`, `Destacado_Home` y orden del Maestro.
-4. Crear componente de fuentes por destino.
-5. Crear componente de ofertas que solo renderice registros válidos activados desde el Maestro.
-6. Preparar endpoint Apps Script y lectura de JSON público.
-7. Agregar metadata SEO/AEO dinámica.
-8. Preparar despliegue de prueba sobre `viajes.trhoncalhomes.com.mx` sin tocar producción hasta aprobación.
-
-## Restricciones
-- No modificar `main` hasta revisión de David.
-- No publicar precio/cupo sin verificación vigente.
-- No convertir muestras de proveedor en ofertas.
-- No presentar rankings editoriales como “calificación mundial oficial”.
-- No romper Jotform/Make/Kommo.
+## Después
+- Importar logo oficial como asset binario.
+- Plantilla dinámica de destino.
+- Fuentes por destino.
+- SEO/AEO.
+- Responsive/accesibilidad.
+- Configurar `viajes.trhoncalhomes.com.mx` en Vercel/DNS.
