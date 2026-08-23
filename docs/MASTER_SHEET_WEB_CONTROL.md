@@ -29,14 +29,34 @@ Public only when:
 - `Mostrar_Web = Sí`
 - research state is `Verificado`, `Aprobado` or `Publicado`
 
+There is **no fixed pilot destination**. The site must render whichever destinations David activates in the Master Sheet.
+
 ## Offer publication rule
 Public only when all are true:
 - `Mostrar_Web = Sí`
 - `Publicable = Sí`
-- `Ultima_Confirmacion_Precio` has a date
+- `Ultima_Confirmacion_Precio` has a valid recent date
 - `Fecha_Expiracion_Web` is empty or has not passed
+- status is not expired/suspended
 
 `Destacada_Home = Sí` controls whether an already-public item appears on the home page.
 
-## Important
-Provider links such as PriceAgencies / Travel Promo Maker are stored internally in the Master Sheet, but the public JSON endpoint does not expose them. The public CTA goes to Trhoncal Travel / CRM / WhatsApp.
+## Provider assets
+PriceAgencies / Travel Promo Maker may provide several dissemination assets:
+- shareable promo link;
+- downloadable PDF;
+- WhatsApp sharing;
+- email sharing.
+
+The Master Sheet may store those capabilities/assets internally for an approved offer.
+
+### Critical distinction
+A screenshot, sample link, PDF or shared material shown by David to explain how a provider works is **not an offer** unless David explicitly decides to load/activate it.
+
+Therefore:
+- sample hotels/prices/destinations are not copied into the public offer table;
+- sample material does not create a destination priority;
+- a real offer starts only when it is intentionally added to the Master Sheet.
+
+## Public JSON security
+Provider/internal links, supplier notes and sensitive operational fields are not exposed by the public JSON endpoint. The public CTA goes to Trhoncal Travel / CRM / WhatsApp/Jotform.
