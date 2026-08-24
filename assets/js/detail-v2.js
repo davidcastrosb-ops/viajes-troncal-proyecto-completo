@@ -1,10 +1,15 @@
 (()=>{
   const esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const list=(items=[])=>items&&items.length?`<ul class="detail-list">${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p>Información en preparación.</p>';
+  const slugify=(v='')=>String(v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  const routeSlug=d=>d.slug||slugify(d.name);
+  const currentRoute=()=>new URLSearchParams(location.search).get('destino')||'';
+
   function sourceRows(d){
     const ids=new Set(d.sourceIds||[]);
     return (typeof SOURCES!=='undefined'?SOURCES:[]).filter(s=>ids.has(s.id));
   }
+
   function ensureModal(){
     let overlay=document.getElementById('destinationDetailOverlay');
     if(overlay)return overlay;
@@ -16,8 +21,29 @@
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
     return overlay;
   }
-  function closeModal(){const o=document.getElementById('destinationDetailOverlay');if(o){o.classList.remove('open');o.setAttribute('aria-hidden','true');document.body.style.overflow='';}}
-  function openModal(d){
+
+  function setRoute(d){
+    const url=new URL(location.href);
+    url.searchParams.set('destino',routeSlug(d));
+    url.hash='destinos';
+    history.pushState({destination:routeSlug(d)},'',url.pathname+url.search+url.hash);
+  }
+
+  function clearRoute(){
+    const url=new URL(location.href);
+    url.searchParams.delete('destino');
+    url.hash='destinos';
+    history.replaceState({},'',url.pathname+url.search+url.hash);
+  }
+
+  function closeModal({syncRoute=true}={}){
+    const o=document.getElementById('destinationDetailOverlay');
+    if(o){o.classList.remove('open');o.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+    if(syncRoute&&currentRoute())clearRoute();
+  }
+
+  function openModal(d,{syncRoute=true}={}){
+    if(syncRoute)setRoute(d);
     const overlay=ensureModal();const holder=document.getElementById('destinationDetailContent');
     const sources=sourceRows(d);
     const sourceHtml=sources.length?sources.map(s=>`<div class="detail-source"><div><b>${esc(s.organization)} — ${esc(s.title)}</b><span>Verificada ${esc(s.verifiedAt||'')} · ${esc(s.note||'')}</span></div><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a></div>`).join(''):'<p>Las fuentes de esta ficha están en proceso de publicación.</p>';
@@ -36,18 +62,42 @@
         <section class="detail-sources"><h3>Fuentes que respaldan esta ficha</h3>${sourceHtml}</section>
         <div class="detail-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar ${esc(d.name)}</a><a class="btn btn-soft" href="#cotizar" data-close-detail>Solicitar viaje</a></div>
       </div>`;
-    holder.querySelector('.detail-close').addEventListener('click',closeModal);holder.querySelectorAll('[data-close-detail]').forEach(a=>a.addEventListener('click',closeModal));
+    holder.querySelector('.detail-close').addEventListener('click',()=>closeModal());
+    holder.querySelectorAll('[data-close-detail]').forEach(a=>a.addEventListener('click',()=>closeModal()));
     overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
   }
+
+  function openFromRoute(){
+    const slug=currentRoute();if(!slug||typeof DESTINATIONS==='undefined')return;
+    const overlay=document.getElementById('destinationDetailOverlay');if(overlay?.classList.contains('open'))return;
+    const d=DESTINATIONS.find(x=>routeSlug(x)===slug&&(!window.isDestinationVisible||isDestinationVisible(x)));
+    if(d)openModal(d,{syncRoute:false});
+  }
+
   function decorate(){
     const grid=document.getElementById('destinationGrid');if(!grid||typeof DESTINATIONS==='undefined')return;
     grid.querySelectorAll('.destination-card').forEach(card=>{
       if(card.dataset.detailReady==='1')return;
       const name=card.querySelector('h3')?.textContent?.trim();const d=DESTINATIONS.find(x=>x.name===name);if(!d)return;
       const foot=card.querySelector('.card-foot');if(!foot)return;
-      const button=document.createElement('button');button.type='button';button.className='detail-link';button.textContent='Ver ficha completa →';button.addEventListener('click',()=>openModal(d));
-      foot.insertBefore(button,foot.querySelector('a'));card.dataset.detailReady='1';
+      const link=document.createElement('a');link.className='detail-link';link.textContent='Ver ficha completa →';link.href=`?destino=${encodeURIComponent(routeSlug(d))}#destinos`;
+      link.addEventListener('click',e=>{e.preventDefault();openModal(d);});
+      foot.insertBefore(link,foot.querySelector('a'));card.dataset.detailReady='1';
     });
+    openFromRoute();
   }
-  document.addEventListener('DOMContentLoaded',()=>{const grid=document.getElementById('destinationGrid');if(!grid)return;new MutationObserver(decorate).observe(grid,{childList:true,subtree:true});setTimeout(decorate,350);});
+
+  window.addEventListener('popstate',()=>{
+    const slug=currentRoute();
+    if(!slug){closeModal({syncRoute:false});return;}
+    const d=(typeof DESTINATIONS!=='undefined'?DESTINATIONS:[]).find(x=>routeSlug(x)===slug);
+    if(d)openModal(d,{syncRoute:false});
+  });
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    const grid=document.getElementById('destinationGrid');if(!grid)return;
+    new MutationObserver(decorate).observe(grid,{childList:true,subtree:true});
+    setTimeout(decorate,350);
+    setTimeout(openFromRoute,900);
+  });
 })();
