@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Trhoncal Travel | Destinos, inspiración y cotización",
-    "description": "Destinos con información verificable, contexto útil y cotización personalizada con Trhoncal Travel."
+    "title": "Trhoncal Travel | Destinos de México y cotización personalizada",
+    "description": "Explora destinos de México con información revisada, contexto útil y cotización personalizada con Trhoncal Travel."
   },
   "brand": {
     "name": "Trhoncal Travel",
@@ -23,6 +23,10 @@
     "localSources": "assets/data/sources.json",
     "localOffers": "assets/data/promos.json",
     "rule": "The website requests /api/master first. Apps Script filters what is public from the Master Sheet; local files are development fallback only."
+  },
+  "presentation": {
+    "featuredLimit": 6,
+    "rule": "Mostrar_Web controls the public library; Destacado_Home controls the first home showcase; Orden_Home controls ordering."
   },
   "hosting": {
     "initialHost": "viajes.trhoncalhomes.com.mx",
