@@ -1,3 +1,5 @@
+const PUBLIC_HOST = 'viajes.trhoncalhomes.com.mx';
+
 function xmlEscape(value = '') {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -8,10 +10,13 @@ function xmlEscape(value = '') {
 }
 
 export default async function handler(req, res) {
-  const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
-  const host = req.headers.host;
-  const base = `${proto}://${host}`;
+  const host = String(req.headers.host || '').split(':')[0].toLowerCase();
+  if (host !== PUBLIC_HOST) {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    return res.status(404).send('Sitemap available on production host only.');
+  }
 
+  const base = `https://${PUBLIC_HOST}`;
   let destinations = [];
   try {
     const response = await fetch(`${base}/api/master`, {
