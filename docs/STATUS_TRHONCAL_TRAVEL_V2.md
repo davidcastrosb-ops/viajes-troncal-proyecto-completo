@@ -1,32 +1,37 @@
 # Trhoncal Travel V2 — Estado actual
 
-Fecha de corte: 2026-08-24 16:20 (America/Mexico_City)
+Fecha de corte: 2026-08-24 16:32 (America/Mexico_City)
 
-## Producción y separación de legado
-- `main` ya contiene la nueva web de Trhoncal Travel.
-- PR #2 fue integrado a `main` mediante squash merge.
-- Commit de producción base: `7b45cb8a1f853824313fee2b55fad2c394ec610b`.
-- Vercel confirmó el despliegue de ese commit con estado `SUCCESS`.
-- `viajes.3dhomes.com.mx` fue retirado de los dominios personalizados del proyecto Vercel.
-- La página antigua quedó preservada en `legacy/viajes-3dhomes-2026-08-24`.
-- La versión nueva previa al merge quedó preservada en `snapshot/trhoncal-travel-v2-2026-08-24`.
-- El dominio comercial objetivo queda exclusivamente en `viajes.trhoncalhomes.com.mx`.
-- Pendiente de limpieza externa: si todavía existe el registro DNS de `viajes.3dhomes.com.mx` en el proveedor DNS de `3dhomes.com.mx`, retirarlo posteriormente sin tocar ningún otro registro.
+## Producción
+- Host público activo: `https://viajes.trhoncalhomes.com.mx/`.
+- DNS creado en GoDaddy mediante CNAME `viajes` → `56b5c49cda876d5a.vercel-dns-017.com`.
+- Vercel reconoce el dominio y SSL quedó operativo.
+- `main` contiene la web nueva de Trhoncal Travel.
+- PR #2 fue integrado a `main`.
+- La página vieja quedó preservada en `legacy/viajes-3dhomes-2026-08-24`.
+- Snapshot de seguridad de la nueva web: `snapshot/trhoncal-travel-v2-2026-08-24`.
+- `viajes.3dhomes.com.mx` ya no está asociado como dominio personalizado del proyecto Vercel.
 
-## Ya operativo
-- Archivo Maestro convertido a Google Sheet nativo.
+## Archivo Maestro / CMS inicial
+- Google Sheet: `Trhoncal Travel | Archivo Maestro`.
 - Spreadsheet ID: `1jVIIMyQuNseDidYkErYDd58Ha3yxJA9oFXleFPjmUJw`.
-- Zona horaria del Sheet: `America/Mexico_City`.
-- Apps Script desplegado como web app de solo lectura.
-- Frontend usa `/api/master` como fuente primaria y JSON local sólo como fallback de desarrollo.
-- Puente Maestro → Apps Script → Vercel → web probado y funcionando en ambos sentidos.
-- Control editorial: `Mostrar_Web`, `Destacado_Home`, `Orden_Home`.
-- Control de ofertas: publicación sólo con autorización, estado vigente, confirmación de precio y no expiración.
-- Ofertas reales activas: 0.
-- Jotform ID `261127730314044` renombrado y verificado como `Cotiza tu viaje con Trhoncal Travel`.
+- Zona horaria: `America/Mexico_City`.
+- `12_Config_Web!Modo_actual` actualizado a `PRODUCCIÓN`.
+- Host público, SSL, fecha de salida y estado de contenido registrados en `12_Config_Web`.
+- `11_Publicacion_Web` actualizado a `Publicado v1` para las 16 fichas públicas.
+- Las rutas documentadas se alinearon con los slugs que genera Apps Script actualmente.
 
-## Destinos públicos
-### Primera ola — destacados
+## Flujo de datos
+- Archivo Maestro → Apps Script → `/api/master` → frontend.
+- Apps Script es de solo lectura hacia la web.
+- `Mostrar_Web` controla biblioteca pública.
+- `Destacado_Home` controla escaparate principal.
+- `Orden_Home` controla orden.
+- Imágenes sólo salen cuando `Permiso_uso_web = Sí` y existen fuente/licencia/crédito/alt/verificación.
+- `/api/master` fue endurecido para no exponer previews del upstream ni detalles internos de errores.
+
+## Contenido público
+### Destacados — 6
 1. Cancún.
 2. Riviera Maya / Playa del Carmen.
 3. Puerto Vallarta.
@@ -34,7 +39,7 @@ Fecha de corte: 2026-08-24 16:20 (America/Mexico_City)
 5. Los Cabos / Cabo San Lucas.
 6. Bahías de Huatulco.
 
-### Segunda ola — biblioteca pública
+### Biblioteca secundaria — 10
 7. Mazatlán.
 8. Ixtapa-Zihuatanejo.
 9. Puerto Escondido.
@@ -42,44 +47,59 @@ Fecha de corte: 2026-08-24 16:20 (America/Mexico_City)
 11. Cozumel.
 12. Sayulita.
 13. La Paz.
-
-### Tercera ola
 14. Tulum.
 15. Bacalar.
 16. Loreto.
 
 - Total público: 16 destinos.
-- Sólo los primeros 6 conservan `Destacado_Home = Sí`.
-- Los destinos 7–16 quedan en la biblioteca secundaria.
-- Acapulco permanece fuera hasta revisión operativa/producto.
+- Ofertas públicas: 0.
+- Acapulco continúa fuera hasta revisión operativa/producto.
 
-## Control visual
-- Toda imagen pública exige URL, fuente, licencia/permiso, crédito, alt text y fecha de verificación.
-- `Permiso_uso_web = Sí` es requisito para que Apps Script exponga la imagen.
-- Si una imagen remota falla, el frontend vuelve al tratamiento gráfico de Trhoncal.
-- Las tarjetas usan relación 16:9 y jerarquía visual consistente.
+## Auditoría de producción 2026-08-24
+Documento: `docs/PRODUCTION_AUDIT_2026-08-24.md`.
 
-## Jerarquía del home
-- `Mostrar_Web = Sí` publica el destino.
-- `Destacado_Home = Sí` lo coloca en el primer escaparate.
-- Límite del escaparate principal: 6.
-- Los demás destinos públicos aparecen en `Más destinos de México`.
-- Los filtros Playa / Cultura / Naturaleza / Pueblo Mágico operan sobre ambos bloques.
-- Las fichas completas `/mexico/<slug>` funcionan en ambos niveles.
+### Home
+- Host real validado visualmente.
+- Marca, navegación, CTA, contador de 16 destinos y jerarquía 6 + biblioteca operativos.
+- Ofertas permanecen ocultas con 0 registros publicables.
 
-## SEO/AEO técnico
-- Home con título, descripción, Open Graph y JSON-LD básico de Organization.
-- `robots.txt` bloquea previews y sólo permite rastreo en el host público definitivo.
-- `sitemap.xml` sólo se sirve cuando el host es exactamente `viajes.trhoncalhomes.com.mx`.
-- `assets/js/seo-host.js` crea canonical y `og:url` únicamente en el host público real.
-- El sitemap toma dinámicamente los destinos públicos desde `/api/master`.
+### API
+- `api/master.js` conserva GET-only, no-store y validación de payload.
+- Errores de producción ya no devuelven preview del upstream ni detalle de excepción al navegador.
 
-## Readiness de subdominio
-- Documento operativo: `docs/SUBDOMINIO_VIAJES_READINESS.md`.
-- El proyecto Vercel ya quedó sin `viajes.3dhomes.com.mx`.
-- La nueva web ya es la producción de `main` en el dominio técnico de Vercel.
-- Siguiente paso seguro: agregar `viajes.trhoncalhomes.com.mx` al proyecto → copiar el registro DNS exacto mostrado por Vercel → crear únicamente el host `viajes` en el DNS de `trhoncalhomes.com.mx` → esperar validación/HTTPS.
-- No tocar raíz, `www`, MX, SPF, DKIM, DMARC ni otros registros de Trhoncal Homes.
+### Fichas auditadas
+- `/mexico/cancun`
+- `/mexico/puerto-vallarta`
+- `/mexico/tulum`
+
+Las tres tienen ficha completa en `02_Fichas_Destino`, fuentes asociadas y datos suficientes para renderizar detalle.
+
+### WhatsApp
+- Número configurado: `523329335952`.
+- CTA general y CTA por destino generan mensaje contextual de Trhoncal Travel.
+
+### Jotform
+- ID: `261127730314044`.
+- Título: `Cotiza tu viaje con Trhoncal Travel`.
+- Estado: ENABLED.
+- 14 preguntas; 21 envíos conservados al corte.
+
+### robots / sitemap / canonical
+- `robots.txt` permite rastreo sólo en el host público y apunta al sitemap.
+- `sitemap.xml` se sirve sólo en `viajes.trhoncalhomes.com.mx` y toma destinos activos desde `/api/master`.
+- `seo-host.js` crea canonical y `og:url` en el host público.
+
+## Hallazgo SEO/AEO prioritario
+Las fichas `/mexico/<slug>` todavía parten de un shell HTML común y completan contenido, title, meta y canonical en cliente con JavaScript.
+
+Google puede renderizar JavaScript, pero para una arquitectura orientada a SEO/AEO conviene que el contenido principal y metadata de cada ficha lleguen ya en el HTML del servidor/prerender.
+
+Próxima mejora técnica prioritaria: server-side/pre-render de fichas sin cambiar la experiencia visual.
+
+## Hallazgo de URLs
+El slug público se deriva actualmente de `Nombre` en Apps Script. Si el nombre visible cambia, podría cambiar la URL.
+
+Mejora recomendada: incorporar un campo estable `Slug_Web` al Maestro y hacer que Apps Script lo utilice con fallback al nombre. No cambiar URLs públicas existentes sin 301.
 
 ## Investigación acumulada
 - 30/30 destinos iniciales de México con ficha base verificada.
@@ -89,25 +109,20 @@ Fecha de corte: 2026-08-24 16:20 (America/Mexico_City)
 
 ## Reglas comerciales vigentes
 - Un destino no se publica sólo por ser atractivo: debe tener información suficiente y sentido comercial/operativo.
-- Oferta, precio, cupo y condiciones permanecen separados del contenido estable.
-- Capturas/links de PriceAgencies son demostraciones del proveedor salvo selección expresa de producto real.
-- Ofertas públicas continúan en 0.
+- Precio, cupo y condiciones permanecen separados del contenido estable.
+- Muestras de PriceAgencies no se convierten en ofertas automáticamente.
+- Ofertas públicas continúan en 0 hasta selección y reconfirmación expresa.
 
-## GitHub / despliegue
-- Repositorio: `davidcastrosb-ops/viajes-troncal-proyecto-completo`.
-- Rama de producción: `main`.
-- PR #2: integrado y cerrado por merge.
-- Respaldo legado: `legacy/viajes-3dhomes-2026-08-24`.
-- Snapshot nueva: `snapshot/trhoncal-travel-v2-2026-08-24`.
+## Siguiente bloque
+1. Mejorar renderizado SEO/AEO de fichas.
+2. Estabilizar slugs controlados desde Maestro.
+3. Pulir copy público de los 6 destinos destacados.
+4. Preparar cuarta ola de contenido sin aumentar todavía los 6 destacados.
+5. Revisar Acapulco por separado antes de cualquier activación.
+6. Después: Search Console / Bing Webmaster y Open Graph social propio.
 
-## Pendiente inmediato
-1. Agregar `viajes.trhoncalhomes.com.mx` al proyecto Vercel.
-2. Copiar y crear únicamente el registro DNS exacto que Vercel solicite.
-3. Confirmar HTTPS y probar home, `/api/master`, `/robots.txt`, `/sitemap.xml` y al menos tres fichas.
-4. Verificar canonical en home y fichas sobre el host real.
-5. Mantener ofertas en 0 hasta selección expresa de producto real.
-
-## Continuidad y recuperación
-- El historial de ChatGPT no es fuente única del proyecto.
+## Continuidad
+- El historial del chat no es fuente única del proyecto.
 - Checkpoint duradero: `docs/CHECKPOINT_MAESTRO_2026-08-24.md`.
-- Las decisiones estructurales y avances materiales deben dejar rastro en GitHub y/o Archivo Maestro.
+- Auditoría de producción: `docs/PRODUCTION_AUDIT_2026-08-24.md`.
+- Mantener decisiones estructurales en GitHub y/o Archivo Maestro.
