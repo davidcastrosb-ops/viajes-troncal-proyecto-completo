@@ -28,6 +28,10 @@ function applyConfig(){
   document.title=SITE.meta?.title||'Trhoncal Travel';
   const desc=document.querySelector('meta[name="description"]');
   if(desc&&SITE.meta?.description)desc.setAttribute('content',SITE.meta.description);
+  const ogTitle=document.querySelector('meta[property="og:title"]');
+  const ogDesc=document.querySelector('meta[property="og:description"]');
+  if(ogTitle)ogTitle.setAttribute('content',SITE.meta?.title||'Trhoncal Travel');
+  if(ogDesc&&SITE.meta?.description)ogDesc.setAttribute('content',SITE.meta.description);
   setText('heroKicker',SITE.hero?.kicker);
   setText('heroTitle',SITE.hero?.title);
   setText('heroAccent',SITE.hero?.accent);
@@ -84,7 +88,7 @@ function renderFilters(){
   const groups=['Todos','Playa','Cultura','Naturaleza','Pueblo Mágico'];
   holder.innerHTML=groups.map((g,i)=>`<button class="chip ${i===0?'active':''}" data-filter="${escapeHTML(g)}">${escapeHTML(g)}</button>`).join('');
   holder.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{
-    holder.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderDestinations(btn.dataset.filter);
+    holder.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderDestinationSections(btn.dataset.filter);
   }));
 }
 
@@ -99,49 +103,84 @@ function matchesFilter(d,filter){
   return true;
 }
 
-function destinationImage(d){
+function destinationImage(d,featured=false){
   if(!d.mainImage)return '';
   const credit=d.imageCredit?`<span class="destination-image-credit">${escapeHTML(d.imageCredit)}</span>`:'';
-  return `<div class="destination-image"><img src="${escapeHTML(d.mainImage)}" alt="${escapeHTML(d.imageAlt||d.name)}" loading="lazy">${credit}</div>`;
+  const badge=featured?'<span class="featured-pill">Selección Trhoncal</span>':'';
+  return `<div class="destination-image">${badge}<img src="${escapeHTML(d.mainImage)}" alt="${escapeHTML(d.imageAlt||d.name)}" loading="lazy">${credit}</div>`;
 }
 
-function renderDestinations(filter='Todos'){
-  const grid=document.getElementById('destinationGrid');if(!grid)return;
-  const rows=DESTINATIONS.filter(isDestinationVisible).filter(d=>matchesFilter(d,filter));
-  if(!rows.length){
-    grid.innerHTML='<div class="empty-state">Estamos preparando nuevas fichas de destino con información revisada y fuentes verificables.</div>';
-    setText('verifiedCount','Destinos en preparación');
-    return;
-  }
-  rows.sort((a,b)=>(a.ordenHome??9999)-(b.ordenHome??9999));
-  grid.innerHTML=rows.map(d=>{
-    const recognitions=(d.recognitions||[]).filter(r=>!(d.puebloMagico&&String(r).trim().toLowerCase()==='pueblo mágico'));
-    const rec=recognitions.slice(0,2).map(r=>`<span class="tag">${escapeHTML(r)}</span>`).join('');
-    const magic=d.puebloMagico?'<span class="tag">Pueblo Mágico</span>':'';
-    return `<article class="destination-card ${d.mainImage?'has-image':''}">
-      ${destinationImage(d)}
-      <div class="destination-card-content">
-        <div class="topline"><span class="eyebrow">${escapeHTML(d.state)} · ${escapeHTML(d.country)}</span><span class="meta">Verificado ${escapeHTML(d.lastVerified||'')}</span></div>
-        <h3>${escapeHTML(d.name)}</h3>
-        <p>${escapeHTML(d.summary)}</p>
-        <div class="recognitions">${magic}${rec}</div>
-        <div class="card-foot"><span>${escapeHTML(d.recommendedStay||'Duración por definir')}</span><a href="#cotizar" data-destination="${escapeHTML(d.name)}">Quiero cotizar →</a></div>
-      </div>
-    </article>`;
-  }).join('');
+function destinationCard(d,{featured=false}={}){
+  const recognitions=(d.recognitions||[]).filter(r=>!(d.puebloMagico&&String(r).trim().toLowerCase()==='pueblo mágico'));
+  const rec=recognitions.slice(0,2).map(r=>`<span class="tag">${escapeHTML(r)}</span>`).join('');
+  const magic=d.puebloMagico?'<span class="tag">Pueblo Mágico</span>':'';
+  return `<article class="destination-card ${d.mainImage?'has-image':''} ${featured?'is-featured':''}" data-destination-id="${escapeHTML(d.id||'')}">
+    ${destinationImage(d,featured)}
+    <div class="destination-card-content">
+      <div class="topline"><span class="eyebrow">${escapeHTML(d.state)} · ${escapeHTML(d.country)}</span><span class="meta">Verificado ${escapeHTML(d.lastVerified||'')}</span></div>
+      <h3>${escapeHTML(d.name)}</h3>
+      <p>${escapeHTML(d.summary)}</p>
+      <div class="recognitions">${magic}${rec}</div>
+      <div class="card-foot"><span>${escapeHTML(d.recommendedStay||'Duración por definir')}</span><a href="#cotizar" data-destination="${escapeHTML(d.name)}">Quiero cotizar →</a></div>
+    </div>
+  </article>`;
+}
 
-  grid.querySelectorAll('.destination-image img').forEach(img=>img.addEventListener('error',()=>{
+function bindDestinationInteractions(scope){
+  if(!scope)return;
+  scope.querySelectorAll('.destination-image img').forEach(img=>img.addEventListener('error',()=>{
     const card=img.closest('.destination-card');
     const holder=img.closest('.destination-image');
     if(card)card.classList.remove('has-image');
     if(holder)holder.remove();
   }));
-
-  grid.querySelectorAll('[data-destination]').forEach(a=>a.addEventListener('click',()=>{
+  scope.querySelectorAll('[data-destination]').forEach(a=>a.addEventListener('click',()=>{
     const name=a.dataset.destination;
     setHref('headerWhatsapp',whatsappLink(`Hola, quiero cotizar un viaje a ${name} con Trhoncal Travel.`));
   }));
-  setText('verifiedCount',`${rows.length} ${rows.length===1?'destino para explorar':'destinos para explorar'}`);
+}
+
+function renderDestinationSections(filter='Todos'){
+  const featuredGrid=document.getElementById('destinationGrid');
+  const moreGrid=document.getElementById('destinationMoreGrid');
+  const moreSection=document.getElementById('destinationMoreSection');
+  if(!featuredGrid)return;
+
+  const allVisible=DESTINATIONS.filter(isDestinationVisible).sort((a,b)=>(a.ordenHome??9999)-(b.ordenHome??9999));
+  const featuredLimit=Number(SITE.presentation?.featuredLimit||6);
+  let featured=allVisible.filter(d=>d.featuredHome===true).slice(0,featuredLimit);
+  if(!featured.length)featured=allVisible.slice(0,featuredLimit);
+  const featuredIds=new Set(featured.map(d=>d.id||d.name));
+  const library=allVisible.filter(d=>!featuredIds.has(d.id||d.name));
+
+  const featuredFiltered=featured.filter(d=>matchesFilter(d,filter));
+  const libraryFiltered=library.filter(d=>matchesFilter(d,filter));
+
+  if(!allVisible.length){
+    featuredGrid.innerHTML='<div class="empty-state">Estamos preparando nuevas fichas de destino con información revisada y fuentes verificables.</div>';
+    if(moreSection)moreSection.hidden=true;
+    setText('verifiedCount','Destinos en preparación');
+    return;
+  }
+
+  featuredGrid.innerHTML=featuredFiltered.length
+    ? featuredFiltered.map(d=>destinationCard(d,{featured:true})).join('')
+    : '<div class="empty-state">No hay destinos destacados que coincidan con este filtro.</div>';
+
+  if(moreGrid&&moreSection){
+    if(libraryFiltered.length){
+      moreGrid.innerHTML=libraryFiltered.map(d=>destinationCard(d)).join('');
+      moreSection.hidden=false;
+      setText('moreDestinationsCount',`${libraryFiltered.length} ${libraryFiltered.length===1?'destino adicional':'destinos adicionales'}`);
+    }else{
+      moreGrid.innerHTML='';
+      moreSection.hidden=true;
+    }
+  }
+
+  bindDestinationInteractions(featuredGrid);
+  bindDestinationInteractions(moreGrid);
+  setText('verifiedCount',`${allVisible.length} ${allVisible.length===1?'destino para explorar':'destinos para explorar'}`);
 }
 
 function renderSourceSummary(){
@@ -207,7 +246,7 @@ async function init(){
     SOURCES=publicData.sources;
     OFFERS=publicData.offers;
     document.documentElement.dataset.dataSource=publicData.source;
-    renderFilters();renderDestinations();renderSourceSummary();renderOffers();
+    renderFilters();renderDestinationSections();renderSourceSummary();renderOffers();
   }catch(error){
     console.error(error);
     const grid=document.getElementById('destinationGrid');if(grid)grid.innerHTML='<div class="empty-state">No pudimos cargar la base de destinos. Intenta recargar la página.</div>';
