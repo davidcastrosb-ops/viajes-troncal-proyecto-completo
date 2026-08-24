@@ -109,13 +109,14 @@ function renderDestinations(filter='Todos'){
   const grid=document.getElementById('destinationGrid');if(!grid)return;
   const rows=DESTINATIONS.filter(isDestinationVisible).filter(d=>matchesFilter(d,filter));
   if(!rows.length){
-    grid.innerHTML='<div class="empty-state">Todavía no hay destinos activados para mostrar. Se publicarán desde el Archivo Maestro cuando David los autorice.</div>';
-    setText('verifiedCount','0 destinos públicos');
+    grid.innerHTML='<div class="empty-state">Estamos preparando nuevas fichas de destino con información revisada y fuentes verificables.</div>';
+    setText('verifiedCount','Destinos en preparación');
     return;
   }
   rows.sort((a,b)=>(a.ordenHome??9999)-(b.ordenHome??9999));
   grid.innerHTML=rows.map(d=>{
-    const rec=(d.recognitions||[]).slice(0,2).map(r=>`<span class="tag">${escapeHTML(r)}</span>`).join('');
+    const recognitions=(d.recognitions||[]).filter(r=>!(d.puebloMagico&&String(r).trim().toLowerCase()==='pueblo mágico'));
+    const rec=recognitions.slice(0,2).map(r=>`<span class="tag">${escapeHTML(r)}</span>`).join('');
     const magic=d.puebloMagico?'<span class="tag">Pueblo Mágico</span>':'';
     return `<article class="destination-card ${d.mainImage?'has-image':''}">
       ${destinationImage(d)}
@@ -132,7 +133,7 @@ function renderDestinations(filter='Todos'){
     const name=a.dataset.destination;
     setHref('headerWhatsapp',whatsappLink(`Hola, quiero cotizar un viaje a ${name} con Trhoncal Travel.`));
   }));
-  setText('verifiedCount',`${rows.length} ${rows.length===1?'destino público':'destinos públicos'}`);
+  setText('verifiedCount',`${rows.length} ${rows.length===1?'destino para explorar':'destinos para explorar'}`);
 }
 
 function renderSourceSummary(){
@@ -165,12 +166,20 @@ function isOfferVisible(o){
 
 function renderOffers(){
   const grid=document.getElementById('promosCards');if(!grid)return;
+  const section=document.getElementById('promociones');
+  const navLink=document.querySelector('.nav a[href="#promociones"]');
+  const footerLink=document.querySelector('.footer a[href="#promociones"]');
   const publishable=OFFERS.filter(isOfferVisible).sort((a,b)=>(a.ordenWeb??9999)-(b.ordenWeb??9999));
   grid.innerHTML='';
   if(!publishable.length){
-    grid.innerHTML=`<article class="promo-card"><h3>Sin ofertas publicadas por ahora</h3><p>Las promociones aparecerán aquí únicamente cuando David las cargue y active desde el Archivo Maestro con precio, vigencia y condiciones reconfirmadas.</p><span class="promo-warning">Control desde Archivo Maestro</span></article>`;
+    if(section)section.hidden=true;
+    if(navLink)navLink.hidden=true;
+    if(footerLink)footerLink.closest('p')?.setAttribute('hidden','');
     return;
   }
+  if(section)section.hidden=false;
+  if(navLink)navLink.hidden=false;
+  if(footerLink)footerLink.closest('p')?.removeAttribute('hidden');
   publishable.forEach(entry=>{
     const title=escapeHTML(entry.title||'Promoción especial');
     const desc=escapeHTML(entry.description||'Cotiza disponibilidad y condiciones vigentes.');
