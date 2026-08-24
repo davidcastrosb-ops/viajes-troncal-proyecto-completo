@@ -1,23 +1,23 @@
-# Trhoncal Travel — SEO/AEO SSR Preview
+# Trhoncal Travel — SEO/AEO SSR
 
 Fecha: 2026-08-24
-Rama: `feat/seo-ssr-stable-slugs`
-PR: #4 (DRAFT)
-Preview Vercel: `https://viajes-troncal-proye-git-4f8e45-david-castros-projects-75de0086.vercel.app`
-Producción permanece en `main` / `https://viajes.trhoncalhomes.com.mx/`.
+Estado: integrado a producción
+PR: #4 — MERGED
+Commit de merge: `5fb975f48b05acaa06f68473e20f8590453e7115`
+Producción: `https://viajes.trhoncalhomes.com.mx/`
 
 ## Objetivo
 Que cada ficha `/mexico/<slug>` entregue desde servidor el contenido principal y metadata SEO/AEO, sin depender de JavaScript para que un robot pueda leer la ficha.
 
 ## Hecho
 - `Slug_Web` agregado al Archivo Maestro.
-- 30/30 destinos cargados con slug estable equivalente a la URL que el sitio generaba al corte.
-- Apps Script del repositorio actualizado para usar `Slug_Web` con fallback a `Nombre`.
-- Nuevo `api/destination.js` server-rendered.
-- `vercel.json` enruta `/mexico/:slug` a `api/destination` en esta rama.
-- La respuesta SSR incluye: title, description, canonical, Open Graph, robots, JSON-LD `TouristDestination` + `BreadcrumbList`, contenido de ficha, fuentes, CTA de WhatsApp y cotización.
-- En preview se emite `noindex,nofollow`; sólo el host público se plantea como indexable.
-- Vercel reportó el deployment de la rama como SUCCESS.
+- 30/30 destinos cargados con slug estable equivalente a la URL pública existente.
+- `api/destination.js` renderiza las fichas desde servidor.
+- `vercel.json` enruta `/mexico/:slug` a `api/destination`.
+- La respuesta SSR incluye title, description, canonical, Open Graph, robots, JSON-LD `TouristDestination` + `BreadcrumbList`, contenido de ficha, fuentes y CTA.
+- En preview se mantiene `noindex,nofollow`; el host público es indexable.
+- PR #4 fue integrado a `main`.
+- Vercel reportó SUCCESS para el commit de producción.
 
 ## URLs de control
 - `/mexico/cancun`
@@ -25,24 +25,18 @@ Que cada ficha `/mexico/<slug>` entregue desde servidor el contenido principal y
 - `/mexico/tulum`
 
 ## Regla de URL
-- `Slug_Web` es identificador público estable.
+- `Slug_Web` es el identificador público estable.
 - Cambiar `Nombre` no debe cambiar la URL.
-- `Slug_Web` no se cambia después de publicar sin un plan explícito de redirección 301 y actualización de sitemap/canonical.
+- `Slug_Web` no se cambia después de publicar sin redirección 301 y actualización de sitemap/canonical.
 
-## Dependencia antes de merge
-El Apps Script desplegado actualmente todavía usa la versión anterior del código. Antes o junto con el merge de PR #4 debe publicarse la nueva versión de `apps-script/Code.gs` para que el endpoint del Maestro use `Slug_Web` como fuente efectiva. Como los slugs cargados son iguales a los actuales, el preview SSR puede probarse sin cambiar URLs.
+## Apps Script
+El código `apps-script/Code.gs` ya está actualizado en `main` para usar `Slug_Web` con fallback a `Nombre` y caché `public-payload-v2`.
 
-## No tocar todavía
-- `Mostrar_Web`.
-- `Destacado_Home`.
-- Ofertas.
-- DNS.
-- Producción `main`.
+Pendiente operativo: publicar una nueva versión del Web App en Google Apps Script. El conector disponible de Google Drive/Sheets no expone despliegues de Apps Script, por lo que ese clic no puede ejecutarse desde ChatGPT. Esto no rompe las URLs actuales porque los 30 `Slug_Web` cargados coinciden con los slugs ya generados por la versión desplegada.
 
-## Criterio para aprobar merge
-1. Preview responde en las tres URLs de control.
-2. HTML inicial contiene el nombre, resumen, secciones y fuentes de la ficha.
-3. Canonical apunta a `https://viajes.trhoncalhomes.com.mx/mexico/<slug>`.
-4. Preview permanece noindex.
-5. Diseño usable en escritorio y móvil.
-6. Nueva versión de Apps Script desplegada y `Slug_Web` confirmado en `/api/master`.
+## Estado de seguridad
+- `Mostrar_Web`: sin cambios.
+- `Destacado_Home`: sin cambios.
+- Ofertas públicas: 0.
+- DNS: sin cambios.
+- Producción: desplegada correctamente.
