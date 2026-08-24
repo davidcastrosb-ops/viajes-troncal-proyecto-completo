@@ -39,13 +39,8 @@
     }
   }
 
-  function setRoute(d){
-    history.pushState({destination:routeSlug(d)},'',`/mexico/${encodeURIComponent(routeSlug(d))}`);
-  }
-
-  function clearRoute(){
-    history.pushState({},'','/#destinos');
-  }
+  function setRoute(d){history.pushState({destination:routeSlug(d)},'',`/mexico/${encodeURIComponent(routeSlug(d))}`);}
+  function clearRoute(){history.pushState({},'','/#destinos');}
 
   function closeModal({syncRoute=true}={}){
     const o=document.getElementById('destinationDetailOverlay');
@@ -56,16 +51,28 @@
     if(syncRoute&&currentRoute())clearRoute();
   }
 
+  function relatedDestinations(d){
+    if(typeof DESTINATIONS==='undefined')return [];
+    return DESTINATIONS
+      .filter(x=>x!==d && (typeof isDestinationVisible!=='function'||isDestinationVisible(x)))
+      .sort((a,b)=>(a.ordenHome??9999)-(b.ordenHome??9999))
+      .slice(0,2);
+  }
+
   function openModal(d,{syncRoute=true}={}){
     if(syncRoute)setRoute(d);
     const clean=isCleanRoute();
     const overlay=ensureModal();const holder=document.getElementById('destinationDetailContent');
     const sources=sourceRows(d);
     const sourceHtml=sources.length?sources.map(s=>`<div class="detail-source"><div><b>${esc(s.organization)} — ${esc(s.title)}</b><span>Verificada ${esc(s.verifiedAt||'')} · ${esc(s.note||'')}</span></div><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a></div>`).join(''):'<p>Las fuentes de esta ficha están en proceso de publicación.</p>';
-    const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero cotizar un viaje a ${d.name} con Trhoncal Travel.`):'#cotizar';
+    const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero cotizar un viaje a ${d.name} con Trhoncal Travel.`):'/#cotizar';
     const photo=d.mainImage?`<div class="detail-photo"><img src="${esc(d.mainImage)}" alt="${esc(d.imageAlt||d.name)}"><div class="detail-photo-caption">${d.imageCredit?`<span>${esc(d.imageCredit)}</span>`:''}${d.imageLicense?`<small>${esc(d.imageLicense)}</small>`:''}</div></div>`:'';
-    const routeBar=clean?`<div class="detail-route-bar"><a class="detail-route-brand" href="/#destinos" aria-label="Volver a Trhoncal Travel"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><a class="detail-route-back" href="/#destinos">← Volver a destinos</a></div>`:'';
+    const routeBar=clean?`<div class="detail-route-bar"><a class="detail-route-brand" href="/#destinos" aria-label="Volver a Trhoncal Travel"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><div class="detail-route-context"><span>México · ${esc(d.state||'')}</span><a class="detail-route-back" href="/#destinos">← Volver a destinos</a></div></div>`:'';
     const closeControl=clean?'':`<button class="detail-close" type="button" aria-label="Cerrar">×</button>`;
+    const related=clean?relatedDestinations(d):[];
+    const relatedHtml=related.length?`<section class="detail-related"><div class="detail-related-head"><span class="eyebrow">Sigue explorando</span><h3>Otros destinos que puedes combinar</h3></div><div class="detail-related-grid">${related.map(x=>`<a class="detail-related-card" href="/mexico/${encodeURIComponent(routeSlug(x))}"><span>${esc(x.state)} · México</span><b>${esc(x.name)}</b><small>${esc(x.recommendedStay||'')}</small></a>`).join('')}</div></section>`:'';
+    const routeConversion=clean?`<section class="detail-conversion"><div><span class="eyebrow">Asesoría Trhoncal Travel</span><h3>¿Quieres convertir ${esc(d.name)} en un viaje real?</h3><p>Cuéntanos fechas, viajeros y estilo de viaje. Revisamos producto disponible y te cotizamos opciones reales antes de que pagues.</p></div><div class="detail-conversion-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar por WhatsApp</a><a class="btn btn-soft" href="/#cotizar">Solicitar cotización</a></div></section>`:'';
+
     holder.innerHTML=`
       ${routeBar}
       <header class="detail-header ${d.mainImage?'with-photo':''}">${closeControl}${photo}<div class="detail-header-copy"><span class="eyebrow">${esc(d.state)} · ${esc(d.country)}${d.puebloMagico?' · Pueblo Mágico':''}</span><h2 id="detailTitle">${esc(d.name)}</h2><p>${esc(d.summary||'')}</p></div></header>
@@ -78,20 +85,15 @@
         <section class="detail-block"><h3>Gastronomía</h3><p>${esc(d.gastronomy||'')}</p></section>
         <section class="detail-block"><h3>Patrimonio y reconocimientos</h3>${list(d.recognitions)}<p style="margin-top:12px">${esc(d.sustainabilityHeritage||'')}</p></section>
         <section class="detail-sources"><h3>Fuentes que respaldan esta ficha</h3>${sourceHtml}</section>
-        <div class="detail-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar ${esc(d.name)}</a><a class="btn btn-soft" href="/#cotizar">Solicitar viaje</a></div>
+        ${clean?'':`<div class="detail-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar ${esc(d.name)}</a><a class="btn btn-soft" href="/#cotizar">Solicitar viaje</a></div>`}
+        ${routeConversion}
+        ${relatedHtml}
       </div>`;
+
     const closeButton=holder.querySelector('.detail-close');if(closeButton)closeButton.addEventListener('click',()=>closeModal());
-    if(clean){
-      overlay.classList.add('route-page');
-      document.body.classList.add('destination-route');
-      document.body.style.overflow='';
-    }else{
-      overlay.classList.remove('route-page');
-      document.body.classList.remove('destination-route');
-      document.body.style.overflow='hidden';
-    }
-    overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
-    applyMeta(d);
+    if(clean){overlay.classList.add('route-page');document.body.classList.add('destination-route');document.body.style.overflow='';}
+    else{overlay.classList.remove('route-page');document.body.classList.remove('destination-route');document.body.style.overflow='hidden';}
+    overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');applyMeta(d);
   }
 
   function openFromRoute(){
@@ -123,7 +125,6 @@
   document.addEventListener('DOMContentLoaded',()=>{
     const grid=document.getElementById('destinationGrid');if(!grid)return;
     new MutationObserver(decorate).observe(grid,{childList:true,subtree:true});
-    setTimeout(decorate,350);
-    setTimeout(openFromRoute,900);
+    setTimeout(decorate,350);setTimeout(openFromRoute,900);
   });
 })();
