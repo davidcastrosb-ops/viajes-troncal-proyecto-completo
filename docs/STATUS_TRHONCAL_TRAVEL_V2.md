@@ -1,6 +1,6 @@
 # Trhoncal Travel V2 — Estado actual
 
-Fecha de corte: 2026-08-24 16:55 (America/Mexico_City)
+Fecha de corte: 2026-08-24 17:28 (America/Mexico_City)
 
 ## Producción
 - Host público activo: `https://viajes.trhoncalhomes.com.mx/`.
@@ -30,9 +30,11 @@ Fecha de corte: 2026-08-24 16:55 (America/Mexico_City)
 - Archivo Maestro → Apps Script → `/api/master` → frontend/SSR.
 - Apps Script es de solo lectura hacia la web.
 - `api/master.js` no expone previews del upstream ni detalles internos de errores.
-- El código de Apps Script en GitHub ya usa `Slug_Web` con fallback a `Nombre` y caché v2.
-- Pendiente: publicar nueva versión del Web App de Apps Script desde la interfaz de Google. El conector disponible no expone despliegues de Apps Script.
-- El pendiente no cambia URLs actuales porque los 30 `Slug_Web` coinciden con los slugs que ya genera la versión desplegada.
+- Apps Script Web App actualizado a versión 4 el 2026-08-24.
+- La implementación conserva el mismo ID y la misma URL `/exec` usada por Vercel.
+- El endpoint desplegado ya usa `Slug_Web` con fallback a `Nombre` y caché `public-payload-v2`.
+- Respuesta JSON confirmada después del despliegue: 16 destinos públicos, slugs estables y 0 ofertas.
+- Slugs de control confirmados en la respuesta: `cancun`, `puerto-vallarta` y `tulum`.
 
 ## Contenido público
 ### Destacados — 6
@@ -71,9 +73,9 @@ Fecha de corte: 2026-08-24 16:55 (America/Mexico_City)
 
 ## Auditorías y checkpoints
 - `docs/PRODUCTION_AUDIT_2026-08-24.md`.
-- `docs/SEO_SSR_PREVIEW_2026-08-24.md` — actualizado a rollout integrado.
+- `docs/SEO_SSR_PREVIEW_2026-08-24.md` — rollout integrado.
 - `docs/CHECKPOINT_MAESTRO_2026-08-24.md`.
-- `10_Revisiones`: REV-037 salida a producción; REV-038 auditoría SEO/AEO; REV-039 slugs estables; REV-040 SSR integrado a `main`.
+- `10_Revisiones`: REV-037 salida a producción; REV-038 auditoría SEO/AEO; REV-039 slugs estables; REV-040 SSR integrado a `main`; REV-041 Apps Script v4 + endpoint confirmado.
 
 ## Jotform / conversión
 - Jotform ID `261127730314044`.
@@ -97,12 +99,11 @@ Fecha de corte: 2026-08-24 16:55 (America/Mexico_City)
 - Imágenes y licencias listas; `Mostrar_Web` permanece en No hasta validación comercial.
 
 ## Siguiente bloque
-1. Publicar la nueva versión del Web App de Apps Script para activar `Slug_Web` como fuente efectiva del endpoint.
-2. Confirmar que `/api/master` devuelve los slugs estables.
-3. Verificación visual de Cancún, Puerto Vallarta y Tulum en producción después del SSR.
-4. Pulir copy público de los 6 destinos destacados.
-5. Evaluar comercialmente Guadalajara + Tequila antes de activar la cuarta ola.
-6. Después: Search Console / Bing Webmaster y Open Graph social propio.
+1. Verificación visual final de Cancún, Puerto Vallarta y Tulum en producción después del SSR.
+2. Comprobar `/api/master`, `robots.txt` y `sitemap.xml` desde el host público cuando el resolver externo ya responda de forma estable.
+3. Pulir copy público de los 6 destinos destacados.
+4. Evaluar comercialmente Guadalajara + Tequila antes de activar la cuarta ola.
+5. Después: Search Console / Bing Webmaster y Open Graph social propio.
 
 ## Reglas comerciales vigentes
 - Un destino no se publica sólo por ser atractivo: debe tener información suficiente y sentido comercial/operativo.
