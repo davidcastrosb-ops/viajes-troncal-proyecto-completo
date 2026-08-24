@@ -10,7 +10,7 @@
     },
     {
       "source": "/mexico/:slug",
-      "destination": "/index.html"
+      "destination": "/api/destination?slug=:slug"
     }
   ]
 }
