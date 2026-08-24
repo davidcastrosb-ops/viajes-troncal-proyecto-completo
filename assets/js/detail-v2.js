@@ -3,7 +3,11 @@
   const list=(items=[])=>items&&items.length?`<ul class="detail-list">${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p>Información en preparación.</p>';
   const slugify=(v='')=>String(v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
   const routeSlug=d=>d.slug||slugify(d.name);
-  const currentRoute=()=>new URLSearchParams(location.search).get('destino')||'';
+  const currentRoute=()=>{
+    const path=location.pathname.match(/^\/mexico\/([^/?#]+)\/?$/i);
+    if(path)return decodeURIComponent(path[1]);
+    return new URLSearchParams(location.search).get('destino')||'';
+  };
 
   function sourceRows(d){
     const ids=new Set(d.sourceIds||[]);
@@ -23,17 +27,11 @@
   }
 
   function setRoute(d){
-    const url=new URL(location.href);
-    url.searchParams.set('destino',routeSlug(d));
-    url.hash='destinos';
-    history.pushState({destination:routeSlug(d)},'',url.pathname+url.search+url.hash);
+    history.pushState({destination:routeSlug(d)},'',`/mexico/${encodeURIComponent(routeSlug(d))}`);
   }
 
   function clearRoute(){
-    const url=new URL(location.href);
-    url.searchParams.delete('destino');
-    url.hash='destinos';
-    history.replaceState({},'',url.pathname+url.search+url.hash);
+    history.replaceState({},'','/#destinos');
   }
 
   function closeModal({syncRoute=true}={}){
@@ -60,11 +58,12 @@
         <section class="detail-block"><h3>Gastronomía</h3><p>${esc(d.gastronomy||'')}</p></section>
         <section class="detail-block"><h3>Patrimonio y reconocimientos</h3>${list(d.recognitions)}<p style="margin-top:12px">${esc(d.sustainabilityHeritage||'')}</p></section>
         <section class="detail-sources"><h3>Fuentes que respaldan esta ficha</h3>${sourceHtml}</section>
-        <div class="detail-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar ${esc(d.name)}</a><a class="btn btn-soft" href="#cotizar" data-close-detail>Solicitar viaje</a></div>
+        <div class="detail-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar ${esc(d.name)}</a><a class="btn btn-soft" href="/#cotizar" data-close-detail>Solicitar viaje</a></div>
       </div>`;
     holder.querySelector('.detail-close').addEventListener('click',()=>closeModal());
     holder.querySelectorAll('[data-close-detail]').forEach(a=>a.addEventListener('click',()=>closeModal()));
     overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+    document.title=`${d.name} | Trhoncal Travel`;
   }
 
   function openFromRoute(){
@@ -80,7 +79,7 @@
       if(card.dataset.detailReady==='1')return;
       const name=card.querySelector('h3')?.textContent?.trim();const d=DESTINATIONS.find(x=>x.name===name);if(!d)return;
       const foot=card.querySelector('.card-foot');if(!foot)return;
-      const link=document.createElement('a');link.className='detail-link';link.textContent='Ver ficha completa →';link.href=`?destino=${encodeURIComponent(routeSlug(d))}#destinos`;
+      const link=document.createElement('a');link.className='detail-link';link.textContent='Ver ficha completa →';link.href=`/mexico/${encodeURIComponent(routeSlug(d))}`;
       link.addEventListener('click',e=>{e.preventDefault();openModal(d);});
       foot.insertBefore(link,foot.querySelector('a'));card.dataset.detailReady='1';
     });
@@ -89,7 +88,7 @@
 
   window.addEventListener('popstate',()=>{
     const slug=currentRoute();
-    if(!slug){closeModal({syncRoute:false});return;}
+    if(!slug){closeModal({syncRoute:false});document.title=SITE?.meta?.title||'Trhoncal Travel';return;}
     const d=(typeof DESTINATIONS!=='undefined'?DESTINATIONS:[]).find(x=>routeSlug(x)===slug);
     if(d)openModal(d,{syncRoute:false});
   });
