@@ -30,7 +30,7 @@ function doGet(e) {
 
 function buildPublicPayload_() {
   const cache = CacheService.getScriptCache();
-  const cached = cache.get('public-payload-v1');
+  const cached = cache.get('public-payload-v2');
   if (cached) return JSON.parse(cached);
 
   const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
@@ -71,7 +71,7 @@ function buildPublicPayload_() {
     offers: visibleOffers
   };
 
-  cache.put('public-payload-v1', JSON.stringify(payload), 60);
+  cache.put('public-payload-v2', JSON.stringify(payload), 60);
   return payload;
 }
 
@@ -94,7 +94,7 @@ function publicDestination_(row, ficha) {
   const imageAllowed = yes_(row.Permiso_uso_web) && !!text_(row.Imagen_principal_URL);
   return {
     id: text_(row.Destino_ID),
-    slug: slug_(row.Nombre),
+    slug: slug_(row.Slug_Web || row.Nombre),
     name: text_(row.Nombre),
     state: text_(row['Estado/Región']),
     country: text_(row.País),
@@ -244,5 +244,7 @@ function startToday_() {
 }
 
 function clearPublicCache_() {
-  CacheService.getScriptCache().remove('public-payload-v1');
+  const cache = CacheService.getScriptCache();
+  cache.remove('public-payload-v1');
+  cache.remove('public-payload-v2');
 }
