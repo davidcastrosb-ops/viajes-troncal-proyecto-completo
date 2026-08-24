@@ -1,14 +1,17 @@
 # Trhoncal Travel V2 — Estado actual
 
-Fecha de corte: 2026-08-24 16:32 (America/Mexico_City)
+Fecha de corte: 2026-08-24 16:55 (America/Mexico_City)
 
 ## Producción
 - Host público activo: `https://viajes.trhoncalhomes.com.mx/`.
-- DNS creado en GoDaddy mediante CNAME `viajes` → `56b5c49cda876d5a.vercel-dns-017.com`.
-- Vercel reconoce el dominio y SSL quedó operativo.
+- DNS en GoDaddy: CNAME `viajes` → `56b5c49cda876d5a.vercel-dns-017.com`.
+- SSL operativo.
 - `main` contiene la web nueva de Trhoncal Travel.
-- PR #2 fue integrado a `main`.
-- La página vieja quedó preservada en `legacy/viajes-3dhomes-2026-08-24`.
+- PR #2 integrado: portal editorial + Archivo Maestro.
+- PR #4 integrado: fichas server-rendered + slugs estables.
+- Commit SSR de producción: `5fb975f48b05acaa06f68473e20f8590453e7115`.
+- Vercel reportó SUCCESS para ese commit.
+- La página antigua quedó preservada en `legacy/viajes-3dhomes-2026-08-24`.
 - Snapshot de seguridad de la nueva web: `snapshot/trhoncal-travel-v2-2026-08-24`.
 - `viajes.3dhomes.com.mx` ya no está asociado como dominio personalizado del proyecto Vercel.
 
@@ -16,19 +19,20 @@ Fecha de corte: 2026-08-24 16:32 (America/Mexico_City)
 - Google Sheet: `Trhoncal Travel | Archivo Maestro`.
 - Spreadsheet ID: `1jVIIMyQuNseDidYkErYDd58Ha3yxJA9oFXleFPjmUJw`.
 - Zona horaria: `America/Mexico_City`.
-- `12_Config_Web!Modo_actual` actualizado a `PRODUCCIÓN`.
-- Host público, SSL, fecha de salida y estado de contenido registrados en `12_Config_Web`.
-- `11_Publicacion_Web` actualizado a `Publicado v1` para las 16 fichas públicas.
-- Las rutas documentadas se alinearon con los slugs que genera Apps Script actualmente.
-
-## Flujo de datos
-- Archivo Maestro → Apps Script → `/api/master` → frontend.
-- Apps Script es de solo lectura hacia la web.
+- `Modo_actual = PRODUCCIÓN`.
+- `Slug_Web` agregado y cargado para 30/30 destinos sin cambiar las URLs públicas actuales.
 - `Mostrar_Web` controla biblioteca pública.
 - `Destacado_Home` controla escaparate principal.
 - `Orden_Home` controla orden.
-- Imágenes sólo salen cuando `Permiso_uso_web = Sí` y existen fuente/licencia/crédito/alt/verificación.
-- `/api/master` fue endurecido para no exponer previews del upstream ni detalles internos de errores.
+- Imágenes sólo salen cuando tienen permiso, fuente/licencia, crédito, alt y verificación.
+
+## Flujo de datos
+- Archivo Maestro → Apps Script → `/api/master` → frontend/SSR.
+- Apps Script es de solo lectura hacia la web.
+- `api/master.js` no expone previews del upstream ni detalles internos de errores.
+- El código de Apps Script en GitHub ya usa `Slug_Web` con fallback a `Nombre` y caché v2.
+- Pendiente: publicar nueva versión del Web App de Apps Script desde la interfaz de Google. El conector disponible no expone despliegues de Apps Script.
+- El pendiente no cambia URLs actuales porque los 30 `Slug_Web` coinciden con los slugs que ya genera la versión desplegada.
 
 ## Contenido público
 ### Destacados — 6
@@ -53,53 +57,30 @@ Fecha de corte: 2026-08-24 16:32 (America/Mexico_City)
 
 - Total público: 16 destinos.
 - Ofertas públicas: 0.
-- Acapulco continúa fuera hasta revisión operativa/producto.
+- Acapulco permanece fuera hasta revisión operativa/producto.
 
-## Auditoría de producción 2026-08-24
-Documento: `docs/PRODUCTION_AUDIT_2026-08-24.md`.
+## SEO/AEO
+- Home con title, description, Open Graph y JSON-LD básico de Organization.
+- `robots.txt` permite rastreo sólo en el host público.
+- `sitemap.xml` toma dinámicamente los destinos públicos desde `/api/master`.
+- Canonical y `og:url` se fijan al host público.
+- Las fichas `/mexico/<slug>` ya se renderizan desde servidor mediante `api/destination.js`.
+- Cada ficha SSR incluye HTML principal, title, description, canonical, Open Graph, robots, JSON-LD `TouristDestination` y `BreadcrumbList`, fuentes y CTA.
+- Previews mantienen `noindex,nofollow`.
+- Regla permanente: `Slug_Web` no cambia después de publicar sin plan 301.
 
-### Home
-- Host real validado visualmente.
-- Marca, navegación, CTA, contador de 16 destinos y jerarquía 6 + biblioteca operativos.
-- Ofertas permanecen ocultas con 0 registros publicables.
+## Auditorías y checkpoints
+- `docs/PRODUCTION_AUDIT_2026-08-24.md`.
+- `docs/SEO_SSR_PREVIEW_2026-08-24.md` — actualizado a rollout integrado.
+- `docs/CHECKPOINT_MAESTRO_2026-08-24.md`.
+- `10_Revisiones`: REV-037 salida a producción; REV-038 auditoría SEO/AEO; REV-039 slugs estables; REV-040 SSR integrado a `main`.
 
-### API
-- `api/master.js` conserva GET-only, no-store y validación de payload.
-- Errores de producción ya no devuelven preview del upstream ni detalle de excepción al navegador.
-
-### Fichas auditadas
-- `/mexico/cancun`
-- `/mexico/puerto-vallarta`
-- `/mexico/tulum`
-
-Las tres tienen ficha completa en `02_Fichas_Destino`, fuentes asociadas y datos suficientes para renderizar detalle.
-
-### WhatsApp
-- Número configurado: `523329335952`.
-- CTA general y CTA por destino generan mensaje contextual de Trhoncal Travel.
-
-### Jotform
-- ID: `261127730314044`.
+## Jotform / conversión
+- Jotform ID `261127730314044`.
 - Título: `Cotiza tu viaje con Trhoncal Travel`.
-- Estado: ENABLED.
-- 14 preguntas; 21 envíos conservados al corte.
-
-### robots / sitemap / canonical
-- `robots.txt` permite rastreo sólo en el host público y apunta al sitemap.
-- `sitemap.xml` se sirve sólo en `viajes.trhoncalhomes.com.mx` y toma destinos activos desde `/api/master`.
-- `seo-host.js` crea canonical y `og:url` en el host público.
-
-## Hallazgo SEO/AEO prioritario
-Las fichas `/mexico/<slug>` todavía parten de un shell HTML común y completan contenido, title, meta y canonical en cliente con JavaScript.
-
-Google puede renderizar JavaScript, pero para una arquitectura orientada a SEO/AEO conviene que el contenido principal y metadata de cada ficha lleguen ya en el HTML del servidor/prerender.
-
-Próxima mejora técnica prioritaria: server-side/pre-render de fichas sin cambiar la experiencia visual.
-
-## Hallazgo de URLs
-El slug público se deriva actualmente de `Nombre` en Apps Script. Si el nombre visible cambia, podría cambiar la URL.
-
-Mejora recomendada: incorporar un campo estable `Slug_Web` al Maestro y hacer que Apps Script lo utilice con fallback al nombre. No cambiar URLs públicas existentes sin 301.
+- Estado ENABLED.
+- WhatsApp configurado: `523329335952`.
+- CTA por destino genera mensaje contextual.
 
 ## Investigación acumulada
 - 30/30 destinos iniciales de México con ficha base verificada.
@@ -107,22 +88,28 @@ Mejora recomendada: incorporar un campo estable `Slug_Web` al Maestro y hacer qu
 - 65/177 Pueblos Mágicos con enriquecimiento individual v1.
 - 162 registros de fuente/evidencia en `05_Fuentes`.
 
+## Cuarta ola preparada — NO PUBLICADA
+- Ciudad de México.
+- Guadalajara.
+- Tequila.
+- Oaxaca de Juárez.
+- Mérida.
+- Imágenes y licencias listas; `Mostrar_Web` permanece en No hasta validación comercial.
+
+## Siguiente bloque
+1. Publicar la nueva versión del Web App de Apps Script para activar `Slug_Web` como fuente efectiva del endpoint.
+2. Confirmar que `/api/master` devuelve los slugs estables.
+3. Verificación visual de Cancún, Puerto Vallarta y Tulum en producción después del SSR.
+4. Pulir copy público de los 6 destinos destacados.
+5. Evaluar comercialmente Guadalajara + Tequila antes de activar la cuarta ola.
+6. Después: Search Console / Bing Webmaster y Open Graph social propio.
+
 ## Reglas comerciales vigentes
 - Un destino no se publica sólo por ser atractivo: debe tener información suficiente y sentido comercial/operativo.
 - Precio, cupo y condiciones permanecen separados del contenido estable.
 - Muestras de PriceAgencies no se convierten en ofertas automáticamente.
 - Ofertas públicas continúan en 0 hasta selección y reconfirmación expresa.
 
-## Siguiente bloque
-1. Mejorar renderizado SEO/AEO de fichas.
-2. Estabilizar slugs controlados desde Maestro.
-3. Pulir copy público de los 6 destinos destacados.
-4. Preparar cuarta ola de contenido sin aumentar todavía los 6 destacados.
-5. Revisar Acapulco por separado antes de cualquier activación.
-6. Después: Search Console / Bing Webmaster y Open Graph social propio.
-
 ## Continuidad
 - El historial del chat no es fuente única del proyecto.
-- Checkpoint duradero: `docs/CHECKPOINT_MAESTRO_2026-08-24.md`.
-- Auditoría de producción: `docs/PRODUCTION_AUDIT_2026-08-24.md`.
-- Mantener decisiones estructurales en GitHub y/o Archivo Maestro.
+- Decisiones estructurales y avances materiales deben quedar en GitHub y/o Archivo Maestro.
