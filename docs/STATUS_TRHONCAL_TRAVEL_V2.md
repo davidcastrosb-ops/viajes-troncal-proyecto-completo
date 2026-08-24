@@ -1,6 +1,17 @@
 # Trhoncal Travel V2 — Estado actual
 
-Fecha de corte: 2026-08-24 15:36 (America/Mexico_City)
+Fecha de corte: 2026-08-24 16:20 (America/Mexico_City)
+
+## Producción y separación de legado
+- `main` ya contiene la nueva web de Trhoncal Travel.
+- PR #2 fue integrado a `main` mediante squash merge.
+- Commit de producción base: `7b45cb8a1f853824313fee2b55fad2c394ec610b`.
+- Vercel confirmó el despliegue de ese commit con estado `SUCCESS`.
+- `viajes.3dhomes.com.mx` fue retirado de los dominios personalizados del proyecto Vercel.
+- La página antigua quedó preservada en `legacy/viajes-3dhomes-2026-08-24`.
+- La versión nueva previa al merge quedó preservada en `snapshot/trhoncal-travel-v2-2026-08-24`.
+- El dominio comercial objetivo queda exclusivamente en `viajes.trhoncalhomes.com.mx`.
+- Pendiente de limpieza externa: si todavía existe el registro DNS de `viajes.3dhomes.com.mx` en el proveedor DNS de `3dhomes.com.mx`, retirarlo posteriormente sin tocar ningún otro registro.
 
 ## Ya operativo
 - Archivo Maestro convertido a Google Sheet nativo.
@@ -13,7 +24,6 @@ Fecha de corte: 2026-08-24 15:36 (America/Mexico_City)
 - Control de ofertas: publicación sólo con autorización, estado vigente, confirmación de precio y no expiración.
 - Ofertas reales activas: 0.
 - Jotform ID `261127730314044` renombrado y verificado como `Cotiza tu viaje con Trhoncal Travel`.
-- Subdominio objetivo inicial: `viajes.trhoncalhomes.com.mx`.
 
 ## Destinos públicos
 ### Primera ola — destacados
@@ -33,21 +43,20 @@ Fecha de corte: 2026-08-24 15:36 (America/Mexico_City)
 12. Sayulita.
 13. La Paz.
 
-### Tercera ola — activada 2026-08-24
-14. Tulum — imagen Camilo Laverde / Pexels.
-15. Bacalar — imagen Carlos Bedoy / Pexels.
-16. Loreto — imagen Jorge Sandoval Lopez / Pexels.
+### Tercera ola
+14. Tulum.
+15. Bacalar.
+16. Loreto.
 
 - Total público: 16 destinos.
 - Sólo los primeros 6 conservan `Destacado_Home = Sí`.
-- Los destinos 7–16 quedan en la biblioteca secundaria y no saturan el escaparate inicial.
+- Los destinos 7–16 quedan en la biblioteca secundaria.
 - Acapulco permanece fuera hasta revisión operativa/producto.
 
 ## Control visual
 - Toda imagen pública exige URL, fuente, licencia/permiso, crédito, alt text y fecha de verificación.
-- Licencia registrada en las olas actuales: `Pexels License`.
 - `Permiso_uso_web = Sí` es requisito para que Apps Script exponga la imagen.
-- Si una imagen remota falla, el frontend vuelve al tratamiento gráfico de Trhoncal en vez de mostrar imagen rota.
+- Si una imagen remota falla, el frontend vuelve al tratamiento gráfico de Trhoncal.
 - Las tarjetas usan relación 16:9 y jerarquía visual consistente.
 
 ## Jerarquía del home
@@ -60,48 +69,45 @@ Fecha de corte: 2026-08-24 15:36 (America/Mexico_City)
 
 ## SEO/AEO técnico
 - Home con título, descripción, Open Graph y JSON-LD básico de Organization.
-- `robots.txt` quedó protegido por host: previews reciben `Disallow: /` y `X-Robots-Tag: noindex, nofollow`.
+- `robots.txt` bloquea previews y sólo permite rastreo en el host público definitivo.
 - `sitemap.xml` sólo se sirve cuando el host es exactamente `viajes.trhoncalhomes.com.mx`.
-- `assets/js/seo-host.js` crea canonical y `og:url` únicamente en el host público real; no canoniza previews.
-- El sitemap toma dinámicamente los destinos públicos desde `/api/master`, por lo que al activar o desactivar destinos cambia sin mantener una lista manual.
-- Todo queda listo para activarse automáticamente en cuanto Vercel y DNS hagan resolver el subdominio.
+- `assets/js/seo-host.js` crea canonical y `og:url` únicamente en el host público real.
+- El sitemap toma dinámicamente los destinos públicos desde `/api/master`.
 
 ## Readiness de subdominio
 - Documento operativo: `docs/SUBDOMINIO_VIAJES_READINESS.md`.
-- No se ha tocado DNS.
-- Flujo seguro: Vercel Project Settings → Domains → agregar `viajes.trhoncalhomes.com.mx` → copiar el registro exacto mostrado por Vercel → crear únicamente el host `viajes` en el DNS actual → esperar validación/HTTPS.
-- No tocar raíz, `www`, MX, SPF, DKIM, DMARC ni registros de Trhoncal Homes.
-- Vercel documenta actualmente que los subdominios usan CNAME y que el dashboard muestra el destino específico del proyecto; prevalece siempre el valor que muestre el proyecto en ese momento.
+- El proyecto Vercel ya quedó sin `viajes.3dhomes.com.mx`.
+- La nueva web ya es la producción de `main` en el dominio técnico de Vercel.
+- Siguiente paso seguro: agregar `viajes.trhoncalhomes.com.mx` al proyecto → copiar el registro DNS exacto mostrado por Vercel → crear únicamente el host `viajes` en el DNS de `trhoncalhomes.com.mx` → esperar validación/HTTPS.
+- No tocar raíz, `www`, MX, SPF, DKIM, DMARC ni otros registros de Trhoncal Homes.
 
 ## Investigación acumulada
 - 30/30 destinos iniciales de México con ficha base verificada.
 - 177/177 Pueblos Mágicos cargados como índice oficial federal.
 - 65/177 Pueblos Mágicos con enriquecimiento individual v1.
 - 162 registros de fuente/evidencia en `05_Fuentes`.
-- Nuevo León permanece pausado mientras avanza la fase comercial de playas.
 
-## Reglas comerciales que siguen vigentes
-- Un destino bonito no se publica sólo por ser bonito: debe tener información suficiente y sentido comercial/operativo.
+## Reglas comerciales vigentes
+- Un destino no se publica sólo por ser atractivo: debe tener información suficiente y sentido comercial/operativo.
 - Oferta, precio, cupo y condiciones permanecen separados del contenido estable.
-- Capturas/links de PriceAgencies siguen siendo demostraciones del proveedor salvo selección expresa de producto real.
+- Capturas/links de PriceAgencies son demostraciones del proveedor salvo selección expresa de producto real.
 - Ofertas públicas continúan en 0.
 
 ## GitHub / despliegue
 - Repositorio: `davidcastrosb-ops/viajes-troncal-proyecto-completo`.
-- Rama: `feat/trhoncal-travel-knowledge-site-v2`.
-- PR #2: `Trhoncal Travel V2 — portal editorial + Maestro control web`.
-- Estado: abierto, DRAFT, sin merge.
+- Rama de producción: `main`.
+- PR #2: integrado y cerrado por merge.
+- Respaldo legado: `legacy/viajes-3dhomes-2026-08-24`.
+- Snapshot nueva: `snapshot/trhoncal-travel-v2-2026-08-24`.
 
 ## Pendiente inmediato
-1. Conectar `viajes.trhoncalhomes.com.mx` al proyecto Vercel correcto y copiar el registro DNS exacto que Vercel solicite.
-2. Confirmar HTTPS y probar home, `/api/master`, `/robots.txt`, `/sitemap.xml` y tres fichas.
-3. Verificar canonical en home y fichas ya sobre el host real.
-4. Revisar Acapulco antes de decidir si entra a una cuarta ola.
-5. Continuar profundidad editorial/SEO de las fichas ya públicas sin aumentar los 6 destacados.
-6. Mantener ofertas en 0 hasta selección expresa de David.
+1. Agregar `viajes.trhoncalhomes.com.mx` al proyecto Vercel.
+2. Copiar y crear únicamente el registro DNS exacto que Vercel solicite.
+3. Confirmar HTTPS y probar home, `/api/master`, `/robots.txt`, `/sitemap.xml` y al menos tres fichas.
+4. Verificar canonical en home y fichas sobre el host real.
+5. Mantener ofertas en 0 hasta selección expresa de producto real.
 
 ## Continuidad y recuperación
-- El historial de ChatGPT NO es fuente única del proyecto.
+- El historial de ChatGPT no es fuente única del proyecto.
 - Checkpoint duradero: `docs/CHECKPOINT_MAESTRO_2026-08-24.md`.
-- Recuperación: PR #2 → STATUS/CHECKPOINT → `00_Control` del Archivo Maestro → pestañas específicas → Jotform/Vercel según la tarea.
 - Las decisiones estructurales y avances materiales deben dejar rastro en GitHub y/o Archivo Maestro.
