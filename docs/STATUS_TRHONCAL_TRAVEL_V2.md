@@ -1,6 +1,6 @@
 # Trhoncal Travel V2 — Estado actual
 
-Fecha de corte: 2026-08-24 14:42 (America/Mexico_City)
+Fecha de corte: 2026-08-24 15:08 (America/Mexico_City)
 
 ## Ya operativo
 - Archivo Maestro convertido a Google Sheet nativo.
@@ -15,6 +15,19 @@ Fecha de corte: 2026-08-24 14:42 (America/Mexico_City)
 - Capturas/links de PriceAgencies son demostración de herramientas del proveedor; no se convierten en ofertas ni prioridades automáticamente.
 - Jotform ID `261127730314044` renombrado y verificado como `Cotiza tu viaje con Trhoncal Travel`.
 - Subdominio objetivo inicial: `viajes.trhoncalhomes.com.mx`.
+
+## Primera ola visual — completada 2026-08-24
+- Se estableció en `00_Control` una regla de trazabilidad visual: cada destino publicado debe registrar imagen, fuente, licencia/permiso, crédito, alt text y fecha de verificación de derechos.
+- Las 6 playas visibles ya tienen imagen principal autorizada desde el Archivo Maestro.
+- Cancún: foto aérea de costa y zona hotelera; Angel Valladares / Pexels.
+- Riviera Maya / Playa del Carmen: frente de playa y ciudad; hugoteconecta / Pexels.
+- Puerto Vallarta: se sustituyó la imagen documental anterior por un atardecer de playa más aspiracional; Elmira Danilova / Pexels.
+- Nuevo Nayarit / Bahía de Banderas: amanecer de playa; Luis Delgado / Pexels.
+- Los Cabos / Cabo San Lucas: El Arco con actividad marítima; Joanie Tidwell / Pexels.
+- Bahías de Huatulco: vista aérea de playa y agua clara; Jorge Pantaleon / Pexels.
+- Licencia registrada para las 6: `Pexels License`; derechos verificados 2026-08-24.
+- `brand-v2.css` uniforma la ventana fotográfica a relación 16:9, altura visual consistente, tarjetas estiradas por fila y crédito legible.
+- Las imágenes siguen controladas desde `01_Destinos`; una imagen sin `Permiso_uso_web = Sí` no sale por el Apps Script.
 
 ## Decisión comercial vigente — prioridad playas
 - David decidió pausar temporalmente el enriquecimiento de Nuevo León.
@@ -60,8 +73,8 @@ Fecha de corte: 2026-08-24 14:42 (America/Mexico_City)
 - Mantener como DRAFT hasta revisión de David.
 
 ## Pendiente inmediato
-1. Confirmar visualmente que la primera ola de 6 playas aparece correctamente en la preview.
-2. Elegir y documentar imágenes con derechos de uso para esos 6 destinos; la web puede seguir funcionando con contenido mientras las imágenes se completan.
+1. Confirmar en la preview que las 6 imágenes cargan correctamente después del TTL de Apps Script.
+2. Si alguna URL remota de Pexels falla, sustituirla sin tocar contenido ni visibilidad; el Maestro conserva la trazabilidad.
 3. Continuar la segunda ola de playas en bloques pequeños.
 4. Configurar `viajes.trhoncalhomes.com.mx` cuando la primera ola tenga presentación visual suficiente.
 5. Mantener ofertas en 0 hasta selección expresa de David.
