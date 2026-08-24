@@ -129,6 +129,14 @@ function renderDestinations(filter='Todos'){
       </div>
     </article>`;
   }).join('');
+
+  grid.querySelectorAll('.destination-image img').forEach(img=>img.addEventListener('error',()=>{
+    const card=img.closest('.destination-card');
+    const holder=img.closest('.destination-image');
+    if(card)card.classList.remove('has-image');
+    if(holder)holder.remove();
+  }));
+
   grid.querySelectorAll('[data-destination]').forEach(a=>a.addEventListener('click',()=>{
     const name=a.dataset.destination;
     setHref('headerWhatsapp',whatsappLink(`Hola, quiero cotizar un viaje a ${name} con Trhoncal Travel.`));
