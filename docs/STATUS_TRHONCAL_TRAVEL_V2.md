@@ -1,6 +1,6 @@
 # Trhoncal Travel V2 — Estado actual
 
-Fecha de corte: 2026-08-24 15:17 (America/Mexico_City)
+Fecha de corte: 2026-08-24 15:24 (America/Mexico_City)
 
 ## Ya operativo
 - Archivo Maestro convertido a Google Sheet nativo.
@@ -43,6 +43,26 @@ Fecha de corte: 2026-08-24 15:17 (America/Mexico_City)
 - Los 6 de primera ola conservan `Destacado_Home = Sí`; los 7 de segunda ola quedan públicos pero no marcados como destacados.
 - `site.js` incorpora fallback: si una imagen remota falla, la tarjeta vuelve automáticamente al tratamiento gráfico de Trhoncal en vez de mostrar una imagen rota.
 
+## Jerarquía nueva del home — implementada 2026-08-24
+- El home ya diferencia entre `publicado` y `destacado`; son decisiones distintas.
+- `Mostrar_Web = Sí` incorpora un destino a la biblioteca pública.
+- `Destacado_Home = Sí` lo coloca en el primer escaparate del home.
+- Límite operativo del escaparate principal: 6 destinos.
+- `Orden_Home` sigue controlando el orden.
+- El primer bloque muestra los 6 destinos destacados con distintivo `Selección Trhoncal`.
+- Un segundo bloque `Más destinos de México` muestra los destinos públicos restantes sin saturar el primer pantallazo.
+- Los filtros Playa / Cultura / Naturaleza / Pueblo Mágico operan sobre ambos bloques.
+- Las fichas completas y sus rutas `/mexico/<slug>` funcionan tanto en el bloque destacado como en la biblioteca secundaria.
+- La jerarquía quedó documentada también en `00_Control`, `12_Config_Web` y `assets/data/site.json`.
+
+## SEO/AEO técnico inicial
+- Título de home actualizado a `Trhoncal Travel | Destinos de México y cotización personalizada`.
+- Meta descripción orientada a destinos + información revisada + cotización.
+- Open Graph básico incorporado: tipo, sitio, título y descripción.
+- Marcado JSON-LD básico de `Organization` incorporado con la marca Trhoncal Travel y correo comercial.
+- Las rutas limpias de destino continúan actualizando título y descripción de la página según la ficha abierta.
+- Canonical y sitemap se dejarán para el momento en que `viajes.trhoncalhomes.com.mx` esté resolviendo correctamente, para no canonizar a un host todavía no publicado.
+
 ## Decisión comercial vigente — prioridad playas
 - David decidió pausar temporalmente el enriquecimiento de Nuevo León.
 - La prioridad inmediata pasa a destinos de playa con salida incremental a la web; no se esperará a terminar toda la base nacional para publicar.
@@ -78,10 +98,10 @@ Fecha de corte: 2026-08-24 15:17 (America/Mexico_City)
 - Mantener como DRAFT hasta revisión de David.
 
 ## Pendiente inmediato
-1. Confirmar visualmente en la preview la segunda ola y el orden 7–13 después del TTL de Apps Script.
-2. Revisar qué destinos deben aparecer realmente en home cuando el frontend empiece a diferenciar `Destacado_Home` de la biblioteca completa.
-3. Preparar y configurar `viajes.trhoncalhomes.com.mx` cuando David entre al panel de dominio/Vercel.
-4. Revisar Acapulco antes de decidir si entra a la siguiente ola.
+1. Revisar visualmente el nuevo home jerarquizado: 6 destacados + biblioteca secundaria.
+2. Preparar `viajes.trhoncalhomes.com.mx` sin cambiar DNS hasta que Vercel muestre el registro exacto requerido.
+3. Al quedar el subdominio resolviendo: agregar canonical, sitemap y validaciones finales de indexación.
+4. Revisar Acapulco antes de decidir si entra a una siguiente ola.
 5. Mantener ofertas en 0 hasta selección expresa de David.
 
 ## Continuidad y recuperación
