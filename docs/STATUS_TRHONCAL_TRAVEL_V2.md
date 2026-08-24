@@ -1,6 +1,6 @@
 # Trhoncal Travel V2 — Estado actual
 
-Fecha de corte: 2026-08-24 15:08 (America/Mexico_City)
+Fecha de corte: 2026-08-24 15:17 (America/Mexico_City)
 
 ## Ya operativo
 - Archivo Maestro convertido a Google Sheet nativo.
@@ -18,7 +18,7 @@ Fecha de corte: 2026-08-24 15:08 (America/Mexico_City)
 
 ## Primera ola visual — completada 2026-08-24
 - Se estableció en `00_Control` una regla de trazabilidad visual: cada destino publicado debe registrar imagen, fuente, licencia/permiso, crédito, alt text y fecha de verificación de derechos.
-- Las 6 playas visibles ya tienen imagen principal autorizada desde el Archivo Maestro.
+- Las 6 playas iniciales ya tienen imagen principal autorizada desde el Archivo Maestro.
 - Cancún: foto aérea de costa y zona hotelera; Angel Valladares / Pexels.
 - Riviera Maya / Playa del Carmen: frente de playa y ciudad; hugoteconecta / Pexels.
 - Puerto Vallarta: se sustituyó la imagen documental anterior por un atardecer de playa más aspiracional; Elmira Danilova / Pexels.
@@ -29,17 +29,32 @@ Fecha de corte: 2026-08-24 15:08 (America/Mexico_City)
 - `brand-v2.css` uniforma la ventana fotográfica a relación 16:9, altura visual consistente, tarjetas estiradas por fila y crédito legible.
 - Las imágenes siguen controladas desde `01_Destinos`; una imagen sin `Permiso_uso_web = Sí` no sale por el Apps Script.
 
+## Segunda ola de playas — activada 2026-08-24
+- Se activaron 7 destinos adicionales desde el Archivo Maestro con imagen, licencia, crédito, alt text y verificación de derechos.
+- Orden web 7: Mazatlán — Isla Venados; Mafer Castañeda / Pexels.
+- Orden web 8: Ixtapa-Zihuatanejo — actividad de paddle frente al mar en Zihuatanejo; Jorge Acre / Pexels.
+- Orden web 9: Puerto Escondido — playa tropical y vegetación; Mafer Castañeda / Pexels.
+- Orden web 10: Isla Mujeres — vista aérea de aguas turquesa; carlos meza / Pexels.
+- Orden web 11: Cozumel — playa caribeña aérea; Luis Flores / Pexels.
+- Orden web 12: Sayulita — costa y pueblo vistos desde el aire; Archie McNicol / Pexels.
+- Orden web 13: La Paz — Playa Balandra; Josué Rodríguez / Pexels.
+- Licencia registrada para las 7: `Pexels License`; derechos verificados 2026-08-24.
+- Total de destinos activados para la web: 13.
+- Los 6 de primera ola conservan `Destacado_Home = Sí`; los 7 de segunda ola quedan públicos pero no marcados como destacados.
+- `site.js` incorpora fallback: si una imagen remota falla, la tarjeta vuelve automáticamente al tratamiento gráfico de Trhoncal en vez de mostrar una imagen rota.
+
 ## Decisión comercial vigente — prioridad playas
 - David decidió pausar temporalmente el enriquecimiento de Nuevo León.
 - La prioridad inmediata pasa a destinos de playa con salida incremental a la web; no se esperará a terminar toda la base nacional para publicar.
-- Primera ola activada desde el Archivo Maestro: Cancún, Riviera Maya / Playa del Carmen, Puerto Vallarta, Nuevo Nayarit / Bahía de Banderas, Los Cabos / Cabo San Lucas y Bahías de Huatulco.
-- Guadalajara y Tequila quedaron fuera de publicación por ahora para que la primera versión pública se enfoque comercialmente en playa.
-- Orden de salida inicial: 1 Cancún, 2 Riviera Maya / Playa del Carmen, 3 Puerto Vallarta, 4 Nuevo Nayarit / Bahía de Banderas, 5 Los Cabos / Cabo San Lucas, 6 Bahías de Huatulco.
+- Primera ola: Cancún, Riviera Maya / Playa del Carmen, Puerto Vallarta, Nuevo Nayarit / Bahía de Banderas, Los Cabos / Cabo San Lucas y Bahías de Huatulco.
+- Segunda ola: Mazatlán, Ixtapa-Zihuatanejo, Puerto Escondido, Isla Mujeres, Cozumel, Sayulita y La Paz.
+- Guadalajara y Tequila permanecen fuera de publicación por ahora para mantener la primera versión pública enfocada comercialmente en playa.
+- Acapulco permanece pendiente de revisión operativa y de producto antes de activarse, por su proceso de recuperación.
 
-## Razón de la primera ola
-- La selección combina destinos ya verificados en el Maestro con señales oficiales recientes de demanda/ocupación hotelera.
-- DataTur 2026 coloca de manera recurrente entre los destinos de mayor ocupación a Playacar/Playa del Carmen, Nuevo Nayarit, Cabo San Lucas/Los Cabos, Cancún, Puerto Vallarta y Bahías de Huatulco.
-- Esta señal se usa para priorizar publicación e investigación comercial; no equivale por sí sola a margen, comisión o rentabilidad de Trhoncal.
+## Razón de la primera fase
+- La selección combina destinos ya verificados en el Maestro con señales oficiales recientes de demanda/ocupación y potencial comercial.
+- DataTur 2026 coloca de manera recurrente entre los destinos de mayor ocupación a varios integrantes de la primera ola.
+- Esta señal sirve para priorizar investigación y publicación; no equivale por sí sola a margen, comisión o rentabilidad de Trhoncal.
 
 ## Investigación acumulada
 - 30/30 destinos iniciales de México con ficha base verificada.
@@ -50,20 +65,10 @@ Fecha de corte: 2026-08-24 15:08 (America/Mexico_City)
 
 ## Método de publicación incremental
 1. Publicar primero destinos ya verificados y comercialmente fuertes.
-2. Mejorar después cada ficha con imagen legal, contenido editorial, CTA y SEO/AEO.
-3. Añadir la siguiente tanda de playas sin esperar a que todas estén perfectas.
+2. Mejorar cada ficha con imagen legal, contenido editorial, CTA y SEO/AEO.
+3. Añadir nuevas tandas sin esperar a que toda la base nacional esté perfecta.
 4. Mantener precios/ofertas separados y publicar sólo cuando David seleccione producto real y se reconfirme vigencia.
 5. No frenar la web por investigación de destinos secundarios.
-
-## Siguiente ola de playas
-- Mazatlán.
-- Ixtapa-Zihuatanejo.
-- Puerto Escondido.
-- Isla Mujeres.
-- Cozumel.
-- Sayulita.
-- La Paz.
-- Acapulco, con revisión operativa y de producto antes de destacarlo por su proceso de recuperación.
 
 ## GitHub / despliegue
 - Repositorio: `davidcastrosb-ops/viajes-troncal-proyecto-completo`.
@@ -73,10 +78,10 @@ Fecha de corte: 2026-08-24 15:08 (America/Mexico_City)
 - Mantener como DRAFT hasta revisión de David.
 
 ## Pendiente inmediato
-1. Confirmar en la preview que las 6 imágenes cargan correctamente después del TTL de Apps Script.
-2. Si alguna URL remota de Pexels falla, sustituirla sin tocar contenido ni visibilidad; el Maestro conserva la trazabilidad.
-3. Continuar la segunda ola de playas en bloques pequeños.
-4. Configurar `viajes.trhoncalhomes.com.mx` cuando la primera ola tenga presentación visual suficiente.
+1. Confirmar visualmente en la preview la segunda ola y el orden 7–13 después del TTL de Apps Script.
+2. Revisar qué destinos deben aparecer realmente en home cuando el frontend empiece a diferenciar `Destacado_Home` de la biblioteca completa.
+3. Preparar y configurar `viajes.trhoncalhomes.com.mx` cuando David entre al panel de dominio/Vercel.
+4. Revisar Acapulco antes de decidir si entra a la siguiente ola.
 5. Mantener ofertas en 0 hasta selección expresa de David.
 
 ## Continuidad y recuperación
