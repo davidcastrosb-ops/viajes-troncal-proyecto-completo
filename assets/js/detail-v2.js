@@ -3,11 +3,10 @@
   const list=(items=[])=>items&&items.length?`<ul class="detail-list">${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p>Información en preparación.</p>';
   const slugify=(v='')=>String(v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
   const routeSlug=d=>d.slug||slugify(d.name);
-  const currentRoute=()=>{
-    const path=location.pathname.match(/^\/mexico\/([^/?#]+)\/?$/i);
-    if(path)return decodeURIComponent(path[1]);
-    return new URLSearchParams(location.search).get('destino')||'';
-  };
+  const pathRoute=()=>{const m=location.pathname.match(/^\/mexico\/([^/?#]+)\/?$/i);return m?decodeURIComponent(m[1]):'';};
+  const queryRoute=()=>new URLSearchParams(location.search).get('destino')||'';
+  const currentRoute=()=>pathRoute()||queryRoute();
+  const isCleanRoute=()=>!!pathRoute();
 
   function sourceRows(d){
     const ids=new Set(d.sourceIds||[]);
@@ -21,9 +20,23 @@
     overlay.id='destinationDetailOverlay';overlay.className='destination-detail-overlay';overlay.setAttribute('aria-hidden','true');
     overlay.innerHTML='<article class="destination-detail" role="dialog" aria-modal="true" aria-labelledby="detailTitle"><div id="destinationDetailContent"></div></article>';
     document.body.appendChild(overlay);
-    overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal();});
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+    overlay.addEventListener('click',e=>{if(e.target===overlay&&!overlay.classList.contains('route-page'))closeModal();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!isCleanRoute())closeModal();});
     return overlay;
+  }
+
+  function applyMeta(d){
+    document.title=`${d.name}${d.state?`, ${d.state}`:''} | Trhoncal Travel`;
+    const desc=document.querySelector('meta[name="description"]');
+    if(desc&&d.summary)desc.setAttribute('content',d.summary);
+  }
+
+  function resetMeta(){
+    if(typeof SITE!=='undefined'&&SITE){
+      document.title=SITE.meta?.title||'Trhoncal Travel';
+      const desc=document.querySelector('meta[name="description"]');
+      if(desc&&SITE.meta?.description)desc.setAttribute('content',SITE.meta.description);
+    }
   }
 
   function setRoute(d){
@@ -31,24 +44,31 @@
   }
 
   function clearRoute(){
-    history.replaceState({},'','/#destinos');
+    history.pushState({},'','/#destinos');
   }
 
   function closeModal({syncRoute=true}={}){
     const o=document.getElementById('destinationDetailOverlay');
-    if(o){o.classList.remove('open');o.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+    if(o){o.classList.remove('open','route-page');o.setAttribute('aria-hidden','true');}
+    document.body.classList.remove('destination-route');
+    document.body.style.overflow='';
+    resetMeta();
     if(syncRoute&&currentRoute())clearRoute();
   }
 
   function openModal(d,{syncRoute=true}={}){
     if(syncRoute)setRoute(d);
+    const clean=isCleanRoute();
     const overlay=ensureModal();const holder=document.getElementById('destinationDetailContent');
     const sources=sourceRows(d);
     const sourceHtml=sources.length?sources.map(s=>`<div class="detail-source"><div><b>${esc(s.organization)} — ${esc(s.title)}</b><span>Verificada ${esc(s.verifiedAt||'')} · ${esc(s.note||'')}</span></div><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a></div>`).join(''):'<p>Las fuentes de esta ficha están en proceso de publicación.</p>';
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero cotizar un viaje a ${d.name} con Trhoncal Travel.`):'#cotizar';
     const photo=d.mainImage?`<div class="detail-photo"><img src="${esc(d.mainImage)}" alt="${esc(d.imageAlt||d.name)}"><div class="detail-photo-caption">${d.imageCredit?`<span>${esc(d.imageCredit)}</span>`:''}${d.imageLicense?`<small>${esc(d.imageLicense)}</small>`:''}</div></div>`:'';
+    const routeBar=clean?`<div class="detail-route-bar"><a class="detail-route-brand" href="/#destinos" aria-label="Volver a Trhoncal Travel"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><a class="detail-route-back" href="/#destinos">← Volver a destinos</a></div>`:'';
+    const closeControl=clean?'':`<button class="detail-close" type="button" aria-label="Cerrar">×</button>`;
     holder.innerHTML=`
-      <header class="detail-header ${d.mainImage?'with-photo':''}"><button class="detail-close" type="button" aria-label="Cerrar">×</button>${photo}<div class="detail-header-copy"><span class="eyebrow">${esc(d.state)} · ${esc(d.country)}${d.puebloMagico?' · Pueblo Mágico':''}</span><h2 id="detailTitle">${esc(d.name)}</h2><p>${esc(d.summary||'')}</p></div></header>
+      ${routeBar}
+      <header class="detail-header ${d.mainImage?'with-photo':''}">${closeControl}${photo}<div class="detail-header-copy"><span class="eyebrow">${esc(d.state)} · ${esc(d.country)}${d.puebloMagico?' · Pueblo Mágico':''}</span><h2 id="detailTitle">${esc(d.name)}</h2><p>${esc(d.summary||'')}</p></div></header>
       <div class="detail-body">
         <div class="detail-summary-grid"><div class="detail-stat"><small>Estancia sugerida</small><b>${esc(d.recommendedStay||'Por definir')}</b></div><div class="detail-stat"><small>Tipo de viaje</small><b>${esc((d.segments||[]).slice(0,4).join(' · ')||d.type||'Por definir')}</b></div><div class="detail-stat"><small>Última verificación</small><b>${esc(d.lastVerified||'En revisión')}</b></div></div>
         <div class="detail-columns">
@@ -58,17 +78,24 @@
         <section class="detail-block"><h3>Gastronomía</h3><p>${esc(d.gastronomy||'')}</p></section>
         <section class="detail-block"><h3>Patrimonio y reconocimientos</h3>${list(d.recognitions)}<p style="margin-top:12px">${esc(d.sustainabilityHeritage||'')}</p></section>
         <section class="detail-sources"><h3>Fuentes que respaldan esta ficha</h3>${sourceHtml}</section>
-        <div class="detail-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar ${esc(d.name)}</a><a class="btn btn-soft" href="/#cotizar" data-close-detail>Solicitar viaje</a></div>
+        <div class="detail-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar ${esc(d.name)}</a><a class="btn btn-soft" href="/#cotizar">Solicitar viaje</a></div>
       </div>`;
-    holder.querySelector('.detail-close').addEventListener('click',()=>closeModal());
-    holder.querySelectorAll('[data-close-detail]').forEach(a=>a.addEventListener('click',()=>closeModal()));
-    overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
-    document.title=`${d.name} | Trhoncal Travel`;
+    const closeButton=holder.querySelector('.detail-close');if(closeButton)closeButton.addEventListener('click',()=>closeModal());
+    if(clean){
+      overlay.classList.add('route-page');
+      document.body.classList.add('destination-route');
+      document.body.style.overflow='';
+    }else{
+      overlay.classList.remove('route-page');
+      document.body.classList.remove('destination-route');
+      document.body.style.overflow='hidden';
+    }
+    overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
+    applyMeta(d);
   }
 
   function openFromRoute(){
     const slug=currentRoute();if(!slug||typeof DESTINATIONS==='undefined')return;
-    const overlay=document.getElementById('destinationDetailOverlay');if(overlay?.classList.contains('open'))return;
     const d=DESTINATIONS.find(x=>routeSlug(x)===slug&&(!window.isDestinationVisible||isDestinationVisible(x)));
     if(d)openModal(d,{syncRoute:false});
   }
@@ -88,7 +115,7 @@
 
   window.addEventListener('popstate',()=>{
     const slug=currentRoute();
-    if(!slug){closeModal({syncRoute:false});document.title=SITE?.meta?.title||'Trhoncal Travel';return;}
+    if(!slug){closeModal({syncRoute:false});return;}
     const d=(typeof DESTINATIONS!=='undefined'?DESTINATIONS:[]).find(x=>routeSlug(x)===slug);
     if(d)openModal(d,{syncRoute:false});
   });
