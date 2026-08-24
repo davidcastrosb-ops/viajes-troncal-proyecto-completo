@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/mexico/:slug",
+      "destination": "/index.html"
+    }
+  ]
+}
