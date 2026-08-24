@@ -8,4 +8,16 @@
 .hero-logo{width:min(62%,340px)}
 .detail-route-brand img{width:210px!important;height:96px!important;object-fit:contain!important;object-position:left center!important}
 .route-page .detail-route-bar{min-height:112px!important}
-@media(max-width:760px){.header-inner{min-height:82px}.brand{height:78px;min-width:138px;padding:2px 0}.brand-logo{width:136px;height:74px;transform:none}.footer-logo{width:180px}.hero-logo{width:64%}.detail-route-brand img{width:150px!important;height:70px!important}.route-page .detail-route-bar{min-height:86px!important}}
+
+/* Sistema visual de destinos 2026-08-24: todas las tarjetas publicadas usan una ventana fotográfica consistente. */
+.destination-grid{align-items:stretch;grid-auto-rows:1fr}
+.destination-card{height:100%}
+.destination-card.has-image{min-height:590px}
+.destination-image{height:auto;aspect-ratio:16/9;min-height:0}
+.destination-image img{width:100%;height:100%;object-fit:cover;object-position:center center}
+.destination-card-content{min-height:360px}
+.destination-card .recognitions{min-height:30px}
+.destination-image-credit{max-width:calc(100% - 20px);backdrop-filter:blur(4px)}
+.destination-image-credit:hover{background:rgba(3,46,62,.9)}
+@media(max-width:1050px){.destination-card.has-image{min-height:560px}.destination-card-content{min-height:330px}}
+@media(max-width:760px){.header-inner{min-height:82px}.brand{height:78px;min-width:138px;padding:2px 0}.brand-logo{width:136px;height:74px;transform:none}.footer-logo{width:180px}.hero-logo{width:64%}.detail-route-brand img{width:150px!important;height:70px!important}.route-page .detail-route-bar{min-height:86px!important}.destination-card.has-image{min-height:0}.destination-image{height:auto;aspect-ratio:16/9}.destination-card-content{min-height:0}.destination-card .recognitions{min-height:0}}
