@@ -103,14 +103,19 @@
   }
 
   function decorate(){
-    const grid=document.getElementById('destinationGrid');if(!grid||typeof DESTINATIONS==='undefined')return;
-    grid.querySelectorAll('.destination-card').forEach(card=>{
-      if(card.dataset.detailReady==='1')return;
-      const name=card.querySelector('h3')?.textContent?.trim();const d=DESTINATIONS.find(x=>x.name===name);if(!d)return;
-      const foot=card.querySelector('.card-foot');if(!foot)return;
-      const link=document.createElement('a');link.className='detail-link';link.textContent='Ver ficha completa →';link.href=`/mexico/${encodeURIComponent(routeSlug(d))}`;
-      link.addEventListener('click',e=>{e.preventDefault();openModal(d);});
-      foot.insertBefore(link,foot.querySelector('a'));card.dataset.detailReady='1';
+    const grids=document.querySelectorAll('[data-destination-grid]');
+    if(!grids.length||typeof DESTINATIONS==='undefined')return;
+    grids.forEach(grid=>{
+      grid.querySelectorAll('.destination-card').forEach(card=>{
+        if(card.dataset.detailReady==='1')return;
+        const id=card.dataset.destinationId;
+        const name=card.querySelector('h3')?.textContent?.trim();
+        const d=DESTINATIONS.find(x=>(id&&x.id===id)||x.name===name);if(!d)return;
+        const foot=card.querySelector('.card-foot');if(!foot)return;
+        const link=document.createElement('a');link.className='detail-link';link.textContent='Ver ficha completa →';link.href=`/mexico/${encodeURIComponent(routeSlug(d))}`;
+        link.addEventListener('click',e=>{e.preventDefault();openModal(d);});
+        foot.insertBefore(link,foot.querySelector('a'));card.dataset.detailReady='1';
+      });
     });
     openFromRoute();
   }
@@ -123,8 +128,9 @@
   });
 
   document.addEventListener('DOMContentLoaded',()=>{
-    const grid=document.getElementById('destinationGrid');if(!grid)return;
-    new MutationObserver(decorate).observe(grid,{childList:true,subtree:true});
+    const grids=document.querySelectorAll('[data-destination-grid]');if(!grids.length)return;
+    const observer=new MutationObserver(decorate);
+    grids.forEach(grid=>observer.observe(grid,{childList:true,subtree:true}));
     setTimeout(decorate,350);setTimeout(openFromRoute,900);
   });
 })();
