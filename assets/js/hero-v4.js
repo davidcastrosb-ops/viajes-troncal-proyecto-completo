@@ -3,6 +3,16 @@
   function validHttp(value=''){
     try{const u=new URL(String(value));return /^https?:$/.test(u.protocol)?u.toString():'';}catch(_){return '';}
   }
+  function loadPromoMakerAssets(){
+    if(!document.querySelector('link[data-promo-maker-v1]')){
+      const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/promo-maker-v1.css';link.dataset.promoMakerV1='';document.head.appendChild(link);
+    }
+    if(document.querySelector('script[data-promo-maker-v1]'))return;
+    const script=document.createElement('script');
+    script.src='/assets/js/promo-maker-v1.js';script.dataset.promoMakerV1='';
+    script.onload=()=>{try{if(typeof renderOffers==='function')renderOffers();}catch(_){/* datos aún cargando */}};
+    document.head.appendChild(script);
+  }
   function destinationText(d){
     return [
       ...(Array.isArray(d.segments)?d.segments:[]),d.travelerProfile||'',d.type||'',d.summary||'',d.whyGo||'',d.gastronomy||'',
@@ -63,18 +73,22 @@
       const destinationName=destination?.name||entry.destinationName||'Viaje seleccionado';
       const price=formatPrice(entry.price);
       const expiry=entry.expiresAt||entry.fechaExpiracionWeb||'';
-      const external=validHttp(entry.publicUrl||entry.urlPublicaCliente||'');
+      const external=validHttp(entry.publicPromoUrl||entry.sharePromoUrl||entry.publicUrl||entry.urlPublicaCliente||'');
+      const lead=validHttp(entry.leadFormUrl||'');
       const fallback=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero información de la promoción ${entry.title||destinationName} con Trhoncal Travel.`):'#cotizar';
       const href=external||fallback;
       const label=external?'Ver promoción →':'Cotizar esta promoción →';
-      const rel=external?'noopener noreferrer sponsored':'noopener noreferrer';
-      return `<article class="hero-promo-card"><span class="promo-destination">${esc(destinationName)}</span><strong>${esc(entry.title||'Promoción verificada')}</strong>${price?`<div class="promo-price">Desde ${esc(price)}</div>`:''}<div class="promo-meta">${entry.nights?`<span>${esc(entry.nights)} noches</span>`:''}${expiry?`<span>Vigente hasta ${esc(expiry)}</span>`:''}</div><a href="${esc(href)}" target="_blank" rel="${rel}">${label}</a></article>`;
+      const rel=external?'noopener noreferrer nofollow sponsored':'noopener noreferrer';
+      return `<article class="hero-promo-card"><span class="promo-destination">${esc(destinationName)}</span><strong>${esc(entry.title||'Promoción verificada')}</strong>${price?`<div class="promo-price">Desde ${esc(price)}</div>`:''}<div class="promo-meta">${entry.nights?`<span>${esc(entry.nights)} noches</span>`:''}${expiry?`<span>Vigente hasta ${esc(expiry)}</span>`:''}</div><a href="${esc(href)}" target="_blank" rel="${rel}">${label}</a>${lead?`<a class="promo-lead-link" href="${esc(lead)}" target="_blank" rel="noopener noreferrer nofollow sponsored">Dejar mis datos →</a>`:''}</article>`;
     }).join('');
     strip.hidden=false;
-    const note=document.createElement('p');note.className='hero-promo-note';note.textContent='Precio, disponibilidad y condiciones se reconfirman antes de reservar. Los enlaces externos sólo se habilitan cuando están autorizados para cliente.';holder.after(note);
+    let note=strip.querySelector('.hero-promo-note');
+    if(!note){note=document.createElement('p');note.className='hero-promo-note';strip.appendChild(note);}
+    note.textContent='Precio, disponibilidad y condiciones se reconfirman antes de reservar. Los enlaces de Promo Maker sólo aparecen cuando fueron generados y autorizados para cliente.';
   }
 
   function boot(){
+    loadPromoMakerAssets();
     let tries=0;
     const timer=setInterval(()=>{
       tries++;
