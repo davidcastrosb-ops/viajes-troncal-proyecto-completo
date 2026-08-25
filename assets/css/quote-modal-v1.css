@@ -1,0 +1,41 @@
+/* Trhoncal Travel — solicitud breve de viaje en modal */
+.quote-cta-section{background:linear-gradient(180deg,#fbfaf7,#f7f1e6);padding:72px 0}
+.quote-cta-card{max-width:980px;margin:0 auto;border:1px solid #ded5c5;border-radius:30px;background:#fff;padding:42px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:34px;align-items:center;box-shadow:0 24px 70px rgba(3,46,62,.10)}
+.quote-cta-copy h2{font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:clamp(36px,4.4vw,58px);line-height:1.02;margin:8px 0 14px}
+.quote-cta-copy p{margin:0;max-width:650px;color:var(--muted);font-size:17px;line-height:1.65}
+.quote-cta-action{display:flex;flex-direction:column;align-items:flex-end;gap:10px;min-width:250px}
+.quote-cta-action small{max-width:250px;text-align:right;color:#76888d;line-height:1.4}
+
+.quote-modal[hidden]{display:none!important}
+.quote-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px}
+.quote-modal-backdrop{position:absolute;inset:0;background:rgba(3,30,41,.72);backdrop-filter:blur(8px)}
+.quote-modal-panel{position:relative;z-index:1;width:min(760px,calc(100vw - 36px));max-height:94vh;border-radius:28px;background:#fff;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.28);display:flex;flex-direction:column}
+.quote-modal-head{padding:22px 70px 18px 24px;border-bottom:1px solid #e8e0d3;background:linear-gradient(180deg,#fff,#fbf8f2)}
+.quote-modal-head .eyebrow{display:block;margin-bottom:5px}
+.quote-modal-head h2{font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:30px;line-height:1.08;margin:0}
+.quote-modal-head p{margin:8px 0 0;color:var(--muted);line-height:1.5;font-size:13px}
+.quote-modal-destination{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:8px 11px;border-radius:999px;background:#f2ecdf;color:#7c612c;font-size:12px;font-weight:900}
+.quote-modal-close{position:absolute;top:18px;right:18px;z-index:3;width:40px;height:40px;border:1px solid #ded5c5;border-radius:50%;background:#fff;color:var(--primary);font-size:24px;line-height:1;cursor:pointer}
+.quote-modal-close:hover{border-color:#b99a5d;color:#7a5b22}
+.quote-modal-frame-wrap{flex:1;min-height:0;background:#fff}
+.quote-modal-frame{display:block;width:100%;height:min(650px,72vh);border:0;background:#fff}
+.quote-modal-fallback{margin:0;padding:9px 20px 14px;color:#75868a;font-size:11px;text-align:center;background:#fff}
+.quote-modal-fallback a{color:var(--primary);font-weight:900}
+body.quote-modal-open{overflow:hidden}
+
+@media(max-width:760px){
+  .quote-cta-section{padding:54px 0}
+  .quote-cta-card{grid-template-columns:1fr;padding:28px 22px;border-radius:24px;gap:22px}
+  .quote-cta-action{align-items:stretch;min-width:0}
+  .quote-cta-action .btn{width:100%}
+  .quote-cta-action small{text-align:left;max-width:none}
+  .quote-modal{padding:0;place-items:stretch}
+  .quote-modal-panel{width:100%;max-height:100dvh;height:100dvh;border-radius:0}
+  .quote-modal-head{padding:18px 60px 14px 18px}
+  .quote-modal-head h2{font-size:25px}
+  .quote-modal-head p{font-size:12px}
+  .quote-modal-frame{height:100%;min-height:0}
+  .quote-modal-frame-wrap{display:flex;min-height:0}
+  .quote-modal-frame{flex:1}
+  .quote-modal-close{top:13px;right:13px}
+}
