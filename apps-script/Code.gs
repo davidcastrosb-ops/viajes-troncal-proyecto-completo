@@ -140,8 +140,7 @@ function publicSource_(row) {
     url: text_(row.URL),
     publicationDate: dateText_(row.Fecha_publicación),
     verifiedAt: dateText_(row.Fecha_verificación),
-    status: text_(row.Estado),
-    note: text_(row.Notas)
+    status: text_(row.Estado)
   };
 }
 
