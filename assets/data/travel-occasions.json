@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-08-25",
+  "occasions": [
+    {
+      "id": "OC-2026-REVOLUCION",
+      "calendarEventId": "CAL-2026-NOV16",
+      "title": "Puente de la Revolución Mexicana",
+      "subtitle": "Aprovecha el fin de semana largo del 14 al 16 de noviembre de 2026.",
+      "type": "puente",
+      "start": "2026-11-14",
+      "end": "2026-11-16",
+      "offerIds": ["OF-PA-PVR-REV26-001"],
+      "featuredHome": true,
+      "order": 1,
+      "slug": "revolucion-mexicana-2026",
+      "note": "Tu próximo viaje puede empezar con un día libre."
+    }
+  ]
+}
