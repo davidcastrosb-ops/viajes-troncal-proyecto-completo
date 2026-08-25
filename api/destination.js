@@ -13,7 +13,7 @@ function esc(value = '') {
 function list(items = []) {
   return Array.isArray(items) && items.length
     ? `<ul class="detail-list">${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
-    : '<p>Información en preparación.</p>';
+    : '<p>Consulta con nosotros las opciones que mejor se adapten a tu viaje.</p>';
 }
 
 function safeHttpUrl(value = '') {
@@ -40,7 +40,7 @@ async function loadMaster() {
 function render404(res, publicHost) {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  return res.status(404).send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Destino no encontrado | Trhoncal Travel</title><meta name="robots" content="noindex,nofollow"><link rel="icon" type="image/svg+xml" href="/assets/images/trhoncal-travel-logo.svg"><link rel="stylesheet" href="/assets/css/styles.css"><link rel="stylesheet" href="/assets/css/brand-v2.css"></head><body><main class="section"><div class="container"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel" style="max-width:180px"><h1>Destino no encontrado</h1><p>La ficha solicitada no está publicada o cambió de estado.</p><a class="btn btn-primary" href="${publicHost ? 'https://' + PUBLIC_HOST + '/#destinos' : '/#destinos'}">Explorar destinos</a></div></main></body></html>`);
+  return res.status(404).send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Destino no encontrado | Trhoncal Travel</title><meta name="robots" content="noindex,nofollow"><link rel="icon" type="image/svg+xml" href="/assets/images/trhoncal-travel-logo.svg"><link rel="stylesheet" href="/assets/css/styles.css"><link rel="stylesheet" href="/assets/css/brand-v2.css"></head><body><main class="section"><div class="container"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel" style="max-width:180px"><h1>Destino no encontrado</h1><p>Esta ficha no está disponible en este momento.</p><a class="btn btn-primary" href="${publicHost ? 'https://' + PUBLIC_HOST + '/#destinos' : '/#destinos'}">Explorar destinos</a></div></main></body></html>`);
 }
 
 export default async function handler(req, res) {
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-    return res.status(503).send('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Trhoncal Travel</title><link rel="icon" type="image/svg+xml" href="/assets/images/trhoncal-travel-logo.svg"></head><body><p>La ficha está temporalmente no disponible. Intenta nuevamente en unos minutos.</p></body></html>');
+    return res.status(503).send('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Trhoncal Travel</title><link rel="icon" type="image/svg+xml" href="/assets/images/trhoncal-travel-logo.svg"></head><body><p>No pudimos cargar esta ficha. Intenta nuevamente en unos minutos.</p></body></html>');
   }
 
   const destinations = Array.isArray(payload.destinations) ? payload.destinations : [];
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
   const sourceHtml = sourceRows.length ? sourceRows.map(s => {
     const u = safeHttpUrl(s.url);
     return `<div class="detail-source"><div><b>${esc(s.organization)} — ${esc(s.title)}</b><span>Verificada ${esc(s.verifiedAt || '')}${s.note ? ` · ${esc(s.note)}` : ''}</span></div>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a>` : ''}</div>`;
-  }).join('') : '<p>Las fuentes de esta ficha están en proceso de publicación.</p>';
+  }).join('') : '<p>Consulta con nosotros las fuentes utilizadas para esta ficha.</p>';
 
   const structured = JSON.stringify({
     '@context': 'https://schema.org',
@@ -138,10 +138,10 @@ export default async function handler(req, res) {
       <div class="detail-route-bar"><a class="detail-route-brand" href="/#destinos"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><div class="detail-route-context"><span>México · ${esc(d.state || '')}</span><a class="detail-route-back" href="/#destinos">← Volver a destinos</a></div></div>
       <header class="detail-header ${image ? 'with-photo' : ''}">${photo}<div class="detail-header-copy"><span class="eyebrow">${esc(d.state || '')} · ${esc(d.country || 'México')}${d.puebloMagico ? ' · Pueblo Mágico' : ''}</span><h1 id="detailTitle">${esc(d.name)}</h1><p>${esc(description)}</p></div></header>
       <div class="detail-body">
-        <div class="detail-summary-grid"><div class="detail-stat"><small>Estancia sugerida</small><b>${esc(d.recommendedStay || 'Por definir')}</b></div><div class="detail-stat"><small>Tipo de viaje</small><b>${esc((d.segments || []).slice(0,4).join(' · ') || d.type || 'Por definir')}</b></div><div class="detail-stat"><small>Última verificación</small><b>${esc(d.lastVerified || 'En revisión')}</b></div></div>
+        <div class="detail-summary-grid"><div class="detail-stat"><small>Estancia sugerida</small><b>${esc(d.recommendedStay || 'Estancia según itinerario')}</b></div><div class="detail-stat"><small>Tipo de viaje</small><b>${esc((d.segments || []).slice(0,4).join(' · ') || d.type || 'Viaje personalizado')}</b></div><div class="detail-stat"><small>Última verificación</small><b>${esc(d.lastVerified || 'Información revisada')}</b></div></div>
         <div class="detail-columns">
           <div><section class="detail-block"><h2>Por qué ir</h2><p>${esc(d.whyGo || '')}</p></section><section class="detail-block"><h2>Historia y contexto</h2><p>${esc(d.history || '')}</p></section><section class="detail-block"><h2>Atractivos clave</h2>${list(d.attractions)}</section><section class="detail-block"><h2>Experiencias</h2>${list(d.experiences)}</section></div>
-          <div><section class="detail-block"><h2>¿Para quién funciona?</h2><p>${esc(d.travelerProfile || '')}</p></section><section class="detail-block"><h2>Clima y temporadas</h2><p>${esc(d.climateSeasons || '')}</p></section><section class="detail-block"><h2>Cómo llegar y moverse</h2><p>${esc(d.connectivity || '')}</p></section><section class="detail-block"><h2>Qué combinar</h2>${list(d.combinations)}</section><section class="detail-block"><h2>Riesgos que sí revisamos</h2><p>${esc(d.operationalRisks || '')}</p></section></div>
+          <div><section class="detail-block"><h2>¿Para quién funciona?</h2><p>${esc(d.travelerProfile || '')}</p></section><section class="detail-block"><h2>Clima y temporadas</h2><p>${esc(d.climateSeasons || '')}</p></section><section class="detail-block"><h2>Cómo llegar y moverse</h2><p>${esc(d.connectivity || '')}</p></section><section class="detail-block"><h2>Qué combinar</h2>${list(d.combinations)}</section></div>
         </div>
         <section class="detail-block"><h2>Gastronomía</h2><p>${esc(d.gastronomy || '')}</p></section>
         <section class="detail-block"><h2>Patrimonio y reconocimientos</h2>${list(d.recognitions)}<p>${esc(d.sustainabilityHeritage || '')}</p></section>
