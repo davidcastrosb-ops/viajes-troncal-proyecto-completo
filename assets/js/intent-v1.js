@@ -47,6 +47,28 @@
     return false;
   }
 
+  /* Amplía los filtros existentes sin tocar la fuente de datos del Maestro. */
+  const originalMatchesFilter=typeof window.matchesFilter==='function'?window.matchesFilter:null;
+  window.matchesFilter=function(d,filter){
+    if(['Familia','Pareja','Gastronomía'].includes(filter))return matchesIntent(d,filter);
+    return originalMatchesFilter?originalMatchesFilter(d,filter):matchesIntent(d,filter);
+  };
+
+  function ensureIntentFilters(){
+    const holder=qs('destinationFilters');if(!holder)return;
+    ['Familia','Pareja','Gastronomía'].forEach(label=>{
+      if(holder.querySelector(`[data-filter="${label}"]`))return;
+      const btn=document.createElement('button');
+      btn.className='chip';btn.type='button';btn.dataset.filter=label;btn.textContent=label;
+      btn.addEventListener('click',()=>{
+        holder.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        if(typeof renderDestinationSections==='function')renderDestinationSections(label);
+      });
+      holder.appendChild(btn);
+    });
+  }
+
   function render(){
     const t=track();if(!t)return;
     const destinations=visibleDestinations();
@@ -68,6 +90,7 @@
 
   function activateFilter(key){
     const holder=qs('destinationFilters');
+    ensureIntentFilters();
     if(holder){
       const button=Array.from(holder.querySelectorAll('button')).find(b=>b.dataset.filter===key);
       if(button){
@@ -141,6 +164,7 @@
   document.addEventListener('DOMContentLoaded',()=>{
     bind();
     const waitForData=setInterval(()=>{
+      ensureIntentFilters();
       if(typeof DESTINATIONS!=='undefined'&&DESTINATIONS.length){clearInterval(waitForData);render();}
     },120);
     setTimeout(()=>clearInterval(waitForData),6000);
