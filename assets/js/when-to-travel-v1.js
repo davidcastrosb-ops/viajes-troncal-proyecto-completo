@@ -99,27 +99,87 @@
     </article>`;
   }
 
+  function minOfferPrice(offers){
+    const nums=offers.map(o=>Number(String(o.price??'').replace(/[^0-9.-]/g,''))).filter(Number.isFinite);
+    return nums.length?Math.min(...nums):null;
+  }
+
+  function groupOffers(offers,destinationMap){
+    const groups=new Map();
+    offers.forEach(offer=>{
+      const key=offer.destinationId||offer.leadDestinationVerified||'sin-destino';
+      if(!groups.has(key))groups.set(key,{destination:destinationMap.get(offer.destinationId)||null,offers:[]});
+      groups.get(key).offers.push(offer);
+    });
+    return [...groups.values()].map(group=>({
+      ...group,
+      count:group.offers.length,
+      minPrice:minOfferPrice(group.offers),
+      name:group.destination?.name||group.offers[0]?.leadDestinationVerified||'Destino disponible'
+    })).sort((a,b)=>(a.minPrice??Infinity)-(b.minPrice??Infinity));
+  }
+
+  function editorialDestination(opp,offers,destinationMap){
+    const firstOffer=offers.find(o=>destinationMap.get(o.destinationId)?.mainImage);
+    if(firstOffer)return destinationMap.get(firstOffer.destinationId);
+
+    const preferred={
+      'CAL-2026-SEP16':'MX-JAL-PVR-001',
+      'CAL-2026-INVIERNO':'MX-ROO-CUN-001',
+      'CAL-2027-FEB1':'MX-ROO-RM-001',
+      'CAL-2027-MAR15':'MX-OAX-HUX-001',
+      'CAL-2027-SEMANA-SANTA':'MX-ROO-RM-001',
+      'CAL-2027-VERANO':'MX-NAY-NN-001'
+    };
+    const preferredDestination=destinationMap.get(preferred[opp.eventId]);
+    if(preferredDestination?.mainImage)return preferredDestination;
+
+    const imageDestinations=[...destinationMap.values()].filter(d=>d?.mainImage);
+    if(!imageDestinations.length)return null;
+    const hash=String(opp.id||opp.eventId||'').split('').reduce((sum,ch)=>sum+ch.charCodeAt(0),0);
+    return imageDestinations[hash%imageDestinations.length];
+  }
+
+  function imageMarkup(destination,title){
+    if(!destination?.mainImage)return '<div class="travel-home-image travel-home-image-placeholder" aria-hidden="true"></div>';
+    const credit=destination.imageCredit?`<span class="travel-home-image-credit">${esc(destination.imageCredit)}</span>`:'';
+    return `<div class="travel-home-image"><img src="${esc(destination.mainImage)}" alt="${esc(destination.imageAlt||title||destination.name)}" loading="lazy">${credit}</div>`;
+  }
+
   function compactHomeCard(opp,offerMap,destinationMap){
     const offers=(opp.offerIds||[]).map(id=>offerMap.get(id)).filter(Boolean);
-    const offer=offers[0]||null;
-    const destination=offer?destinationMap.get(offer.destinationId):null;
-    const price=offer?.price?money(offer.price):'';
+    const groups=groupOffers(offers,destinationMap);
+    const imageDestination=editorialDestination(opp,offers,destinationMap);
     const target=`/cuando-viajar/#occasion-${encodeURIComponent(opp.id)}`;
+    const summaries=groups.slice(0,2).map(group=>{
+      const optionLabel=`${group.count} ${group.count===1?'opción':'opciones'}`;
+      const from=group.minPrice!==null?` · desde ${money(group.minPrice)}`:'';
+      return `<div class="travel-home-option"><strong>${esc(group.name)}</strong><span>${optionLabel}${esc(from)}</span></div>`;
+    }).join('');
+    const more=groups.length>2?`<span class="travel-home-more">+ ${groups.length-2} destinos más</span>`:'';
     return `<article class="travel-home-card ${opp.featuredHome?'is-featured':''}">
-      <div class="travel-home-card-top"><span class="travel-type-pill type-${esc(opp.sourceType||opp.type)}">${esc(typeLabel(opp.sourceType||opp.type))}</span><span class="travel-date-range">${esc(fmtRange(opp.start,opp.end))}</span></div>
-      <h3>${esc(opp.title)}</h3>
-      <p>${esc(opp.subtitle||opp.note||'Una fecha que puede convertirse en viaje.')}</p>
-      ${offer?`<div class="travel-home-promo">${esc(destination?.name||offer.leadDestinationVerified||'Promoción vigente')}${price?`<strong>${esc(price)}</strong>`:''}</div>`:''}
-      <a href="${esc(target)}">${offer?'Ver viaje':'Ver ideas para estas fechas'} →</a>
+      ${imageMarkup(imageDestination,opp.title)}
+      <div class="travel-home-body">
+        <div class="travel-home-card-top"><span class="travel-type-pill type-${esc(opp.sourceType||opp.type)}">${esc(typeLabel(opp.sourceType||opp.type))}</span><span class="travel-date-range">${esc(fmtRange(opp.start,opp.end))}</span></div>
+        <h3>${esc(opp.title)}</h3>
+        <p>${esc(opp.subtitle||opp.note||'Una fecha que puede convertirse en viaje.')}</p>
+        ${groups.length?`<div class="travel-home-options">${summaries}${more}</div>`:`<div class="travel-home-idea"><span>Ideas de viaje para estas fechas</span></div>`}
+        <a href="${esc(target)}">${groups.length?'Ver viajes para estas fechas':'Ver ideas para estas fechas'} →</a>
+      </div>
     </article>`;
   }
 
-  function weekendIdeaCard(){
-    return `<article class="travel-home-card">
-      <div class="travel-home-card-top"><span class="travel-type-pill type-idea">Idea de viaje</span><span class="travel-date-range">Cualquier fin de semana</span></div>
-      <h3>Escapada de fin de semana</h3>
-      <p>No necesitas esperar vacaciones. A veces dos o tres noches son suficientes para cambiar de aire.</p>
-      <a class="home-quote-link" href="#cotizar" data-quote-launch>Armar una escapada →</a>
+  function weekendIdeaCard(destinationMap){
+    const preferred=destinationMap.get('MX-JAL-PVR-001')||[...destinationMap.values()].find(d=>d?.mainImage)||null;
+    return `<article class="travel-home-card travel-home-card-weekend">
+      ${imageMarkup(preferred,'Escapada de fin de semana')}
+      <div class="travel-home-body">
+        <div class="travel-home-card-top"><span class="travel-type-pill type-idea">Idea de viaje</span><span class="travel-date-range">Cualquier fin de semana</span></div>
+        <h3>Escapada de fin de semana</h3>
+        <p>No necesitas esperar vacaciones. A veces dos o tres noches son suficientes para cambiar de aire.</p>
+        <div class="travel-home-idea"><span>Playa, ciudad o un descanso cerca</span></div>
+        <a class="home-quote-link" href="#cotizar" data-quote-launch>Armar una escapada →</a>
+      </div>
     </article>`;
   }
 
@@ -129,7 +189,7 @@
     const section=document.createElement('section');
     section.id='cuando-viajar-preview';
     section.className='section when-travel-section when-travel-home';
-    section.innerHTML=`<div class="container"><div class="when-travel-home-head"><div><span class="eyebrow">Tu próximo viaje puede empezar con un día libre</span><h2>¿Cuándo te puedes escapar?</h2></div><p>Puentes, vacaciones escolares y escapadas para ayudarte a encontrar el momento antes de elegir el destino.</p><a class="when-travel-home-link" href="/cuando-viajar/">Ver calendario completo →</a></div><div class="when-travel-carousel"><button class="when-travel-arrow" type="button" data-when-prev aria-label="Ver oportunidad anterior">←</button><div id="whenTravelHomeGrid" class="travel-home-track" aria-live="polite"></div><button class="when-travel-arrow" type="button" data-when-next aria-label="Ver oportunidad siguiente">→</button></div><div id="whenTravelHomeStatus" class="travel-home-status"></div></div>`;
+    section.innerHTML=`<div class="container"><div class="when-travel-home-head"><div><span class="eyebrow">Tu próximo viaje puede empezar con un día libre</span><h2>¿Cuándo te puedes escapar?</h2></div><p>Aprovecha puentes, vacaciones y escapadas con opciones reales para distintos presupuestos.</p><a class="when-travel-home-link" href="/cuando-viajar/">Ver calendario completo →</a></div><div class="when-travel-carousel"><button class="when-travel-arrow" type="button" data-when-prev aria-label="Ver oportunidad anterior">←</button><div id="whenTravelHomeGrid" class="travel-home-track" aria-live="polite"></div><button class="when-travel-arrow" type="button" data-when-next aria-label="Ver oportunidad siguiente">→</button></div><div id="whenTravelHomeStatus" class="travel-home-status"></div></div>`;
     hero.insertAdjacentElement('afterend',section);
   }
 
@@ -200,7 +260,7 @@
         if(grid){
           const homeEventIds=new Set((calendar.events||[]).filter(homeImportant).map(e=>e.id));
           const featured=opportunities.filter(o=>homeEventIds.has(o.eventId)).sort((a,b)=>Number(b.featuredHome)-Number(a.featuredHome)||parseDate(a.start)-parseDate(b.start)).slice(0,5);
-          grid.innerHTML=featured.map(o=>compactHomeCard(o,offers,destinations)).join('')+weekendIdeaCard();
+          grid.innerHTML=featured.map(o=>compactHomeCard(o,offers,destinations)).join('')+weekendIdeaCard(destinations);
           setupHomeCarousel(featured.length+1);
         }
         handleIncomingQuote();
