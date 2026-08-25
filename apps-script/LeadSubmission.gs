@@ -9,7 +9,6 @@ function doPost(e) {
       return jsonLead_({ ok: false, error: 'Acción no válida.' });
     }
 
-    // Honeypot: responder como éxito sin guardar bots obvios.
     if (cleanLead_(body.website, 120)) {
       return jsonLead_({ ok: true, leadId: 'IGNORED' });
     }
@@ -50,7 +49,16 @@ function doPost(e) {
         lead.utmCampaign,
         lead.consentimiento ? 'Sí' : 'No',
         'Nuevo',
-        ''
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        lead.ocasionId,
+        lead.ofertaId,
+        lead.promoUrl,
+        lead.ctaOrigen
       ]);
     } finally {
       lock.releaseLock();
@@ -94,6 +102,10 @@ function normalizeLead_(body) {
     utmSource: cleanLead_(body.utmSource, 120),
     utmMedium: cleanLead_(body.utmMedium, 120),
     utmCampaign: cleanLead_(body.utmCampaign, 160),
+    ocasionId: cleanLead_(body.ocasionId, 120),
+    ofertaId: cleanLead_(body.ofertaId, 120),
+    promoUrl: cleanLead_(body.promoUrl, 500),
+    ctaOrigen: cleanLead_(body.ctaOrigen, 120),
     consentimiento: body.consentimiento === true || String(body.consentimiento).toLowerCase() === 'true'
   };
 }
@@ -145,6 +157,10 @@ function notifyLead_(lead, leadId) {
       'Viajeros: ' + lead.personas,
       'Hospedaje: ' + lead.hospedaje,
       'Origen: ' + (lead.origen || 'web'),
+      'Ocasión: ' + (lead.ocasionId || 'No aplica'),
+      'Oferta: ' + (lead.ofertaId || 'No aplica'),
+      'Promo: ' + (lead.promoUrl || ''),
+      'CTA: ' + (lead.ctaOrigen || ''),
       'URL: ' + (lead.urlOrigen || ''),
       '',
       'La solicitud quedó registrada en 13_Solicitudes_Web.'
