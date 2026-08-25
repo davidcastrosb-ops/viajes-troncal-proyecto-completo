@@ -5,7 +5,8 @@ const CONFIG = {
     fichas: '02_Fichas_Destino',
     sources: '05_Fuentes',
     offers: '07_Ofertas_Vigentes',
-    calendar: '14_Calendario_MX'
+    calendar: '14_Calendario_MX',
+    occasions: '15_Ocasiones_Viaje'
   }
 };
 
@@ -19,6 +20,7 @@ function doGet(e) {
     if (type === 'sources') output = { generatedAt: payload.generatedAt, sources: payload.sources };
     if (type === 'offers') output = { generatedAt: payload.generatedAt, offers: payload.offers };
     if (type === 'calendar') output = { generatedAt: payload.generatedAt, calendar: payload.calendar };
+    if (type === 'occasions') output = { generatedAt: payload.generatedAt, occasions: payload.occasions };
 
     return ContentService
       .createTextOutput(JSON.stringify(output))
@@ -32,7 +34,7 @@ function doGet(e) {
 
 function buildPublicPayload_() {
   const cache = CacheService.getScriptCache();
-  const cached = cache.get('public-payload-v4');
+  const cached = cache.get('public-payload-v5');
   if (cached) return JSON.parse(cached);
 
   const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
@@ -41,6 +43,7 @@ function buildPublicPayload_() {
   const sourceRows = sheetObjects_(ss, CONFIG.sheets.sources);
   const offerRows = sheetObjects_(ss, CONFIG.sheets.offers);
   const calendarRows = sheetObjects_(ss, CONFIG.sheets.calendar);
+  const occasionRows = sheetObjects_(ss, CONFIG.sheets.occasions);
 
   const fichaByDestination = {};
   fichaRows.forEach(row => {
@@ -73,6 +76,12 @@ function buildPublicPayload_() {
     .filter(row => row.id && row.start)
     .sort((a, b) => a.start.localeCompare(b.start));
 
+  const visibleOccasions = occasionRows
+    .filter(row => yes_(row.Mostrar_Web) && text_(row.Estado).toLowerCase() !== 'inactivo')
+    .map(publicOccasion_)
+    .filter(row => row.id && row.calendarEventId)
+    .sort((a, b) => (a.order || 9999) - (b.order || 9999));
+
   const payload = {
     generatedAt: new Date().toISOString(),
     destinations: visibleDestinations,
@@ -82,10 +91,11 @@ function buildPublicPayload_() {
       country: 'MX',
       label: 'México',
       events: calendarEvents
-    }
+    },
+    occasions: visibleOccasions
   };
 
-  cache.put('public-payload-v4', JSON.stringify(payload), 60);
+  cache.put('public-payload-v5', JSON.stringify(payload), 60);
   return payload;
 }
 
@@ -180,6 +190,7 @@ function publicOffer_(row) {
     id: text_(row.Oferta_ID),
     providerId: text_(row.Proveedor_ID),
     destinationId: text_(row.Destino_ID),
+    occasionId: text_(row.Ocasion_ID),
     title: text_(row.Título),
     hotel: text_(row.Hotel),
     days: number_(row.Días),
@@ -201,6 +212,8 @@ function publicOffer_(row) {
     leadFormUrl,
     leadDestinationVerified: directAuthorized ? text_(row.Destino_Lead_Verificado) : '',
     image: promoImage,
+    travelStart: dateText_(row.Fecha_Viaje_Inicio),
+    travelEnd: dateText_(row.Fecha_Viaje_Fin),
     directLinkAuthorized: directAuthorized
   };
 }
@@ -220,6 +233,29 @@ function publicCalendarEvent_(row) {
     sourceUrl: httpUrl_(row.URL_fuente),
     verifiedAt: dateText_(row.Fecha_verificacion),
     note: text_(row.Nota_publica)
+  };
+}
+
+function publicOccasion_(row) {
+  return {
+    id: text_(row.Ocasion_ID),
+    calendarEventId: text_(row.Calendario_Evento_ID),
+    title: text_(row.Titulo_publico),
+    shortTitle: text_(row.Titulo_corto),
+    subtitle: text_(row.Subtitulo),
+    emotionalCopy: text_(row.Frase_emocional),
+    type: text_(row.Tipo),
+    start: dateText_(row.Fecha_inicio),
+    end: dateText_(row.Fecha_fin),
+    suggestedDestinationIds: split_(row.Destinos_sugeridos_IDs),
+    offerIds: split_(row.Oferta_IDs),
+    featuredHome: yes_(row.Destacada_Home),
+    order: number_(row.Orden_Web),
+    slug: slug_(row.Slug_Web),
+    status: text_(row.Estado),
+    verifiedAt: dateText_(row.Fecha_verificacion),
+    note: text_(row.Nota_publica),
+    imageDestinationId: text_(row.Imagen_Destino_ID)
   };
 }
 
@@ -297,4 +333,5 @@ function clearPublicCache_() {
   cache.remove('public-payload-v2');
   cache.remove('public-payload-v3');
   cache.remove('public-payload-v4');
+  cache.remove('public-payload-v5');
 }
