@@ -8,6 +8,10 @@
     if(document.querySelector('link[data-hero-v5]'))return;
     const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/hero-v5.css';link.dataset.heroV5='';document.head.appendChild(link);
   }
+  function loadWhenTravelAssets(){
+    if(document.querySelector('script[data-when-travel-v1]'))return;
+    const script=document.createElement('script');script.src='/assets/js/when-to-travel-v1.js';script.dataset.whenTravelV1='';document.head.appendChild(script);
+  }
   function loadPromoMakerAssets(){
     if(!document.querySelector('link[data-promo-maker-v1]')){
       const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/promo-maker-v1.css';link.dataset.promoMakerV1='';document.head.appendChild(link);
@@ -121,6 +125,7 @@
 
   function boot(){
     loadHeroV5Assets();
+    loadWhenTravelAssets();
     loadPromoMakerAssets();
     let tries=0;
     const timer=setInterval(()=>{
