@@ -14,7 +14,9 @@
     "email": "viajestroncal@gmail.com"
   },
   "forms": {
-    "jotformUrl": "https://form.jotform.com/262364782762062"
+    "mode": "native",
+    "leadEndpoint": "/api/lead",
+    "legacyJotformFormId": "262364782762062"
   },
   "data": {
     "mode": "master-with-local-fallback",
