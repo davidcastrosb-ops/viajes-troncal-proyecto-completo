@@ -30,7 +30,7 @@ function doGet(e) {
 
 function buildPublicPayload_() {
   const cache = CacheService.getScriptCache();
-  const cached = cache.get('public-payload-v2');
+  const cached = cache.get('public-payload-v3');
   if (cached) return JSON.parse(cached);
 
   const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
@@ -71,7 +71,7 @@ function buildPublicPayload_() {
     offers: visibleOffers
   };
 
-  cache.put('public-payload-v2', JSON.stringify(payload), 60);
+  cache.put('public-payload-v3', JSON.stringify(payload), 60);
   return payload;
 }
 
@@ -158,6 +158,13 @@ function isOfferPublishable_(row) {
 }
 
 function publicOffer_(row) {
+  const directAuthorized = yes_(row.Enlace_Publico_Autorizado);
+  const leadVerified = !!text_(row.Destino_Lead_Verificado);
+  const publicPromoUrl = directAuthorized ? httpUrl_(row.URL_Promo_Publica || row.URL_Promo_Compartir) : '';
+  const sharePromoUrl = directAuthorized ? httpUrl_(row.URL_Promo_Compartir) : '';
+  const leadFormUrl = directAuthorized && leadVerified ? httpUrl_(row.URL_Formulario_Lead) : '';
+  const promoImage = directAuthorized ? httpUrl_(row.Imagen_Promo_URL) : '';
+
   return {
     id: text_(row.Oferta_ID),
     providerId: text_(row.Proveedor_ID),
@@ -177,7 +184,13 @@ function publicOffer_(row) {
     expiresAt: dateText_(row.Fecha_Expiracion_Web),
     includes: split_(row.Incluye),
     excludes: split_(row.No_Incluye),
-    note: text_(row.Notas_Publicacion)
+    note: text_(row.Notas_Publicacion),
+    publicPromoUrl,
+    sharePromoUrl,
+    leadFormUrl,
+    leadDestinationVerified: directAuthorized ? text_(row.Destino_Lead_Verificado) : '',
+    image: promoImage,
+    directLinkAuthorized: directAuthorized
   };
 }
 
@@ -218,6 +231,12 @@ function slug_(value) {
     .replace(/^-+|-+$/g, '');
 }
 
+function httpUrl_(value) {
+  const v = text_(value);
+  if (!/^https?:\/\//i.test(v)) return '';
+  return v;
+}
+
 function dateText_(value) {
   const v = text_(value);
   if (!v) return '';
@@ -247,4 +266,5 @@ function clearPublicCache_() {
   const cache = CacheService.getScriptCache();
   cache.remove('public-payload-v1');
   cache.remove('public-payload-v2');
+  cache.remove('public-payload-v3');
 }
