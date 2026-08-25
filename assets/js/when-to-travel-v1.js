@@ -11,14 +11,25 @@
   const money=v=>{const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n):String(v||'')};
   const fetchJSON=async url=>{const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(url);return r.json()};
 
+  function loadStyles(){
+    if(document.querySelector('link[data-when-travel-v1]'))return;
+    const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/when-to-travel-v1.css';link.dataset.whenTravelV1='';document.head.appendChild(link);
+  }
+
   function importantEvent(e){
     if(e.quick) return true;
     if(e.type==='vacaciones_escolares'||e.type==='receso_escolar') return true;
     return /Independencia|Navidad|Año Nuevo|Trabajo/i.test(e.name||'');
   }
 
+  function homeImportant(e){
+    if(e.quick) return true;
+    if(e.type==='vacaciones_escolares'||e.type==='receso_escolar') return true;
+    return /Independencia/i.test(e.name||'');
+  }
+
   function typeLabel(type){
-    return ({descanso_obligatorio:'Descanso obligatorio',vacaciones_escolares:'Vacaciones escolares SEP',dia_sin_clases:'Día sin clases SEP',receso_escolar:'Receso escolar',puente:'Fin de semana largo'})[type]||'Oportunidad para viajar';
+    return ({descanso_obligatorio:'Descanso obligatorio',vacaciones_escolares:'Vacaciones escolares SEP',dia_sin_clases:'Día sin clases SEP',receso_escolar:'Receso escolar',puente:'Fin de semana largo',idea:'Idea de viaje'})[type]||'Oportunidad para viajar';
   }
 
   function mergeOpportunities(calendar,occasions){
@@ -38,7 +49,8 @@
           offerIds:o?.offerIds||[],
           featuredHome:!!o?.featuredHome,
           note:o?.note||'',
-          sourceType:e.type
+          sourceType:e.type,
+          slug:o?.slug||''
         };
       })
       .filter(x=>parseDate(x.end)>=now)
@@ -64,7 +76,7 @@
       <span class="travel-offer-badge">Promoción vigente</span>
       <h4>${esc(title)}</h4>
       <div class="travel-offer-meta">${offer.days?`${esc(offer.days)} días`:''}${offer.nights?` · ${esc(offer.nights)} noches`:''}${offer.plan?` · ${esc(offer.plan)}`:''}</div>
-      ${price?`<div class="travel-offer-price"><small>desde / precio publicado</small><strong>${esc(price)}</strong><span>${esc(offer.priceUnit||'')}</span></div>`:''}
+      ${price?`<div class="travel-offer-price"><small>precio publicado</small><strong>${esc(price)}</strong><span>${esc(offer.priceUnit||'')}</span></div>`:''}
       <p>${esc(offer.note||'Precio, disponibilidad y condiciones se reconfirman antes de cualquier pago.')}</p>
       <div class="travel-offer-actions">
         ${detail?`<a class="btn btn-soft" href="${esc(detail)}" target="_blank" rel="noopener noreferrer">Ver promoción ↗</a>`:''}
@@ -76,7 +88,7 @@
   function opportunityCard(opp,offerMap,destinationMap,onHome=false){
     const offers=(opp.offerIds||[]).map(id=>offerMap.get(id)).filter(Boolean);
     const hasOffer=offers.length>0;
-    return `<article class="travel-opportunity-card ${hasOffer?'has-offer':''}">
+    return `<article id="occasion-${esc(opp.id)}" class="travel-opportunity-card ${hasOffer?'has-offer':''}">
       <div class="travel-opportunity-top">
         <span class="travel-type-pill type-${esc(opp.sourceType||opp.type)}">${esc(typeLabel(opp.sourceType||opp.type))}</span>
         <span class="travel-date-range">${esc(fmtRange(opp.start,opp.end))}</span>
@@ -87,15 +99,50 @@
     </article>`;
   }
 
+  function compactHomeCard(opp,offerMap,destinationMap){
+    const offers=(opp.offerIds||[]).map(id=>offerMap.get(id)).filter(Boolean);
+    const offer=offers[0]||null;
+    const destination=offer?destinationMap.get(offer.destinationId):null;
+    const price=offer?.price?money(offer.price):'';
+    const target=`/cuando-viajar/#occasion-${encodeURIComponent(opp.id)}`;
+    return `<article class="travel-home-card ${opp.featuredHome?'is-featured':''}">
+      <div class="travel-home-card-top"><span class="travel-type-pill type-${esc(opp.sourceType||opp.type)}">${esc(typeLabel(opp.sourceType||opp.type))}</span><span class="travel-date-range">${esc(fmtRange(opp.start,opp.end))}</span></div>
+      <h3>${esc(opp.title)}</h3>
+      <p>${esc(opp.subtitle||opp.note||'Una fecha que puede convertirse en viaje.')}</p>
+      ${offer?`<div class="travel-home-promo">${esc(destination?.name||offer.leadDestinationVerified||'Promoción vigente')}${price?`<strong>${esc(price)}</strong>`:''}</div>`:''}
+      <a href="${esc(target)}">${offer?'Ver viaje':'Ver ideas para estas fechas'} →</a>
+    </article>`;
+  }
+
+  function weekendIdeaCard(){
+    return `<article class="travel-home-card">
+      <div class="travel-home-card-top"><span class="travel-type-pill type-idea">Idea de viaje</span><span class="travel-date-range">Cualquier fin de semana</span></div>
+      <h3>Escapada de fin de semana</h3>
+      <p>No necesitas esperar vacaciones. A veces dos o tres noches son suficientes para cambiar de aire.</p>
+      <a class="home-quote-link" href="#cotizar" data-quote-launch>Armar una escapada →</a>
+    </article>`;
+  }
+
   function injectHomeShell(){
     if(document.getElementById('cuando-viajar-preview'))return;
-    const target=document.getElementById('inspiracion')||document.getElementById('promociones');
-    if(!target)return;
+    const hero=document.querySelector('.hero-emotional-section');if(!hero)return;
     const section=document.createElement('section');
     section.id='cuando-viajar-preview';
-    section.className='section when-travel-section';
-    section.innerHTML=`<div class="container"><div class="section-head"><div><span class="eyebrow">Tu próximo viaje puede empezar con un día libre</span><h2>Próximas oportunidades para viajar</h2></div><p>Puentes, vacaciones escolares y fechas especiales de México reunidas en un solo lugar. Cuando exista una promoción real, la verás aquí.</p></div><div id="whenTravelHomeGrid" class="travel-home-grid"></div><div class="travel-section-more"><a class="btn btn-soft" href="/cuando-viajar/">Ver cuándo viajar →</a></div></div>`;
-    target.parentNode.insertBefore(section,target);
+    section.className='section when-travel-section when-travel-home';
+    section.innerHTML=`<div class="container"><div class="when-travel-home-head"><div><span class="eyebrow">Tu próximo viaje puede empezar con un día libre</span><h2>¿Cuándo te puedes escapar?</h2></div><p>Puentes, vacaciones escolares y escapadas para ayudarte a encontrar el momento antes de elegir el destino.</p><a class="when-travel-home-link" href="/cuando-viajar/">Ver calendario completo →</a></div><div class="when-travel-carousel"><button class="when-travel-arrow" type="button" data-when-prev aria-label="Ver oportunidad anterior">←</button><div id="whenTravelHomeGrid" class="travel-home-track" aria-live="polite"></div><button class="when-travel-arrow" type="button" data-when-next aria-label="Ver oportunidad siguiente">→</button></div><div id="whenTravelHomeStatus" class="travel-home-status"></div></div>`;
+    hero.insertAdjacentElement('afterend',section);
+  }
+
+  function setupHomeCarousel(count){
+    const track=document.getElementById('whenTravelHomeGrid');if(!track)return;
+    const prev=document.querySelector('[data-when-prev]');const next=document.querySelector('[data-when-next]');const status=document.getElementById('whenTravelHomeStatus');
+    let index=0;
+    const cards=()=>Array.from(track.querySelectorAll('.travel-home-card'));
+    const sync=()=>{const list=cards();if(!list.length)return;if(status)status.textContent=`${Math.min(index+1,list.length)} de ${list.length} · desliza para ver más`;};
+    const go=delta=>{const list=cards();if(!list.length)return;index=(index+delta+list.length)%list.length;track.scrollTo({left:list[index].offsetLeft-track.offsetLeft,behavior:'smooth'});sync();};
+    prev?.addEventListener('click',()=>go(-1));next?.addEventListener('click',()=>go(1));
+    track.addEventListener('scroll',()=>{const list=cards();let best=Infinity,closest=0;list.forEach((card,i)=>{const d=Math.abs((card.offsetLeft-track.offsetLeft)-track.scrollLeft);if(d<best){best=d;closest=i;}});index=closest;sync();},{passive:true});
+    if(count<2){if(prev)prev.hidden=true;if(next)next.hidden=true;}sync();
   }
 
   function injectMenuLink(){
@@ -136,6 +183,7 @@
   }
 
   async function init(){
+    loadStyles();
     const isPage=!!document.getElementById('whenTravelPage');
     if(!isPage){injectMenuLink();injectHomeShell();bindHomeQuotePrefill();}
     try{
@@ -150,8 +198,10 @@
       }else{
         const grid=document.getElementById('whenTravelHomeGrid');
         if(grid){
-          const featured=[...opportunities].sort((a,b)=>Number(b.featuredHome)-Number(a.featuredHome)||parseDate(a.start)-parseDate(b.start)).slice(0,4);
-          grid.innerHTML=featured.map(o=>opportunityCard(o,offers,destinations,true)).join('');
+          const homeEventIds=new Set((calendar.events||[]).filter(homeImportant).map(e=>e.id));
+          const featured=opportunities.filter(o=>homeEventIds.has(o.eventId)).sort((a,b)=>Number(b.featuredHome)-Number(a.featuredHome)||parseDate(a.start)-parseDate(b.start)).slice(0,5);
+          grid.innerHTML=featured.map(o=>compactHomeCard(o,offers,destinations)).join('')+weekendIdeaCard();
+          setupHomeCarousel(featured.length+1);
         }
         handleIncomingQuote();
       }
