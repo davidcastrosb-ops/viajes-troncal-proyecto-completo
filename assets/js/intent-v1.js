@@ -1,12 +1,12 @@
 (()=>{
   const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const INTENTS=[
-    {key:'Familia',title:'Viajes en familia',kicker:'Para compartir',description:'Destinos con playa, actividades y opciones que funcionan bien para viajar con niños o varias generaciones.'},
-    {key:'Pareja',title:'Escapadas en pareja',kicker:'Tiempo para dos',description:'Destinos para descansar, comer bien, caminar, celebrar o simplemente cambiar de aire juntos.'},
-    {key:'Playa',title:'Playa y mar',kicker:'Sol, agua y descanso',description:'Caribe, Pacífico e islas para combinar descanso, actividades acuáticas y experiencias costeras.'},
-    {key:'Cultura',title:'Cultura e historia',kicker:'Viajar entendiendo el lugar',description:'Destinos con patrimonio, identidad, arqueología, tradiciones o contexto histórico que vale la pena conocer.'},
-    {key:'Naturaleza',title:'Naturaleza y aventura',kicker:'Salir de la rutina',description:'Lagunas, cenotes, áreas protegidas, paisajes y experiencias al aire libre.'},
-    {key:'Gastronomía',title:'Comer también es viajar',kicker:'Sabores con destino',description:'Lugares donde la cocina, mercados, restaurantes y producto local forman parte central de la experiencia.'}
+    {key:'Familia',title:'Viajes que se disfrutan juntos',kicker:'Momentos para compartir',description:'Playas, actividades y escapadas que funcionan para niños, adultos y varias generaciones.',preferred:['Riviera Maya / Playa del Carmen','Cancún','Puerto Vallarta','Bahías de Huatulco']},
+    {key:'Pareja',title:'Escapadas para dos',kicker:'Tiempo que sí se recuerda',description:'Atardeceres, buena mesa, descanso y lugares para celebrar o simplemente volver a conectar.',preferred:['Puerto Vallarta','Los Cabos / Cabo San Lucas','Tulum','Sayulita']},
+    {key:'Playa',title:'El mar también es destino',kicker:'Sol, agua y libertad',description:'Caribe, Pacífico e islas para bajar el ritmo, entrar al agua y volver con la cabeza en otro lugar.',preferred:['Cancún','Riviera Maya / Playa del Carmen','Bahías de Huatulco','Los Cabos / Cabo San Lucas']},
+    {key:'Cultura',title:'Historias que se viven',kicker:'Conocer cambia el viaje',description:'Ciudades, patrimonio, arqueología y tradiciones que convierten una visita en algo que sí deja huella.',preferred:['Tulum','Puerto Vallarta','Cozumel','Loreto']},
+    {key:'Naturaleza',title:'Sal de la rutina',kicker:'Respira, muévete, descubre',description:'Cenotes, lagunas, áreas protegidas, senderos y paisajes para volver a sentir que estás de viaje.',preferred:['Bacalar','La Paz','Bahías de Huatulco','Isla Mujeres']},
+    {key:'Gastronomía',title:'Sabores que valen el viaje',kicker:'Comer también es viajar',description:'Mercados, cocina local, restaurantes y sabores que se vuelven parte del recuerdo del destino.',preferred:['Puerto Vallarta','Mazatlán','Riviera Maya / Playa del Carmen','Sayulita']}
   ];
 
   let timer=null;
@@ -18,6 +18,7 @@
   const qs=id=>document.getElementById(id);
   const track=()=>qs('intentTrack');
   const cards=()=>Array.from(track()?.querySelectorAll('.intent-card')||[]);
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   function visibleDestinations(){
     if(typeof DESTINATIONS==='undefined')return [];
@@ -26,12 +27,7 @@
 
   function normalizedText(d){
     return [
-      ...(d.segments||[]),
-      d.travelerProfile||'',
-      d.type||'',
-      d.summary||'',
-      d.whyGo||'',
-      d.gastronomy||''
+      ...(d.segments||[]),d.travelerProfile||'',d.type||'',d.summary||'',d.whyGo||'',d.gastronomy||'',...(d.recognitions||[])
     ].join(' ').toLowerCase();
   }
 
@@ -47,7 +43,6 @@
     return false;
   }
 
-  /* Amplía los filtros existentes sin tocar la fuente de datos del Maestro. */
   const originalMatchesFilter=typeof window.matchesFilter==='function'?window.matchesFilter:null;
   window.matchesFilter=function(d,filter){
     if(['Familia','Pareja','Gastronomía'].includes(filter))return matchesIntent(d,filter);
@@ -69,19 +64,38 @@
     });
   }
 
+  function imageFor(matches,intent){
+    const usable=matches.filter(d=>d&&d.mainImage);
+    for(const name of intent.preferred||[]){
+      const found=usable.find(d=>d.name===name);
+      if(found)return found;
+    }
+    return usable[0]||null;
+  }
+
+  function chipNames(matches){
+    return matches.slice(0,3).map(d=>`<span class="intent-destination-chip">${esc(d.name)}</span>`).join('');
+  }
+
   function render(){
     const t=track();if(!t)return;
     const destinations=visibleDestinations();
     t.innerHTML=INTENTS.map(intent=>{
       const matches=destinations.filter(d=>matchesIntent(d,intent.key));
-      const examples=matches.slice(0,3).map(d=>d.name).join(' · ');
       const count=matches.length;
-      return `<article class="intent-card" data-intent="${intent.key}">
-        <span class="eyebrow">${intent.kicker}</span>
-        <h3>${intent.title}</h3>
-        <p>${intent.description}</p>
-        <div class="intent-card-meta"><b>${count} ${count===1?'destino':'destinos'}</b>${examples?`<span>${examples}</span>`:''}</div>
-        <button class="intent-card-action" type="button" data-intent-action="${intent.key}">Ver destinos →</button>
+      const visual=imageFor(matches,intent);
+      const image=visual?.mainImage?esc(visual.mainImage):'';
+      const alt=visual?esc(visual.imageAlt||`Viaje de ${intent.title}`):'';
+      const credit=visual?.imageCredit?esc(visual.imageCredit):'';
+      const visualHtml=image?`<div class="intent-card-visual"><img src="${image}" alt="${alt}" loading="lazy"><span class="intent-card-shade"></span><span class="intent-card-visual-label">${esc(intent.kicker)}</span>${credit?`<small class="intent-card-credit">${credit}</small>`:''}</div>`:`<div class="intent-card-visual intent-card-visual-fallback"><span class="intent-card-visual-label">${esc(intent.kicker)}</span></div>`;
+      return `<article class="intent-card" data-intent="${esc(intent.key)}">
+        ${visualHtml}
+        <div class="intent-card-body">
+          <div class="intent-card-heading"><span class="intent-card-count">${count} ${count===1?'destino':'destinos'}</span><h3>${esc(intent.title)}</h3></div>
+          <p>${esc(intent.description)}</p>
+          <div class="intent-card-meta">${chipNames(matches)}</div>
+          <button class="intent-card-action" type="button" data-intent-action="${esc(intent.key)}">Descubrir destinos <span aria-hidden="true">→</span></button>
+        </div>
       </article>`;
     }).join('');
     bindCards();
@@ -103,15 +117,13 @@
   }
 
   function bindCards(){
-    track()?.querySelectorAll('[data-intent-action]').forEach(btn=>{
-      btn.addEventListener('click',()=>activateFilter(btn.dataset.intentAction));
-    });
+    track()?.querySelectorAll('[data-intent-action]').forEach(btn=>btn.addEventListener('click',()=>activateFilter(btn.dataset.intentAction)));
   }
 
   function currentIndex(){
     const t=track(),list=cards();if(!t||!list.length)return 0;
     let best=0,distance=Infinity;
-    list.forEach((card,i)=>{const d=Math.abs(card.offsetLeft-t.scrollLeft);if(d<distance){distance=d;best=i;}});
+    list.forEach((card,i)=>{const d=Math.abs((card.offsetLeft-t.offsetLeft)-t.scrollLeft);if(d<distance){distance=d;best=i;}});
     return best;
   }
 
@@ -125,18 +137,18 @@
     const t=track(),list=cards();if(!t||!list.length)return;
     const safe=((index%list.length)+list.length)%list.length;
     if(manual)markInteraction();
-    t.scrollTo({left:list[safe].offsetLeft,behavior:reducedMotion?'auto':'smooth'});
+    t.scrollTo({left:list[safe].offsetLeft-t.offsetLeft,behavior:reducedMotion?'auto':'smooth'});
     setTimeout(updateStatus,reducedMotion?0:380);
   }
   const next=(manual=false)=>scrollToIndex(currentIndex()+1,{manual});
   const prev=(manual=false)=>scrollToIndex(currentIndex()-1,{manual});
 
   function canAutoplay(){
-    return !reducedMotion&&!userPaused&&!hoverPaused&&!focusPaused&&Date.now()>interactionUntil&&cards().length>1;
+    return !reducedMotion&&!userPaused&&!hoverPaused&&!focusPaused&&Date.now()>interactionUntil&&cards().length>1&&!document.hidden;
   }
   function start(){
     clearInterval(timer);
-    timer=setInterval(()=>{if(canAutoplay())next(false);},6200);
+    timer=setInterval(()=>{if(canAutoplay())next(false);},6500);
   }
   function syncPause(){
     const btn=qs('intentPause');if(!btn)return;
