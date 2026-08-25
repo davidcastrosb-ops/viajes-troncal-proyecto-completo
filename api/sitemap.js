@@ -34,8 +34,13 @@ export default async function handler(req, res) {
   const validStatus = new Set(['verified', 'verified-initial', 'approved', 'published']);
   const rows = destinations.filter(d => d && d.slug && validStatus.has(d.status));
 
+  const staticUrls = [
+    { loc: `${base}/`, changefreq: 'weekly', priority: '1.0' },
+    { loc: `${base}/cuando-viajar/`, changefreq: 'weekly', priority: '0.9' }
+  ];
+
   const urls = [
-    `<url><loc>${xmlEscape(`${base}/`)}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>`,
+    ...staticUrls.map(item => `<url><loc>${xmlEscape(item.loc)}</loc><changefreq>${item.changefreq}</changefreq><priority>${item.priority}</priority></url>`),
     ...rows.map(d => {
       const loc = `${base}/mexico/${encodeURIComponent(d.slug)}`;
       const lastmod = d.lastVerified ? `<lastmod>${xmlEscape(d.lastVerified)}</lastmod>` : '';
