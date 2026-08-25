@@ -1,8 +1,10 @@
 (() => {
   const LEAD_ENDPOINT = '/api/lead';
   const WHATSAPP_NUMBER = '523329335952';
+  const CALENDAR_URL = '/assets/data/mexico-calendar.json';
   let lastTrigger = null;
   let built = false;
+  const calendarState = { data:null, loading:null, month:null, target:'fechaSalida' };
 
   const qs = (sel, root=document) => root.querySelector(sel);
   const qsa = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -16,6 +18,40 @@
   function inferPageDestination(){
     const title = document.getElementById('detailTitle');
     return title ? String(title.textContent || '').trim() : '';
+  }
+
+  function dateFromISO(iso=''){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(iso))) return null;
+    const [y,m,d]=String(iso).split('-').map(Number);
+    return new Date(y,m-1,d,12,0,0,0);
+  }
+
+  function isoFromDate(date){
+    if(!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    const y=date.getFullYear();
+    const m=String(date.getMonth()+1).padStart(2,'0');
+    const d=String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function formatDate(iso=''){
+    const date=dateFromISO(iso);
+    if(!date) return 'Elegir fecha';
+    return new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric'}).format(date).replace('.','');
+  }
+
+  function formatRange(start,end){
+    if(!start) return '';
+    if(!end || end===start) return formatDate(start);
+    const a=dateFromISO(start), b=dateFromISO(end);
+    if(!a||!b) return '';
+    const sameYear=a.getFullYear()===b.getFullYear();
+    const sameMonth=sameYear&&a.getMonth()===b.getMonth();
+    if(sameMonth){
+      const month=new Intl.DateTimeFormat('es-MX',{month:'short'}).format(a).replace('.','');
+      return `${a.getDate()}–${b.getDate()} ${month} ${a.getFullYear()}`;
+    }
+    return `${formatDate(start)} – ${formatDate(end)}`;
   }
 
   function buildForm(){
@@ -54,19 +90,40 @@
             <span>Ciudad de salida <b>*</b></span>
             <input name="ciudadSalida" type="text" maxlength="120" placeholder="Ej. Guadalajara" required>
           </label>
-          <label class="native-field">
+          <div class="native-field native-date-field">
             <span>Fecha aproximada de salida <b>*</b></span>
-            <input name="fechaSalida" type="date" required>
-          </label>
-          <label class="native-field">
+            <button class="native-date-trigger" type="button" data-calendar-open="fechaSalida"><span data-date-display="fechaSalida">Elegir fecha</span><i>▾</i></button>
+            <input name="fechaSalida" type="hidden">
+          </div>
+          <div class="native-field native-date-field">
             <span>Fecha aproximada de regreso</span>
-            <input name="fechaRegreso" type="date">
-          </label>
+            <button class="native-date-trigger" type="button" data-calendar-open="fechaRegreso"><span data-date-display="fechaRegreso">Elegir fecha</span><i>▾</i></button>
+            <input name="fechaRegreso" type="hidden">
+          </div>
           <label class="native-field">
             <span>Número de viajeros <b>*</b></span>
             <input name="personas" type="number" inputmode="numeric" min="1" max="99" value="2" required>
           </label>
         </div>
+
+        <div class="travel-calendar-nudge">
+          <div><b>¿Aún no sabes cuándo viajar?</b><span>Consulta puentes, vacaciones escolares y días sin clases en México sin salir de Trhoncal Travel.</span></div>
+          <button type="button" data-calendar-open="fechaSalida" data-calendar-browse>Ver puentes y vacaciones →</button>
+        </div>
+
+        <section id="travelCalendarPanel" class="travel-calendar-panel" hidden aria-label="Calendario para elegir fechas">
+          <div class="travel-calendar-topline">
+            <div><span class="eyebrow">Calendario México</span><strong id="travelCalendarPrompt">Elige tu fecha de salida</strong></div>
+            <button type="button" class="travel-calendar-close" data-calendar-close aria-label="Cerrar calendario">×</button>
+          </div>
+          <div id="travelQuickDates" class="travel-quick-dates"></div>
+          <div class="travel-calendar-nav"><button type="button" data-calendar-prev aria-label="Mes anterior">←</button><strong id="travelCalendarMonth"></strong><button type="button" data-calendar-next aria-label="Mes siguiente">→</button></div>
+          <div class="travel-calendar-weekdays" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+          <div id="travelCalendarGrid" class="travel-calendar-grid"></div>
+          <div class="travel-calendar-legend"><span class="legend-holiday">Descanso obligatorio</span><span class="legend-vacation">Vacaciones SEP</span><span class="legend-school">Día sin clases SEP</span></div>
+          <p class="travel-calendar-help">Los días sin clases SEP no significan necesariamente descanso laboral para los adultos. Las ventanas de escapada marcadas como sugeridas son una recomendación de Trhoncal Travel basada en las fechas oficiales.</p>
+          <div id="travelCalendarSources" class="travel-calendar-sources"></div>
+        </section>
 
         <fieldset class="native-choice-group">
           <legend>¿Cómo prefieres hospedarte? <b>*</b></legend>
@@ -79,7 +136,7 @@
 
         <label class="native-consent">
           <input name="consentimiento" type="checkbox" required>
-          <span>Acepto que Trhoncal Travel me contacte para dar seguimiento a esta solicitud.</span>
+          <span><b>Autorizo el contacto.</b> Acepto que Trhoncal Travel me contacte para dar seguimiento a esta solicitud.</span>
         </label>
 
         <label class="native-honeypot" aria-hidden="true">Sitio web<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
@@ -101,6 +158,7 @@
     const form = document.getElementById('travelQuoteForm');
     form.addEventListener('submit', submitForm);
     built = true;
+    loadCalendar().catch(()=>{});
   }
 
   function setDestination(destination=''){
@@ -127,10 +185,28 @@
       : 'Cuéntanos lo esencial. Nosotros te ayudamos a convertirlo en un viaje real.';
   }
 
+  function setDateField(name, iso=''){
+    const form=document.getElementById('travelQuoteForm');
+    if(!form || !form.elements[name]) return;
+    form.elements[name].value=iso;
+    const display=qs(`[data-date-display="${name}"]`, form);
+    const trigger=qs(`[data-calendar-open="${name}"]`, form);
+    if(display) display.textContent=iso ? formatDate(iso) : 'Elegir fecha';
+    if(trigger){
+      trigger.classList.toggle('has-value', !!iso);
+      trigger.classList.remove('is-error');
+    }
+    if(name==='fechaSalida'){
+      const back=form.elements.fechaRegreso.value;
+      if(back && iso && back<iso) setDateField('fechaRegreso','');
+    }
+  }
+
   function resetState(){
     const form = document.getElementById('travelQuoteForm');
     const success = document.getElementById('quoteSuccess');
     const status = document.getElementById('quoteFormStatus');
+    const calendar=document.getElementById('travelCalendarPanel');
     if(form){
       form.hidden = false;
       form.reset();
@@ -143,7 +219,10 @@
         destination.setAttribute('aria-readonly','false');
         destination.title='';
       }
+      setDateField('fechaSalida','');
+      setDateField('fechaRegreso','');
     }
+    if(calendar) calendar.hidden=true;
     if(success) success.hidden = true;
     if(status){ status.textContent=''; status.className='native-form-status'; }
   }
@@ -171,6 +250,141 @@
     root.setAttribute('aria-hidden','true');
     document.body.classList.remove('quote-modal-open');
     if(lastTrigger && typeof lastTrigger.focus === 'function') lastTrigger.focus();
+  }
+
+  async function loadCalendar(){
+    if(calendarState.data) return calendarState.data;
+    if(calendarState.loading) return calendarState.loading;
+    calendarState.loading=fetch(CALENDAR_URL,{cache:'no-store'})
+      .then(r=>{ if(!r.ok) throw new Error('calendar'); return r.json(); })
+      .then(data=>{
+        calendarState.data=data&&Array.isArray(data.events)?data:{events:[],sources:[]};
+        return calendarState.data;
+      })
+      .finally(()=>{calendarState.loading=null;});
+    return calendarState.loading;
+  }
+
+  function monthStartFromTarget(target){
+    const form=document.getElementById('travelQuoteForm');
+    const selected=form&&form.elements[target]?form.elements[target].value:'';
+    const date=dateFromISO(selected)||new Date();
+    return new Date(date.getFullYear(),date.getMonth(),1,12,0,0,0);
+  }
+
+  async function openCalendar(target='fechaSalida'){
+    const panel=document.getElementById('travelCalendarPanel');
+    if(!panel) return;
+    calendarState.target=target==='fechaRegreso'?'fechaRegreso':'fechaSalida';
+    calendarState.month=monthStartFromTarget(calendarState.target);
+    panel.hidden=false;
+    const prompt=document.getElementById('travelCalendarPrompt');
+    if(prompt) prompt.textContent=calendarState.target==='fechaRegreso'?'Elige tu fecha de regreso':'Elige tu fecha de salida';
+    renderCalendarLoading();
+    try{ await loadCalendar(); renderCalendar(); }
+    catch(_){ renderCalendarError(); }
+    panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function closeCalendar(){
+    const panel=document.getElementById('travelCalendarPanel');
+    if(panel) panel.hidden=true;
+  }
+
+  function renderCalendarLoading(){
+    const grid=document.getElementById('travelCalendarGrid');
+    if(grid) grid.innerHTML='<p class="travel-calendar-loading">Cargando fechas oficiales…</p>';
+  }
+
+  function renderCalendarError(){
+    const grid=document.getElementById('travelCalendarGrid');
+    if(grid) grid.innerHTML='<p class="travel-calendar-loading">No pudimos cargar las fechas especiales. Puedes elegir una fecha manualmente más tarde.</p>';
+  }
+
+  function eventIncludes(event,iso){
+    if(!event||!event.start) return false;
+    const end=event.end||event.start;
+    return iso>=event.start&&iso<=end;
+  }
+
+  function eventsForDate(iso){
+    const events=(calendarState.data&&calendarState.data.events)||[];
+    return events.filter(event=>eventIncludes(event,iso));
+  }
+
+  function renderQuickDates(){
+    const root=document.getElementById('travelQuickDates');
+    if(!root) return;
+    const today=isoFromDate(new Date());
+    const quick=((calendarState.data&&calendarState.data.events)||[])
+      .filter(e=>e.quick&&e.suggestedStart&&e.suggestedEnd&&e.suggestedEnd>=today)
+      .sort((a,b)=>a.suggestedStart.localeCompare(b.suggestedStart))
+      .slice(0,5);
+    if(!quick.length){root.innerHTML='';return;}
+    root.innerHTML=`<div class="travel-quick-head"><b>Próximas oportunidades para escaparte</b><span>Toca una opción y llenamos salida y regreso.</span></div><div class="travel-quick-list">${quick.map(event=>`<button type="button" data-calendar-quick="${event.id}"><span>${event.type==='vacaciones_escolares'?'Vacaciones escolares':'Escapada sugerida'}</span><strong>${event.name}</strong><small>${formatRange(event.suggestedStart,event.suggestedEnd)}</small></button>`).join('')}</div>`;
+  }
+
+  function renderSources(){
+    const root=document.getElementById('travelCalendarSources');
+    if(!root) return;
+    const sources=(calendarState.data&&calendarState.data.sources)||[];
+    root.innerHTML=sources.length?`<span>Fuentes oficiales:</span> ${sources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.name.includes('Educación')?'SEP':'LFT'}</a>`).join(' · ')}`:'';
+  }
+
+  function renderCalendar(){
+    const data=calendarState.data||{events:[]};
+    const month=calendarState.month||new Date();
+    const monthLabel=document.getElementById('travelCalendarMonth');
+    const grid=document.getElementById('travelCalendarGrid');
+    if(!grid) return;
+    if(monthLabel) monthLabel.textContent=new Intl.DateTimeFormat('es-MX',{month:'long',year:'numeric'}).format(month);
+
+    const first=new Date(month.getFullYear(),month.getMonth(),1,12,0,0,0);
+    const offset=(first.getDay()+6)%7;
+    const days=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
+    const form=document.getElementById('travelQuoteForm');
+    const out=form?form.elements.fechaSalida.value:'';
+    const back=form?form.elements.fechaRegreso.value:'';
+    let html='';
+    for(let i=0;i<offset;i++) html+='<span class="travel-calendar-empty"></span>';
+    for(let day=1;day<=days;day++){
+      const date=new Date(month.getFullYear(),month.getMonth(),day,12,0,0,0);
+      const iso=isoFromDate(date);
+      const events=eventsForDate(iso);
+      const types=new Set(events.map(e=>e.type));
+      const classes=['travel-calendar-day'];
+      if(types.has('descanso_obligatorio'))classes.push('is-holiday');
+      if(types.has('vacaciones_escolares'))classes.push('is-vacation');
+      if(types.has('dia_sin_clases'))classes.push('is-school');
+      if(types.has('receso_escolar'))classes.push('is-recess');
+      if(iso===out)classes.push('is-departure');
+      if(iso===back)classes.push('is-return');
+      const eventNames=events.map(e=>e.name).join('. ');
+      const aria=eventNames?`${formatDate(iso)}. ${eventNames}`:formatDate(iso);
+      html+=`<button type="button" class="${classes.join(' ')}" data-calendar-date="${iso}" aria-label="${aria.replace(/"/g,'&quot;')}" title="${eventNames.replace(/"/g,'&quot;')}"><span>${day}</span>${events.length?'<i></i>':''}</button>`;
+    }
+    grid.innerHTML=html;
+    renderQuickDates();
+    renderSources();
+  }
+
+  function moveCalendarMonth(delta){
+    const month=calendarState.month||new Date();
+    calendarState.month=new Date(month.getFullYear(),month.getMonth()+delta,1,12,0,0,0);
+    renderCalendar();
+  }
+
+  function chooseCalendarDate(iso){
+    setDateField(calendarState.target,iso);
+    closeCalendar();
+  }
+
+  function chooseQuickDate(id){
+    const event=((calendarState.data&&calendarState.data.events)||[]).find(e=>e.id===id);
+    if(!event||!event.suggestedStart||!event.suggestedEnd) return;
+    setDateField('fechaSalida',event.suggestedStart);
+    setDateField('fechaRegreso',event.suggestedEnd);
+    closeCalendar();
   }
 
   function inferOrigin(trigger){
@@ -208,15 +422,24 @@
     };
   }
 
-  function validateDates(form){
-    const out = form.elements.fechaSalida.value;
-    const back = form.elements.fechaRegreso.value;
-    if(out && back && back < out){
-      form.elements.fechaRegreso.setCustomValidity('La fecha de regreso no puede ser anterior a la salida.');
-      form.elements.fechaRegreso.reportValidity();
+  function validateDates(form,status){
+    const out=String(form.elements.fechaSalida.value||'');
+    const back=String(form.elements.fechaRegreso.value||'');
+    qsa('.native-date-trigger',form).forEach(el=>el.classList.remove('is-error'));
+    if(!out){
+      const trigger=qs('[data-calendar-open="fechaSalida"]',form);
+      if(trigger)trigger.classList.add('is-error');
+      if(status){status.textContent='Elige una fecha aproximada de salida.';status.className='native-form-status is-error';}
+      openCalendar('fechaSalida');
       return false;
     }
-    form.elements.fechaRegreso.setCustomValidity('');
+    if(back&&back<out){
+      const trigger=qs('[data-calendar-open="fechaRegreso"]',form);
+      if(trigger)trigger.classList.add('is-error');
+      if(status){status.textContent='La fecha de regreso no puede ser anterior a la salida.';status.className='native-form-status is-error';}
+      openCalendar('fechaRegreso');
+      return false;
+    }
     return true;
   }
 
@@ -240,7 +463,7 @@
     const status = document.getElementById('quoteFormStatus');
     const button = document.getElementById('quoteSubmitButton');
 
-    if(!form.reportValidity() || !validateDates(form)) return;
+    if(!form.reportValidity() || !validateDates(form,status)) return;
     const payload = buildPayload(form);
 
     button.disabled = true;
@@ -293,6 +516,28 @@
   });
 
   document.addEventListener('click',event=>{
+    const calendarOpen=event.target.closest('[data-calendar-open]');
+    if(calendarOpen){
+      event.preventDefault();
+      openCalendar(calendarOpen.dataset.calendarOpen||'fechaSalida');
+      return;
+    }
+    if(event.target.closest('[data-calendar-close]')){
+      event.preventDefault();
+      closeCalendar();
+      return;
+    }
+    if(event.target.closest('[data-calendar-prev]')){
+      event.preventDefault();moveCalendarMonth(-1);return;
+    }
+    if(event.target.closest('[data-calendar-next]')){
+      event.preventDefault();moveCalendarMonth(1);return;
+    }
+    const quick=event.target.closest('[data-calendar-quick]');
+    if(quick){event.preventDefault();chooseQuickDate(quick.dataset.calendarQuick);return;}
+    const day=event.target.closest('[data-calendar-date]');
+    if(day){event.preventDefault();chooseCalendarDate(day.dataset.calendarDate);return;}
+
     const trigger = event.target.closest('[data-quote-launch],.quote-link');
     if(trigger){
       event.preventDefault();
@@ -306,6 +551,10 @@
   });
 
   document.addEventListener('keydown',event=>{
-    if(event.key==='Escape' && modal() && !modal().hidden) closeQuote();
+    if(event.key==='Escape'){
+      const calendar=document.getElementById('travelCalendarPanel');
+      if(calendar&&!calendar.hidden){closeCalendar();return;}
+      if(modal()&&!modal().hidden) closeQuote();
+    }
   });
 })();
