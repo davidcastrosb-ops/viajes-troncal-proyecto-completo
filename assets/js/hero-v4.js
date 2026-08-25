@@ -38,7 +38,7 @@
     const img=document.getElementById(id);if(!img||!d?.mainImage)return;
     img.src=d.mainImage;img.alt=d.imageAlt||`Viaja a ${d.name}`;
     const holder=img.closest('.hero-photo');
-    if(holder&&d.imageCredit){
+    if(holder&&d.imageCredit&&!holder.querySelector('.hero-image-credit')){
       const credit=document.createElement('span');credit.className='hero-image-credit';credit.textContent=d.imageCredit;holder.appendChild(credit);
     }
     img.addEventListener('error',()=>{if(holder)holder.style.background='linear-gradient(145deg,#063f53,#0a6171)';img.remove();},{once:true});
@@ -73,18 +73,20 @@
       const destinationName=destination?.name||entry.destinationName||'Viaje seleccionado';
       const price=formatPrice(entry.price);
       const expiry=entry.expiresAt||entry.fechaExpiracionWeb||'';
-      const external=validHttp(entry.publicPromoUrl||entry.sharePromoUrl||entry.publicUrl||entry.urlPublicaCliente||'');
-      const lead=validHttp(entry.leadFormUrl||'');
+      const authorized=entry.directLinkAuthorized===true;
+      const external=authorized?validHttp(entry.publicPromoUrl||entry.sharePromoUrl||''):'';
+      const lead=authorized?validHttp(entry.leadFormUrl||''):'';
+      const image=validHttp(entry.image||destination?.mainImage||'');
       const fallback=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero información de la promoción ${entry.title||destinationName} con Trhoncal Travel.`):'#cotizar';
       const href=external||fallback;
       const label=external?'Ver promoción →':'Cotizar esta promoción →';
       const rel=external?'noopener noreferrer nofollow sponsored':'noopener noreferrer';
-      return `<article class="hero-promo-card"><span class="promo-destination">${esc(destinationName)}</span><strong>${esc(entry.title||'Promoción verificada')}</strong>${price?`<div class="promo-price">Desde ${esc(price)}</div>`:''}<div class="promo-meta">${entry.nights?`<span>${esc(entry.nights)} noches</span>`:''}${expiry?`<span>Vigente hasta ${esc(expiry)}</span>`:''}</div><a href="${esc(href)}" target="_blank" rel="${rel}">${label}</a>${lead?`<a class="promo-lead-link" href="${esc(lead)}" target="_blank" rel="noopener noreferrer nofollow sponsored">Dejar mis datos →</a>`:''}</article>`;
+      return `<article class="hero-promo-card">${image?`<div class="hero-promo-card-image"><img src="${esc(image)}" alt="${esc(entry.title||destinationName)}" loading="lazy"></div>`:''}<div class="hero-promo-card-body"><span class="promo-destination">${esc(destinationName)}</span><strong>${esc(entry.title||'Promoción verificada')}</strong>${price?`<div class="promo-price">Desde ${esc(price)}</div>`:''}<div class="promo-meta">${entry.nights?`<span>${esc(entry.nights)} noches</span>`:''}${expiry?`<span>Vigente hasta ${esc(expiry)}</span>`:''}</div><div class="hero-promo-actions"><a href="${esc(href)}" target="_blank" rel="${rel}">${label}</a>${external?`<a href="${esc(fallback)}" target="_blank" rel="noopener noreferrer">Quiero asesoría</a>`:''}${lead?`<a class="promo-lead-link" href="${esc(lead)}" target="_blank" rel="noopener noreferrer nofollow sponsored">Dejar mis datos</a>`:''}</div></div></article>`;
     }).join('');
     strip.hidden=false;
     let note=strip.querySelector('.hero-promo-note');
     if(!note){note=document.createElement('p');note.className='hero-promo-note';strip.appendChild(note);}
-    note.textContent='Precio, disponibilidad y condiciones se reconfirman antes de reservar. Los enlaces de Promo Maker sólo aparecen cuando fueron generados y autorizados para cliente.';
+    note.textContent='Precio, disponibilidad y condiciones se reconfirman antes de reservar. Las promociones se muestran sólo cuando están vigentes y autorizadas para cliente.';
   }
 
   function boot(){
