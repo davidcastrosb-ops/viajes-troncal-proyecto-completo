@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-08-25",
+  "country": "MX",
+  "label": "México",
+  "legend": {
+    "descanso_obligatorio": "Descanso obligatorio",
+    "vacaciones_escolares": "Vacaciones escolares SEP",
+    "dia_sin_clases": "Día sin clases SEP",
+    "receso_escolar": "Receso escolar"
+  },
+  "sources": [
+    {
+      "name": "Secretaría de Educación Pública — Calendario Escolar 2026–2027",
+      "url": "https://educacionbasica.sep.gob.mx/publica-sep-calendario-escolar-2026-2027-para-educacion-basica-y-normal/",
+      "verifiedAt": "2026-08-25"
+    },
+    {
+      "name": "Cámara de Diputados — Ley Federal del Trabajo, artículo 74",
+      "url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LFT.pdf",
+      "verifiedAt": "2026-08-25"
+    }
+  ],
+  "events": [
+    {"id":"CAL-2026-SEP16","type":"descanso_obligatorio","name":"Día de la Independencia","start":"2026-09-16","end":"2026-09-16","quick":false,"note":"Descanso obligatorio federal."},
+    {"id":"CAL-2026-CTE-SEP","type":"dia_sin_clases","name":"Día sin clases SEP","start":"2026-09-25","end":"2026-09-25","quick":false,"note":"Consejo Técnico Escolar; no implica descanso laboral para adultos."},
+    {"id":"CAL-2026-CTE-OCT","type":"dia_sin_clases","name":"Día sin clases SEP","start":"2026-10-30","end":"2026-10-30","quick":false,"note":"Consejo Técnico Escolar; no implica descanso laboral para adultos."},
+    {"id":"CAL-2026-NOV2","type":"dia_sin_clases","name":"Suspensión de clases SEP","start":"2026-11-02","end":"2026-11-02","quick":false,"note":"Suspensión de labores docentes; no equivale a descanso laboral general."},
+    {"id":"CAL-2026-NOV16","type":"descanso_obligatorio","name":"Fin de semana largo · Revolución Mexicana","start":"2026-11-16","end":"2026-11-16","quick":true,"suggestedStart":"2026-11-14","suggestedEnd":"2026-11-16","note":"Descanso obligatorio el lunes 16; la ventana sugerida de escapada es sábado a lunes."},
+    {"id":"CAL-2026-CTE-NOV","type":"dia_sin_clases","name":"Día sin clases SEP","start":"2026-11-27","end":"2026-11-27","quick":false,"note":"Consejo Técnico Escolar; no implica descanso laboral para adultos."},
+    {"id":"CAL-2026-INVIERNO","type":"vacaciones_escolares","name":"Vacaciones escolares de invierno","start":"2026-12-21","end":"2027-01-05","quick":true,"suggestedStart":"2026-12-21","suggestedEnd":"2027-01-05","note":"Periodo vacacional escolar nacional."},
+    {"id":"CAL-2026-DIC25","type":"descanso_obligatorio","name":"Navidad","start":"2026-12-25","end":"2026-12-25","quick":false,"note":"Descanso obligatorio federal."},
+    {"id":"CAL-2027-ENE1","type":"descanso_obligatorio","name":"Año Nuevo","start":"2027-01-01","end":"2027-01-01","quick":false,"note":"Descanso obligatorio federal."},
+    {"id":"CAL-2027-ENE6","type":"dia_sin_clases","name":"Suspensión de clases SEP","start":"2027-01-06","end":"2027-01-06","quick":false,"note":"Suspensión de labores docentes; no equivale a descanso laboral general."},
+    {"id":"CAL-2027-CTE-ENE","type":"dia_sin_clases","name":"Día sin clases SEP","start":"2027-01-29","end":"2027-01-29","quick":false,"note":"Consejo Técnico Escolar; no implica descanso laboral para adultos."},
+    {"id":"CAL-2027-FEB1","type":"descanso_obligatorio","name":"Fin de semana largo · Constitución","start":"2027-02-01","end":"2027-02-01","quick":true,"suggestedStart":"2027-01-30","suggestedEnd":"2027-02-01","note":"Descanso obligatorio el lunes 1; la ventana sugerida de escapada es sábado a lunes."},
+    {"id":"CAL-2027-CTE-FEB","type":"dia_sin_clases","name":"Día sin clases SEP","start":"2027-02-26","end":"2027-02-26","quick":false,"note":"Consejo Técnico Escolar; no implica descanso laboral para adultos."},
+    {"id":"CAL-2027-MAR15","type":"descanso_obligatorio","name":"Fin de semana largo · Natalicio de Benito Juárez","start":"2027-03-15","end":"2027-03-15","quick":true,"suggestedStart":"2027-03-13","suggestedEnd":"2027-03-15","note":"Descanso obligatorio el lunes 15; la ventana sugerida de escapada es sábado a lunes."},
+    {"id":"CAL-2027-SEMANA-SANTA","type":"vacaciones_escolares","name":"Vacaciones escolares de Semana Santa","start":"2027-03-22","end":"2027-04-03","quick":true,"suggestedStart":"2027-03-22","suggestedEnd":"2027-04-03","note":"Periodo vacacional escolar nacional."},
+    {"id":"CAL-2027-CTE-ABR","type":"dia_sin_clases","name":"Día sin clases SEP","start":"2027-04-30","end":"2027-04-30","quick":false,"note":"Consejo Técnico Escolar; no implica descanso laboral para adultos."},
+    {"id":"CAL-2027-MAY1","type":"descanso_obligatorio","name":"Día del Trabajo","start":"2027-05-01","end":"2027-05-01","quick":false,"note":"Descanso obligatorio federal."},
+    {"id":"CAL-2027-MAY5","type":"dia_sin_clases","name":"Suspensión de clases SEP","start":"2027-05-05","end":"2027-05-05","quick":false,"note":"Suspensión de labores docentes; no equivale a descanso laboral general."},
+    {"id":"CAL-2027-CTE-MAY","type":"dia_sin_clases","name":"Día sin clases SEP","start":"2027-05-28","end":"2027-05-28","quick":false,"note":"Consejo Técnico Escolar; no implica descanso laboral para adultos."},
+    {"id":"CAL-2027-CTE-JUN","type":"dia_sin_clases","name":"Día sin clases SEP","start":"2027-06-25","end":"2027-06-25","quick":false,"note":"Consejo Técnico Escolar; no implica descanso laboral para adultos."},
+    {"id":"CAL-2027-VERANO","type":"receso_escolar","name":"Inicio del receso escolar de verano","start":"2027-07-10","end":null,"quick":false,"note":"El ciclo escolar concluye el 9 de julio de 2027; el receso inicia el 10 de julio."},
+    {"id":"CAL-2027-SEP16","type":"descanso_obligatorio","name":"Día de la Independencia","start":"2027-09-16","end":"2027-09-16","quick":false,"note":"Descanso obligatorio federal."},
+    {"id":"CAL-2027-NOV15","type":"descanso_obligatorio","name":"Fin de semana largo · Revolución Mexicana","start":"2027-11-15","end":"2027-11-15","quick":true,"suggestedStart":"2027-11-13","suggestedEnd":"2027-11-15","note":"Descanso obligatorio el lunes 15; la ventana sugerida de escapada es sábado a lunes."},
+    {"id":"CAL-2027-DIC25","type":"descanso_obligatorio","name":"Navidad","start":"2027-12-25","end":"2027-12-25","quick":false,"note":"Descanso obligatorio federal."}
+  ]
+}
