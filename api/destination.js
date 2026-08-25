@@ -129,6 +129,7 @@ export default async function handler(req, res) {
   <link rel="stylesheet" href="/assets/css/styles.css">
   <link rel="stylesheet" href="/assets/css/brand-v2.css">
   <link rel="stylesheet" href="/assets/css/detail-v2.css">
+  <link rel="stylesheet" href="/assets/css/quote-modal-v1.css">
   <script>if('scrollRestoration' in history)history.scrollRestoration='manual';window.scrollTo(0,0);</script>
   <script type="application/ld+json">${structured}</script>
 </head>
@@ -147,10 +148,14 @@ export default async function handler(req, res) {
         <section class="detail-block"><h2>Gastronomía</h2><p>${esc(d.gastronomy || '')}</p></section>
         <section class="detail-block"><h2>Patrimonio y reconocimientos</h2>${list(d.recognitions)}<p>${esc(d.sustainabilityHeritage || '')}</p></section>
         <section class="detail-sources"><h2>Fuentes que respaldan esta ficha</h2>${sourceHtml}</section>
-        <section class="detail-conversion"><div><span class="eyebrow">Asesoría Trhoncal Travel</span><h2>¿Quieres convertir ${esc(d.name)} en un viaje real?</h2><p>Cuéntanos fechas, viajeros y estilo de viaje. Buscamos opciones disponibles y confirmamos precio y condiciones antes de que pagues.</p></div><div class="detail-conversion-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar por WhatsApp</a><a class="btn btn-soft" href="/#cotizar">Solicitar cotización</a></div></section>
+        <section class="detail-conversion"><div><span class="eyebrow">Tu viaje, a tu medida</span><h2>¿Te imaginas en ${esc(d.name)}?</h2><p>Ya conocemos el destino. Sólo cuéntanos tus fechas, cuántas personas viajan y desde dónde sales para empezar.</p></div><div class="detail-conversion-actions"><a class="btn btn-primary quote-link" href="/#cotizar" data-destination="${esc(d.name)}">Solicita tu viaje a ${esc(d.name)}</a><a class="btn btn-soft" href="${wa}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a></div></section>
       </div>
     </article></div>
   </main>
+
+  <div id="quoteModal" class="quote-modal" hidden aria-hidden="false"><div class="quote-modal-backdrop" data-quote-close></div><section class="quote-modal-panel" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle"><button class="quote-modal-close" type="button" data-quote-close aria-label="Cerrar solicitud">×</button><header class="quote-modal-head"><span class="eyebrow">Trhoncal Travel</span><h2 id="quoteModalTitle">Tu viaje a ${esc(d.name)}</h2><p id="quoteModalCopy">Ya sabemos a dónde quieres ir. Cuéntanos fechas, viajeros y lo esencial para empezar.</p><div id="quoteSelectedDestination" class="quote-modal-destination">Destino seleccionado: ${esc(d.name)}</div></header><div class="quote-modal-frame-wrap"><iframe id="quoteModalFrame" class="quote-modal-frame" title="Solicita tu viaje con Trhoncal Travel" src="about:blank" loading="lazy"></iframe></div><p class="quote-modal-fallback">Si el formulario no carga, <a id="quoteModalFallbackLink" href="https://form.jotform.com/261127730314044?destinoDeseado=${encodeURIComponent(d.name)}" target="_blank" rel="noopener noreferrer">ábrelo aquí</a>.</p></section></div>
+
   <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"><p>Información útil para elegir mejor y asesoría humana para convertir la idea en un viaje real.</p></div><div><h3>Explora</h3><p><a href="/#destinos">Destinos</a></p><p><a href="/#fuentes">Fuentes</a></p></div><div><h3>Contacto</h3><p><a href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a></p><p><a href="mailto:viajestroncal@gmail.com">viajestroncal@gmail.com</a></p></div></div></footer>
+  <script src="/assets/js/quote-modal-v1.js"></script>
 </body></html>`);
 }
