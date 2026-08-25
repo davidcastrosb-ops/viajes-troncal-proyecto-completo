@@ -33,5 +33,13 @@
 .destination-grid-more .destination-card-content{min-height:330px}
 .destination-grid-more .destination-card h3{font-size:25px}
 
+/* Auditoría pública 2026-08-25: estancia en una línea propia y dos CTA siempre simétricos. */
+.destination-card .card-foot{margin-top:auto;display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.destination-card .card-stay{display:block;width:100%;min-height:30px;line-height:1.35}
+.destination-card .card-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:end;width:100%}
+.destination-card .card-actions a{display:flex;align-items:flex-end;min-height:32px;font-size:12px;font-weight:900;color:#8d6928;line-height:1.25}
+.destination-card .card-actions a:last-child{justify-content:flex-end;text-align:right}
+
 @media(max-width:1050px){.destination-card.has-image{min-height:560px}.destination-card-content{min-height:330px}.destination-grid-more .destination-card.has-image{min-height:530px}}
-@media(max-width:760px){.header-inner{min-height:82px}.brand{height:78px;min-width:138px;padding:2px 0}.brand-logo{width:136px;height:74px;transform:none}.footer-logo{width:180px}.hero-logo{width:64%}.detail-route-brand img{width:150px!important;height:70px!important}.route-page .detail-route-bar{min-height:86px!important}.destination-card.has-image,.destination-grid-more .destination-card.has-image{min-height:0}.destination-image{height:auto;aspect-ratio:16/9}.destination-card-content,.destination-grid-more .destination-card-content{min-height:0}.destination-card .recognitions{min-height:0}.destination-more-section{margin-top:50px;padding-top:32px}.destination-more-head{align-items:flex-start;flex-direction:column}.destination-count{white-space:normal}}
+@media(max-width:760px){.header-inner{min-height:82px}.brand{height:78px;min-width:138px;padding:2px 0}.brand-logo{width:136px;height:74px;transform:none}.footer-logo{width:180px}.hero-logo{width:64%}.detail-route-brand img{width:150px!important;height:70px!important}.route-page .detail-route-bar{min-height:86px!important}.destination-card.has-image,.destination-grid-more .destination-card.has-image{min-height:0}.destination-image{height:auto;aspect-ratio:16/9}.destination-card-content,.destination-grid-more .destination-card-content{min-height:0}.destination-card .recognitions{min-height:0}.destination-more-section{margin-top:50px;padding-top:32px}.destination-more-head{align-items:flex-start;flex-direction:column}.destination-count{white-space:normal}.destination-card .card-actions{gap:8px}.destination-card .card-actions a{font-size:11px}}
+@media(max-width:390px){.destination-card .card-actions{grid-template-columns:1fr}.destination-card .card-actions a,.destination-card .card-actions a:last-child{justify-content:flex-start;text-align:left;min-height:26px}}
