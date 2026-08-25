@@ -110,7 +110,13 @@
     const title = document.getElementById('quoteModalTitle');
     const copy = document.getElementById('quoteModalCopy');
 
-    if(input) input.value = clean;
+    if(input){
+      input.value = clean;
+      input.readOnly = !!clean;
+      input.classList.toggle('is-context-locked', !!clean);
+      input.setAttribute('aria-readonly', clean ? 'true' : 'false');
+      input.title = clean ? 'Destino seleccionado desde esta ficha' : '';
+    }
     if(selected){
       selected.hidden = !clean;
       selected.textContent = clean ? `Destino seleccionado: ${clean}` : '';
@@ -130,6 +136,13 @@
       form.reset();
       const people=qs('[name="personas"]',form); if(people)people.value='2';
       const rec=qs('[name="hospedaje"][value="Recomiéndame"]',form); if(rec)rec.checked=true;
+      const destination=qs('[name="destino"]',form);
+      if(destination){
+        destination.readOnly=false;
+        destination.classList.remove('is-context-locked');
+        destination.setAttribute('aria-readonly','false');
+        destination.title='';
+      }
     }
     if(success) success.hidden = true;
     if(status){ status.textContent=''; status.className='native-form-status'; }
