@@ -111,6 +111,80 @@
     return payload;
   }
 
+  function installMasterFirstData(){
+    if (window.__trhoncalMasterFirstPatched) return;
+    window.__trhoncalMasterFirstPatched = true;
+
+    const upstreamFetch = window.fetch.bind(window);
+    const MASTER_PATH = '/api/master';
+    const CALENDAR_PATH = '/assets/data/mexico-calendar.json';
+    const OCCASIONS_PATH = '/assets/data/travel-occasions.json';
+    let masterPromise = null;
+
+    function pathnameOf(input){
+      try {
+        const value = typeof input === 'string' ? input : (input && input.url) || '';
+        return value ? new URL(value, location.origin).pathname : '';
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function jsonResponse(payload){
+      return new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'X-Trhoncal-Data-Source': 'master'
+        }
+      });
+    }
+
+    function loadMaster(){
+      if (!masterPromise) {
+        masterPromise = upstreamFetch(MASTER_PATH, { cache: 'no-store' })
+          .then(async response => {
+            if (!response.ok) throw new Error(`master-${response.status}`);
+            const payload = await response.json();
+            if (!payload || typeof payload !== 'object') throw new Error('master-invalid');
+            return payload;
+          })
+          .catch(error => {
+            masterPromise = null;
+            throw error;
+          });
+      }
+      return masterPromise;
+    }
+
+    window.fetch = async function(input, init = {}){
+      const method = String(init.method || (input && input.method) || 'GET').toUpperCase();
+      const path = pathnameOf(input);
+
+      if (method === 'GET' && (path === CALENDAR_PATH || path === OCCASIONS_PATH)) {
+        try {
+          const master = await loadMaster();
+          if (path === CALENDAR_PATH && master.calendar && Array.isArray(master.calendar.events) && master.calendar.events.length) {
+            return jsonResponse(master.calendar);
+          }
+          if (path === OCCASIONS_PATH && Array.isArray(master.occasions) && master.occasions.length) {
+            return jsonResponse({ occasions: master.occasions });
+          }
+        } catch (error) {
+          console.warn('Trhoncal Master no disponible; usando respaldo local.', error);
+        }
+      }
+
+      return upstreamFetch(input, init);
+    };
+
+    window.TrhoncalMasterData = {
+      load: loadMaster,
+      source: 'master-first-with-local-fallback'
+    };
+  }
+
   function patchLeadFetch(){
     if (window.__trhoncalFetchPatched) return;
     window.__trhoncalFetchPatched = true;
@@ -184,6 +258,7 @@
     if (destinationSlug) track('destination_click', { destination_slug: destinationSlug });
   }, true);
 
+  installMasterFirstData();
   patchLeadFetch();
   window.TrhoncalTracking = { track, getAttribution, capture };
 
