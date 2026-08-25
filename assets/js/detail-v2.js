@@ -64,7 +64,7 @@
     const clean=isCleanRoute();
     const overlay=ensureModal();const holder=document.getElementById('destinationDetailContent');
     const sources=sourceRows(d);
-    const sourceHtml=sources.length?sources.map(s=>`<div class="detail-source"><div><b>${esc(s.organization)} — ${esc(s.title)}</b><span>Verificada ${esc(s.verifiedAt||'')}${s.note?` · ${esc(s.note)}`:''}</span></div><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a></div>`).join(''):'<p>Consulta con nosotros las fuentes utilizadas para esta ficha.</p>';
+    const sourceHtml=sources.length?sources.map(s=>`<div class="detail-source"><div><b>${esc(s.organization)} — ${esc(s.title)}</b><span>Verificada ${esc(s.verifiedAt||'')}</span></div><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a></div>`).join(''):'<p>Consulta con nosotros las fuentes utilizadas para esta ficha.</p>';
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero cotizar un viaje a ${d.name} con Trhoncal Travel.`):'/#cotizar';
     const photo=d.mainImage?`<div class="detail-photo"><img src="${esc(d.mainImage)}" alt="${esc(d.imageAlt||d.name)}"><div class="detail-photo-caption">${d.imageCredit?`<span>${esc(d.imageCredit)}</span>`:''}${d.imageLicense?`<small>${esc(d.imageLicense)}</small>`:''}</div></div>`:'';
     const routeBar=clean?`<div class="detail-route-bar"><a class="detail-route-brand" href="/#destinos" aria-label="Volver a Trhoncal Travel"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><div class="detail-route-context"><span>México · ${esc(d.state||'')}</span><a class="detail-route-back" href="/#destinos">← Volver a destinos</a></div></div>`:'';
