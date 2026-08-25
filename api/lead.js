@@ -31,6 +31,10 @@ function normalize(body = {}) {
     utmSource: clean(body.utmSource, 120),
     utmMedium: clean(body.utmMedium, 120),
     utmCampaign: clean(body.utmCampaign, 160),
+    ocasionId: clean(body.ocasionId, 120),
+    ofertaId: clean(body.ofertaId, 120),
+    promoUrl: clean(body.promoUrl, 500),
+    ctaOrigen: clean(body.ctaOrigen, 120),
     consentimiento: body.consentimiento === true
   };
 }
@@ -77,7 +81,7 @@ export default async function handler(req, res) {
       redirect: 'follow',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'TrhoncalTravel-Lead/2.0'
+        'User-Agent': 'TrhoncalTravel-Lead/2.1'
       },
       body: JSON.stringify(lead),
       signal: controller.signal
