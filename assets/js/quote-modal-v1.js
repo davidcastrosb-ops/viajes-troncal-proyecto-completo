@@ -24,6 +24,27 @@
     };
   }
 
+  function currentDestination(){
+    const contextual=document.querySelector('.quote-link[data-destination]');
+    return contextual?String(contextual.dataset.destination||'').trim():'';
+  }
+
+  function enhanceQuoteEntrances(){
+    const destination=currentDestination();
+    document.querySelectorAll('.nav a[href="#cotizar"],.nav a[href="/#cotizar"]').forEach(link=>{
+      link.textContent=destination?'Solicita este viaje':'Solicita tu viaje';
+      link.dataset.quoteLaunch='';
+      if(destination)link.dataset.destination=destination;
+      link.classList.add('nav-quote');
+    });
+
+    document.querySelectorAll('.hero-actions a[href="#cotizar"]').forEach(link=>{
+      link.textContent='Solicita tu viaje';
+      link.dataset.quoteLaunch='';
+      link.classList.add('hero-quote');
+    });
+  }
+
   function openQuote(destination=''){
     const el=elements();
     if(!el.modal||!el.frame)return;
@@ -69,4 +90,7 @@
   document.addEventListener('keydown',event=>{
     if(event.key==='Escape')closeQuote();
   });
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhanceQuoteEntrances);
+  else enhanceQuoteEntrances();
 })();
