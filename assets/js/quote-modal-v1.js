@@ -1,5 +1,5 @@
 (() => {
-  const DEFAULT_FORM_URL='https://form.jotform.com/261127730314044';
+  const DEFAULT_FORM_URL='https://form.jotform.com/262364782762062';
 
   function formUrl(destination=''){
     let base=DEFAULT_FORM_URL;
