@@ -80,7 +80,7 @@ export default async function handler(req, res) {
   const photo = image ? `<div class="detail-photo"><img src="${esc(image)}" alt="${esc(d.imageAlt || d.name)}"><div class="detail-photo-caption">${d.imageCredit ? `<span>${esc(d.imageCredit)}</span>` : ''}${d.imageLicense ? `<small>${esc(d.imageLicense)}</small>` : ''}</div></div>` : '';
   const sourceHtml = sourceRows.length ? sourceRows.map(s => {
     const u = safeHttpUrl(s.url);
-    return `<div class="detail-source"><div><b>${esc(s.organization)} — ${esc(s.title)}</b><span>Verificada ${esc(s.verifiedAt || '')}${s.note ? ` · ${esc(s.note)}` : ''}</span></div>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a>` : ''}</div>`;
+    return `<div class="detail-source"><div><b>${esc(s.organization)} — ${esc(s.title)}</b><span>Verificada ${esc(s.verifiedAt || '')}</span></div>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a>` : ''}</div>`;
   }).join('') : '<p>Consulta con nosotros las fuentes utilizadas para esta ficha.</p>';
 
   const structured = JSON.stringify({
