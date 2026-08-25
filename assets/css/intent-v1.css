@@ -1,0 +1,23 @@
+/* Trhoncal Travel — carrusel por intención de viaje */
+.intent-section{background:linear-gradient(180deg,#fff,#faf7f1)}
+.intent-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-bottom:22px}
+.intent-head h2{font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:clamp(34px,4vw,54px);line-height:1.02;margin:8px 0 0}
+.intent-head p{max-width:520px;color:var(--muted);line-height:1.6;margin:0}
+.intent-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.intent-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.intent-control,.intent-secondary{border:1px solid #d9cfbd;background:#fff;color:#315763;border-radius:999px;min-height:42px;padding:10px 14px;font-weight:900;font-size:12px;cursor:pointer;transition:.18s ease}
+.intent-control:hover,.intent-secondary:hover{border-color:#b99a5d;color:#7b5b22;transform:translateY(-1px)}
+.intent-control:focus-visible,.intent-secondary:focus-visible,.intent-card-action:focus-visible{outline:3px solid rgba(216,175,88,.35);outline-offset:2px}
+.intent-status{display:inline-flex;align-items:center;justify-content:center;min-width:72px;min-height:42px;padding:8px 11px;border-radius:999px;background:#f2ecdf;color:#725a2a;font-size:11px;font-weight:950}
+.intent-hint{margin:10px 0 0;color:#718287;font-size:12px;font-weight:750}.intent-hint strong{color:#8d6928}
+.intent-track{display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-inline:contain;scrollbar-width:thin;padding:4px 2px 16px}
+.intent-card{flex:0 0 calc((100% - 32px)/3);scroll-snap-align:start;scroll-snap-stop:always;border:1px solid #dfd5c4;border-radius:24px;background:#fff;padding:24px;min-height:330px;display:flex;flex-direction:column;box-shadow:0 14px 34px rgba(3,46,62,.05)}
+.intent-card h3{font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:30px;line-height:1.04;margin:9px 0 12px}
+.intent-card p{color:var(--muted);line-height:1.6;margin:0 0 18px}
+.intent-card-meta{margin-top:auto;padding-top:18px;border-top:1px solid #eee7da;display:grid;gap:6px}
+.intent-card-meta b{color:#8b6727;font-size:13px}.intent-card-meta span{color:#7b8b90;font-size:11px;line-height:1.45}
+.intent-card-action{margin-top:16px;border:0;background:transparent;color:#8d6928;font-weight:950;font-size:13px;padding:0;text-align:left;cursor:pointer}
+.intent-card-action:hover{text-decoration:underline}
+@media(max-width:1050px){.intent-card{flex-basis:calc((100% - 16px)/2)}}
+@media(max-width:760px){.intent-head{align-items:flex-start;flex-direction:column}.intent-toolbar{align-items:flex-start;flex-direction:column}.intent-actions{width:100%;display:grid;grid-template-columns:1fr auto 1fr;gap:7px}.intent-control{width:100%;padding:10px 8px}.intent-secondary{width:100%}#intentPause{grid-column:1/2}#intentViewDestinations{grid-column:2/4}.intent-track{margin-right:-12px;padding-right:44px;gap:12px}.intent-card{flex:0 0 min(82vw,330px);min-height:300px;padding:22px}.intent-card h3{font-size:27px}.intent-hint{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.intent-track{scroll-behavior:auto}.intent-control,.intent-secondary{transition:none}}

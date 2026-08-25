@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="assets/css/brand-v2.css" />
   <link rel="stylesheet" href="assets/css/detail-v2.css" />
   <link rel="stylesheet" href="assets/css/discovery-v3.css" />
+  <link rel="stylesheet" href="assets/css/intent-v1.css" />
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"Trhoncal Travel","email":"viajestroncal@gmail.com","logo":"https://viajes.trhoncalhomes.com.mx/assets/images/trhoncal-travel-logo.svg"}
   </script>
@@ -61,6 +62,23 @@
       </div>
     </section>
 
+    <section class="section intent-section" id="viaja-a-tu-manera">
+      <div class="container">
+        <div class="intent-head"><div><span class="eyebrow">Empieza por cómo quieres sentir el viaje</span><h2>Viaja según lo que buscas</h2></div><p>No siempre se empieza con un destino. A veces primero sabes si quieres playa, familia, cultura, pareja, naturaleza o comer increíble. Nosotros partimos de ahí.</p></div>
+        <div class="intent-toolbar" aria-label="Controles del carrusel por tipo de viaje">
+          <div class="intent-actions">
+            <button id="intentPrev" class="intent-control" type="button" aria-label="Ver categoría anterior">← Anterior</button>
+            <span id="intentStatus" class="intent-status" aria-live="polite">1 de 6</span>
+            <button id="intentNext" class="intent-control" type="button" aria-label="Ver categoría siguiente">Siguiente →</button>
+            <button id="intentPause" class="intent-secondary" type="button" aria-pressed="false">Pausar movimiento</button>
+            <button id="intentViewDestinations" class="intent-secondary" type="button">Ver todos los destinos</button>
+          </div>
+        </div>
+        <div id="intentTrack" class="intent-track" aria-label="Tipos de viaje" aria-live="polite"></div>
+        <p class="intent-hint"><strong>También puedes deslizar con el dedo.</strong> En celular dejamos visible parte de la siguiente tarjeta para que siempre se note que hay más.</p>
+      </div>
+    </section>
+
     <section class="section section-soft" id="inspiracion"><div class="container split-editorial"><div><span class="eyebrow">No vendemos sólo noches de hotel</span><h2>Primero entendemos el viaje</h2><p>Una ficha debe ayudarte a saber para quién funciona un destino, cuántas noches valen la pena, qué combinar, qué riesgos estacionales existen y qué experiencias realmente tienen sentido.</p></div><div class="editorial-points"><article><b>01</b><h3>Contexto</h3><p>Historia, identidad, geografía y patrimonio documentados.</p></article><article><b>02</b><h3>Experiencia</h3><p>Qué hacer, para quién es y cómo combinarlo.</p></article><article><b>03</b><h3>Logística</h3><p>Accesos, temporadas, conectividad y riesgos operativos.</p></article><article><b>04</b><h3>Producto</h3><p>Precio, cupo y condiciones separados del contenido estable.</p></article></div></div></section>
 
     <section class="section" id="faq">
@@ -87,5 +105,6 @@
   <script src="assets/js/seo-host.js"></script>
   <script src="assets/js/detail-v2.js"></script>
   <script src="assets/js/discovery-v3.js"></script>
+  <script src="assets/js/intent-v1.js"></script>
 </body>
 </html>
