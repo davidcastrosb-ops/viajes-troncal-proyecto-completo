@@ -40,7 +40,7 @@ async function loadMaster() {
 function render404(res, publicHost) {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  return res.status(404).send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Destino no encontrado | Trhoncal Travel</title><meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="/assets/css/styles.css"><link rel="stylesheet" href="/assets/css/brand-v2.css"></head><body><main class="section"><div class="container"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel" style="max-width:180px"><h1>Destino no encontrado</h1><p>La ficha solicitada no está publicada o cambió de estado.</p><a class="btn btn-primary" href="${publicHost ? 'https://' + PUBLIC_HOST + '/#destinos' : '/#destinos'}">Explorar destinos</a></div></main></body></html>`);
+  return res.status(404).send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Destino no encontrado | Trhoncal Travel</title><meta name="robots" content="noindex,nofollow"><link rel="icon" type="image/svg+xml" href="/assets/images/trhoncal-travel-logo.svg"><link rel="stylesheet" href="/assets/css/styles.css"><link rel="stylesheet" href="/assets/css/brand-v2.css"></head><body><main class="section"><div class="container"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel" style="max-width:180px"><h1>Destino no encontrado</h1><p>La ficha solicitada no está publicada o cambió de estado.</p><a class="btn btn-primary" href="${publicHost ? 'https://' + PUBLIC_HOST + '/#destinos' : '/#destinos'}">Explorar destinos</a></div></main></body></html>`);
 }
 
 export default async function handler(req, res) {
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-    return res.status(503).send('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Trhoncal Travel</title></head><body><p>La ficha está temporalmente no disponible. Intenta nuevamente en unos minutos.</p></body></html>');
+    return res.status(503).send('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Trhoncal Travel</title><link rel="icon" type="image/svg+xml" href="/assets/images/trhoncal-travel-logo.svg"></head><body><p>La ficha está temporalmente no disponible. Intenta nuevamente en unos minutos.</p></body></html>');
   }
 
   const destinations = Array.isArray(payload.destinations) ? payload.destinations : [];
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
   const sourceSet = new Set(Array.isArray(d.sourceIds) ? d.sourceIds : []);
   const sourceRows = sources.filter(s => s && sourceSet.has(s.id));
   const canonical = `https://${PUBLIC_HOST}/mexico/${encodeURIComponent(d.slug)}`;
-  const title = `${d.name}${d.state ? `, ${d.state}` : ''} | Trhoncal Travel`;
+  const title = `${d.name}: inspírate y viaja | Trhoncal Travel`;
   const description = d.summary || `Guía de ${d.name} con información revisada y asesoría de Trhoncal Travel.`;
   const image = safeHttpUrl(d.mainImage);
   const waText = encodeURIComponent(`Hola, quiero cotizar un viaje a ${d.name} con Trhoncal Travel.`);
@@ -118,6 +118,7 @@ export default async function handler(req, res) {
   <title>${esc(title)}</title>
   <meta name="description" content="${esc(description)}">
   <meta name="robots" content="${robotsMeta}">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/trhoncal-travel-logo.svg">
   <link rel="canonical" href="${esc(canonical)}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Trhoncal Travel">
