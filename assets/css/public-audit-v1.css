@@ -1,0 +1,37 @@
+/* Public-facing polish: CTA symmetry and compact mobile alignment. */
+.destination-card .card-actions{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:12px;
+  width:100%;
+  align-items:end;
+}
+.destination-card .card-actions a:first-child{
+  justify-content:flex-start;
+  text-align:left;
+}
+.destination-card .card-actions a:last-child{
+  justify-content:flex-end;
+  text-align:right;
+}
+
+@media(max-width:390px){
+  .destination-card .card-actions{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:7px;
+  }
+  .destination-card .card-actions a,
+  .destination-card .card-actions a:last-child{
+    min-height:30px;
+    font-size:10px;
+    line-height:1.2;
+  }
+  .destination-card .card-actions a:first-child{
+    justify-content:flex-start;
+    text-align:left;
+  }
+  .destination-card .card-actions a:last-child{
+    justify-content:flex-end;
+    text-align:right;
+  }
+}
