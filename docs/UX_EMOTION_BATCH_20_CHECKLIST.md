@@ -11,9 +11,13 @@
 - [x] Mobile: tarjeta ~84vw, siguiente visible, swipe y controles.
 - [x] Accesibilidad: reduced-motion, focus visible, pausa por interacción.
 - [x] Preview Vercel SUCCESS en rama `feat/ux-emotion-batch20`.
-- [ ] PR creado.
-- [ ] Merge a main si PR mergeable y Vercel SUCCESS.
-- [ ] REV en Archivo Maestro.
+- [x] PR #9 creado y mergeable.
+- [x] Merge a main: `3f530da80ff0c7ca2b5de77accc44af8b177be4c`.
+- [x] Producción Vercel SUCCESS.
+- [x] REV-047 registrado en Archivo Maestro.
 
-## Nota de dependencia
-Apps Script v5 ya está preparado en GitHub para exponer campos de Promo Maker. La publicación de una nueva versión del Web App sólo será necesaria antes de encender la primera oferta real; no bloquea este batch porque actualmente hay 0 ofertas visibles.
+## Resultado
+Las seis categorías de intención ahora reutilizan fotografías ya autorizadas de destinos públicos, muestran copys más emocionales, chips de destinos y CTA claros. La experiencia conserva navegación explícita y funciona con swipe en móvil. El módulo visual de promociones queda preparado, pero permanece oculto mientras existan 0 ofertas reales.
+
+## Única dependencia futura
+Apps Script v5 ya está preparado en GitHub para exponer campos de Promo Maker. La publicación de una nueva versión del Web App será necesaria antes de encender la primera oferta real; no bloquea la web actual.
