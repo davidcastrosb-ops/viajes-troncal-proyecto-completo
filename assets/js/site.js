@@ -12,6 +12,7 @@ function setText(id,text){const el=document.getElementById(id);if(el)el.textCont
 function setHref(id,href){const el=document.getElementById(id);if(el)el.href=href||'#'}
 function setSrc(id,src,alt=''){const el=document.getElementById(id);if(el&&src){el.src=src;if(alt)el.alt=alt}}
 function escapeHTML(value=''){return String(value).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]))}
+function destinationSlug(d={}){return String(d.slug||d.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
 
 function whatsappLink(message='Hola, quiero cotizar un viaje con Trhoncal Travel.'){
   return `https://wa.me/${SITE.contact.whatsapp}?text=${encodeURIComponent(message)}`;
@@ -114,6 +115,8 @@ function destinationCard(d,{featured=false}={}){
   const recognitions=(d.recognitions||[]).filter(r=>!(d.puebloMagico&&String(r).trim().toLowerCase()==='pueblo mágico'));
   const rec=recognitions.slice(0,2).map(r=>`<span class="tag">${escapeHTML(r)}</span>`).join('');
   const magic=d.puebloMagico?'<span class="tag">Pueblo Mágico</span>':'';
+  const slug=destinationSlug(d);
+  const stay=d.recommendedStay||'Estancia según itinerario';
   return `<article class="destination-card ${d.mainImage?'has-image':''} ${featured?'is-featured':''}" data-destination-id="${escapeHTML(d.id||'')}">
     ${destinationImage(d,featured)}
     <div class="destination-card-content">
@@ -121,7 +124,13 @@ function destinationCard(d,{featured=false}={}){
       <h3>${escapeHTML(d.name)}</h3>
       <p>${escapeHTML(d.summary)}</p>
       <div class="recognitions">${magic}${rec}</div>
-      <div class="card-foot"><span>${escapeHTML(d.recommendedStay||'Duración por definir')}</span><a href="#cotizar" data-destination="${escapeHTML(d.name)}">Quiero cotizar →</a></div>
+      <div class="card-foot">
+        <span class="card-stay">${escapeHTML(stay)}</span>
+        <div class="card-actions">
+          <a class="detail-link" href="/mexico/${encodeURIComponent(slug)}" aria-label="Ver ficha completa de ${escapeHTML(d.name)}">Ver ficha completa →</a>
+          <a class="quote-link" href="#cotizar" data-destination="${escapeHTML(d.name)}">Quiero cotizar →</a>
+        </div>
+      </div>
     </div>
   </article>`;
 }
@@ -157,15 +166,15 @@ function renderDestinationSections(filter='Todos'){
   const libraryFiltered=library.filter(d=>matchesFilter(d,filter));
 
   if(!allVisible.length){
-    featuredGrid.innerHTML='<div class="empty-state">Estamos preparando nuevas fichas de destino con información revisada y fuentes verificables.</div>';
+    featuredGrid.innerHTML='<div class="empty-state">No encontramos destinos disponibles en este momento. Cuéntanos qué tipo de viaje buscas y te ayudamos a encontrar opciones.</div>';
     if(moreSection)moreSection.hidden=true;
-    setText('verifiedCount','Destinos en preparación');
+    setText('verifiedCount','Explora ideas de viaje');
     return;
   }
 
   featuredGrid.innerHTML=featuredFiltered.length
     ? featuredFiltered.map(d=>destinationCard(d,{featured:true})).join('')
-    : '<div class="empty-state">No hay destinos destacados que coincidan con este filtro.</div>';
+    : '<div class="empty-state">No hay destinos que coincidan con este filtro. Prueba otra categoría o cuéntanos qué viaje buscas.</div>';
 
   if(moreGrid&&moreSection){
     if(libraryFiltered.length){
@@ -249,7 +258,7 @@ async function init(){
     renderFilters();renderDestinationSections();renderSourceSummary();renderOffers();
   }catch(error){
     console.error(error);
-    const grid=document.getElementById('destinationGrid');if(grid)grid.innerHTML='<div class="empty-state">No pudimos cargar la base de destinos. Intenta recargar la página.</div>';
+    const grid=document.getElementById('destinationGrid');if(grid)grid.innerHTML='<div class="empty-state">No pudimos cargar los destinos. Intenta recargar la página.</div>';
   }
 }
 
