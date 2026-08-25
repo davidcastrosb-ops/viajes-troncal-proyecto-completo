@@ -4,7 +4,8 @@ const CONFIG = {
     destinations: '01_Destinos',
     fichas: '02_Fichas_Destino',
     sources: '05_Fuentes',
-    offers: '07_Ofertas_Vigentes'
+    offers: '07_Ofertas_Vigentes',
+    calendar: '14_Calendario_MX'
   }
 };
 
@@ -17,6 +18,7 @@ function doGet(e) {
     if (type === 'destinations') output = { generatedAt: payload.generatedAt, destinations: payload.destinations };
     if (type === 'sources') output = { generatedAt: payload.generatedAt, sources: payload.sources };
     if (type === 'offers') output = { generatedAt: payload.generatedAt, offers: payload.offers };
+    if (type === 'calendar') output = { generatedAt: payload.generatedAt, calendar: payload.calendar };
 
     return ContentService
       .createTextOutput(JSON.stringify(output))
@@ -30,7 +32,7 @@ function doGet(e) {
 
 function buildPublicPayload_() {
   const cache = CacheService.getScriptCache();
-  const cached = cache.get('public-payload-v3');
+  const cached = cache.get('public-payload-v4');
   if (cached) return JSON.parse(cached);
 
   const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
@@ -38,6 +40,7 @@ function buildPublicPayload_() {
   const fichaRows = sheetObjects_(ss, CONFIG.sheets.fichas);
   const sourceRows = sheetObjects_(ss, CONFIG.sheets.sources);
   const offerRows = sheetObjects_(ss, CONFIG.sheets.offers);
+  const calendarRows = sheetObjects_(ss, CONFIG.sheets.calendar);
 
   const fichaByDestination = {};
   fichaRows.forEach(row => {
@@ -64,14 +67,25 @@ function buildPublicPayload_() {
     .map(publicOffer_)
     .sort((a, b) => (a.ordenWeb || 9999) - (b.ordenWeb || 9999));
 
+  const calendarEvents = calendarRows
+    .filter(row => yes_(row.Mostrar_Web))
+    .map(publicCalendarEvent_)
+    .filter(row => row.id && row.start)
+    .sort((a, b) => a.start.localeCompare(b.start));
+
   const payload = {
     generatedAt: new Date().toISOString(),
     destinations: visibleDestinations,
     sources: visibleSources,
-    offers: visibleOffers
+    offers: visibleOffers,
+    calendar: {
+      country: 'MX',
+      label: 'México',
+      events: calendarEvents
+    }
   };
 
-  cache.put('public-payload-v3', JSON.stringify(payload), 60);
+  cache.put('public-payload-v4', JSON.stringify(payload), 60);
   return payload;
 }
 
@@ -191,6 +205,24 @@ function publicOffer_(row) {
   };
 }
 
+function publicCalendarEvent_(row) {
+  return {
+    id: text_(row.Evento_ID),
+    type: text_(row.Tipo),
+    name: text_(row.Nombre_publico),
+    start: dateText_(row.Fecha_inicio),
+    end: dateText_(row.Fecha_fin) || null,
+    scope: text_(row.Ambito),
+    quick: yes_(row.Seleccion_rapida),
+    suggestedStart: dateText_(row.Inicio_sugerido) || '',
+    suggestedEnd: dateText_(row.Fin_sugerido) || '',
+    source: text_(row.Fuente),
+    sourceUrl: httpUrl_(row.URL_fuente),
+    verifiedAt: dateText_(row.Fecha_verificacion),
+    note: text_(row.Nota_publica)
+  };
+}
+
 function yes_(value) {
   const v = text_(value).toLowerCase();
   return v === 'sí' || v === 'si' || v === 'true' || v === '1';
@@ -264,4 +296,5 @@ function clearPublicCache_() {
   cache.remove('public-payload-v1');
   cache.remove('public-payload-v2');
   cache.remove('public-payload-v3');
+  cache.remove('public-payload-v4');
 }
