@@ -3,6 +3,11 @@
   function validHttp(value=''){
     try{const u=new URL(String(value));return /^https?:$/.test(u.protocol)?u.toString():'';}catch(_){return '';}
   }
+  async function fetchJSON(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(url);return r.json();}
+  function loadHeroV5Assets(){
+    if(document.querySelector('link[data-hero-v5]'))return;
+    const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/hero-v5.css';link.dataset.heroV5='';document.head.appendChild(link);
+  }
   function loadPromoMakerAssets(){
     if(!document.querySelector('link[data-promo-maker-v1]')){
       const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/promo-maker-v1.css';link.dataset.promoMakerV1='';document.head.appendChild(link);
@@ -38,15 +43,20 @@
     const img=document.getElementById(id);if(!img||!d?.mainImage)return;
     img.src=d.mainImage;img.alt=d.imageAlt||`Viaja a ${d.name}`;
     const holder=img.closest('.hero-photo');
-    if(holder&&d.imageCredit&&!holder.querySelector('.hero-image-credit')){
+    const old=holder?.querySelector('.hero-image-credit');if(old)old.remove();
+    if(holder&&d.imageCredit){
       const credit=document.createElement('span');credit.className='hero-image-credit';credit.textContent=d.imageCredit;holder.appendChild(credit);
     }
     img.addEventListener('error',()=>{if(holder)holder.style.background='linear-gradient(145deg,#063f53,#0a6171)';img.remove();},{once:true});
   }
 
-  function renderHero(){
-    if(typeof DESTINATIONS==='undefined'||typeof isDestinationVisible!=='function')return;
-    const visible=DESTINATIONS.filter(isDestinationVisible);
+  function visibleDestinations(){
+    if(typeof DESTINATIONS==='undefined'||typeof isDestinationVisible!=='function')return [];
+    return DESTINATIONS.filter(isDestinationVisible);
+  }
+
+  function renderGenericHero(){
+    const visible=visibleDestinations();
     const featured=visible.filter(d=>d.featuredHome===true&&d.mainImage);
     const rest=visible.filter(d=>d.mainImage&&!featured.includes(d));
     const picks=[...featured,...rest].slice(0,3);
@@ -55,48 +65,69 @@
     if(picks[2])setPhoto('heroPhotoBottom',picks[2]);
   }
 
-  function formatPrice(value){
-    if(value===null||value===undefined||value==='')return '';
-    const numeric=Number(String(value).replace(/[^0-9.-]/g,''));
-    if(Number.isFinite(numeric))return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(numeric);
-    return String(value);
+  function fmtShort(value){
+    if(!value)return '';
+    const d=new Date(`${value}T12:00:00`);if(Number.isNaN(d.getTime()))return '';
+    return new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'long'}).format(d);
+  }
+  function fmtRange(start,end){
+    if(!start)return '';
+    if(!end||start===end)return fmtShort(start);
+    const a=new Date(`${start}T12:00:00`),b=new Date(`${end}T12:00:00`);
+    if(a.getMonth()===b.getMonth())return `${a.getDate()}–${b.getDate()} de ${new Intl.DateTimeFormat('es-MX',{month:'long'}).format(b)}`;
+    return `${fmtShort(start)} – ${fmtShort(end)}`;
   }
 
-  function renderHeroPromos(){
-    const strip=document.getElementById('heroPromoStrip');
-    const holder=document.getElementById('heroPromoItems');
-    if(!strip||!holder||typeof OFFERS==='undefined'||typeof isOfferVisible!=='function')return;
-    const publishable=OFFERS.filter(isOfferVisible).sort((a,b)=>(a.ordenWeb??9999)-(b.ordenWeb??9999)).slice(0,3);
-    if(!publishable.length){strip.hidden=true;holder.innerHTML='';return;}
-    holder.innerHTML=publishable.map(entry=>{
-      const destination=(typeof DESTINATIONS!=='undefined'?DESTINATIONS:[]).find(d=>d.id===entry.destinationId);
-      const destinationName=destination?.name||entry.destinationName||'Viaje seleccionado';
-      const price=formatPrice(entry.price);
-      const expiry=entry.expiresAt||entry.fechaExpiracionWeb||'';
-      const authorized=entry.directLinkAuthorized===true;
-      const external=authorized?validHttp(entry.publicPromoUrl||entry.sharePromoUrl||''):'';
-      const lead=authorized?validHttp(entry.leadFormUrl||''):'';
-      const image=validHttp(entry.image||destination?.mainImage||'');
-      const fallback=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero información de la promoción ${entry.title||destinationName} con Trhoncal Travel.`):'#cotizar';
-      const href=external||fallback;
-      const label=external?'Ver promoción →':'Cotizar esta promoción →';
-      const rel=external?'noopener noreferrer nofollow sponsored':'noopener noreferrer';
-      return `<article class="hero-promo-card">${image?`<div class="hero-promo-card-image"><img src="${esc(image)}" alt="${esc(entry.title||destinationName)}" loading="lazy"></div>`:''}<div class="hero-promo-card-body"><span class="promo-destination">${esc(destinationName)}</span><strong>${esc(entry.title||'Promoción verificada')}</strong>${price?`<div class="promo-price">Desde ${esc(price)}</div>`:''}<div class="promo-meta">${entry.nights?`<span>${esc(entry.nights)} noches</span>`:''}${expiry?`<span>Vigente hasta ${esc(expiry)}</span>`:''}</div><div class="hero-promo-actions"><a href="${esc(href)}" target="_blank" rel="${rel}">${label}</a>${external?`<a href="${esc(fallback)}" target="_blank" rel="noopener noreferrer">Quiero asesoría</a>`:''}${lead?`<a class="promo-lead-link" href="${esc(lead)}" target="_blank" rel="noopener noreferrer nofollow sponsored">Dejar mis datos</a>`:''}</div></div></article>`;
-    }).join('');
-    strip.hidden=false;
-    let note=strip.querySelector('.hero-promo-note');
-    if(!note){note=document.createElement('p');note.className='hero-promo-note';strip.appendChild(note);}
-    note.textContent='Precio, disponibilidad y condiciones se reconfirman antes de reservar. Las promociones se muestran sólo cuando están vigentes y autorizadas para cliente.';
+  function ensureHeroWhenLink(){
+    const actions=document.querySelector('.hero-actions');if(!actions||actions.querySelector('.hero-when-link'))return;
+    const a=document.createElement('a');a.className='hero-when-link';a.href='/cuando-viajar/';a.textContent='Cuándo viajar →';actions.appendChild(a);
+  }
+
+  async function renderHeroTheme(){
+    const hero=document.getElementById('heroExperience');if(!hero)return;
+    hero.classList.add('hero-v5');
+    ensureHeroWhenLink();
+    const subtitle=document.getElementById('heroSubtitle');
+    if(subtitle)subtitle.textContent='Descubre destinos, fechas y oportunidades reales para tu próximo viaje.';
+
+    try{
+      const data=await fetchJSON('/assets/data/travel-occasions.json');
+      const now=new Date();now.setHours(0,0,0,0);
+      const occasions=(data.occasions||[])
+        .filter(o=>o.featuredHome!==false&&(!o.end||new Date(`${o.end}T23:59:59`)>=now))
+        .sort((a,b)=>(a.order??9999)-(b.order??9999)||String(a.start).localeCompare(String(b.start)));
+      const occasion=occasions[0];
+      if(!occasion)throw new Error('No featured occasion');
+
+      const offers=typeof OFFERS!=='undefined'?OFFERS:[];
+      const offer=(occasion.offerIds||[]).map(id=>offers.find(o=>o.id===id)).find(Boolean)||null;
+      const destinations=visibleDestinations();
+      const destination=offer?destinations.find(d=>d.id===offer.destinationId):null;
+      const fallback=destinations.find(d=>d.featuredHome&&d.mainImage)||destinations.find(d=>d.mainImage);
+      const visual=destination?.mainImage?destination:fallback;
+      if(visual)setPhoto('heroPhotoMain',visual);
+
+      const message=document.querySelector('#heroExperience .hero-emotion-message');
+      if(message){
+        const meta=[fmtRange(occasion.start,occasion.end),destination?.name||''].filter(Boolean).join(' · ');
+        message.innerHTML=`<span>${esc(occasion.heroEyebrow||occasion.title||'Una oportunidad para viajar')}</span><b>${esc(occasion.heroHeadline||occasion.note||'Tu próximo viaje puede empezar con un día libre.')}</b>${meta?`<p>${esc(meta)}</p>`:''}<a href="/cuando-viajar/#occasion-${esc(occasion.id)}">${esc(occasion.heroCta||'Ver oportunidades')} →</a>`;
+      }
+      const brand=document.querySelector('#heroExperience .hero-brand-pill span');if(brand)brand.textContent='Tu próximo viaje empieza aquí';
+    }catch(_){
+      const message=document.querySelector('#heroExperience .hero-emotion-message');
+      if(message)message.innerHTML='<span>INSPÍRATE · DESCUBRE · VIAJA</span><b>Una experiencia empieza mucho antes de hacer la maleta.</b><a href="/cuando-viajar/">Encuentra cuándo viajar →</a>';
+    }
   }
 
   function boot(){
+    loadHeroV5Assets();
     loadPromoMakerAssets();
     let tries=0;
     const timer=setInterval(()=>{
       tries++;
       if(typeof DESTINATIONS!=='undefined'&&DESTINATIONS.length){
-        clearInterval(timer);renderHero();renderHeroPromos();
-      }else if(tries>60){clearInterval(timer);}
+        clearInterval(timer);renderGenericHero();renderHeroTheme();
+      }else if(tries>60){clearInterval(timer);renderHeroTheme();}
     },120);
   }
   document.addEventListener('DOMContentLoaded',boot);
