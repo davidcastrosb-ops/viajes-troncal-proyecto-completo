@@ -1,4 +1,4 @@
-/* Trhoncal Travel — carrusel por intención de viaje */
+/* Trhoncal Travel — carrusel visual por intención de viaje */
 .intent-section{background:linear-gradient(180deg,#fff,#faf7f1)}
 .intent-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-bottom:22px}
 .intent-head h2{font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:clamp(34px,4vw,54px);line-height:1.02;margin:8px 0 0}
@@ -7,17 +7,26 @@
 .intent-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .intent-control,.intent-secondary{border:1px solid #d9cfbd;background:#fff;color:#315763;border-radius:999px;min-height:42px;padding:10px 14px;font-weight:900;font-size:12px;cursor:pointer;transition:.18s ease}
 .intent-control:hover,.intent-secondary:hover{border-color:#b99a5d;color:#7b5b22;transform:translateY(-1px)}
-.intent-control:focus-visible,.intent-secondary:focus-visible,.intent-card-action:focus-visible{outline:3px solid rgba(216,175,88,.35);outline-offset:2px}
+.intent-control:focus-visible,.intent-secondary:focus-visible,.intent-card-action:focus-visible{outline:3px solid rgba(216,175,88,.35);outline-offset:3px}
 .intent-status{display:inline-flex;align-items:center;justify-content:center;min-width:72px;min-height:42px;padding:8px 11px;border-radius:999px;background:#f2ecdf;color:#725a2a;font-size:11px;font-weight:950}
 .intent-hint{margin:10px 0 0;color:#718287;font-size:12px;font-weight:750}.intent-hint strong{color:#8d6928}
-.intent-track{display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-inline:contain;scrollbar-width:thin;padding:4px 2px 16px}
-.intent-card{flex:0 0 calc((100% - 32px)/3);scroll-snap-align:start;scroll-snap-stop:always;border:1px solid #dfd5c4;border-radius:24px;background:#fff;padding:24px;min-height:330px;display:flex;flex-direction:column;box-shadow:0 14px 34px rgba(3,46,62,.05)}
-.intent-card h3{font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:30px;line-height:1.04;margin:9px 0 12px}
-.intent-card p{color:var(--muted);line-height:1.6;margin:0 0 18px}
-.intent-card-meta{margin-top:auto;padding-top:18px;border-top:1px solid #eee7da;display:grid;gap:6px}
-.intent-card-meta b{color:#8b6727;font-size:13px}.intent-card-meta span{color:#7b8b90;font-size:11px;line-height:1.45}
-.intent-card-action{margin-top:16px;border:0;background:transparent;color:#8d6928;font-weight:950;font-size:13px;padding:0;text-align:left;cursor:pointer}
-.intent-card-action:hover{text-decoration:underline}
+.intent-track{display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-inline:contain;scrollbar-width:thin;padding:4px 2px 18px}
+.intent-card{flex:0 0 calc((100% - 32px)/3);scroll-snap-align:start;scroll-snap-stop:always;border:1px solid #dfd5c4;border-radius:24px;background:#fff;min-height:420px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 38px rgba(3,46,62,.08);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.intent-card:hover{transform:translateY(-4px);box-shadow:0 22px 46px rgba(3,46,62,.13);border-color:#d3c09c}
+.intent-card-visual{position:relative;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(145deg,#0c5365,#073d50)}
+.intent-card-visual img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .55s ease}
+.intent-card:hover .intent-card-visual img{transform:scale(1.035)}
+.intent-card-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,23,32,.02) 20%,rgba(2,23,32,.16) 58%,rgba(2,23,32,.75) 100%)}
+.intent-card-visual-label{position:absolute;left:18px;bottom:16px;z-index:2;max-width:80%;color:#fff;font-size:10px;font-weight:950;letter-spacing:.14em;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.28)}
+.intent-card-credit{position:absolute;right:8px;top:8px;z-index:2;padding:3px 6px;border-radius:999px;background:rgba(3,46,62,.62);color:#fff;font-size:8px;line-height:1.2;backdrop-filter:blur(4px)}
+.intent-card-visual-fallback:after{content:"Tu próximo viaje puede empezar aquí";position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.82);font-family:Georgia,"Times New Roman",serif;font-size:22px;line-height:1.08;text-align:center}
+.intent-card-body{padding:20px 22px 22px;display:flex;flex-direction:column;gap:13px;flex:1}
+.intent-card-heading{display:grid;gap:7px}.intent-card-heading h3{font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:29px;line-height:1.03;margin:0}.intent-card-count{justify-self:start;padding:5px 8px;border-radius:999px;background:#f4edde;color:#8b6727;font-size:10px;font-weight:950;letter-spacing:.02em}
+.intent-card-body>p{color:var(--muted);line-height:1.55;margin:0;font-size:14px}
+.intent-card-meta{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap;padding-top:4px}
+.intent-destination-chip{display:inline-flex;align-items:center;padding:6px 8px;border-radius:999px;background:#f7f3eb;color:#526c73;border:1px solid #eee4d4;font-size:10px;font-weight:800;line-height:1.1}
+.intent-card-action{margin-top:3px;border:0;border-top:1px solid #eee7da;background:transparent;color:#8d6928;font-weight:950;font-size:13px;padding:15px 0 0;text-align:left;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.intent-card-action span{transition:transform .18s ease}.intent-card-action:hover span{transform:translateX(3px)}.intent-card-action:hover{text-decoration:none;color:#67460d}
 @media(max-width:1050px){.intent-card{flex-basis:calc((100% - 16px)/2)}}
-@media(max-width:760px){.intent-head{align-items:flex-start;flex-direction:column}.intent-toolbar{align-items:flex-start;flex-direction:column}.intent-actions{width:100%;display:grid;grid-template-columns:1fr auto 1fr;gap:7px}.intent-control{width:100%;padding:10px 8px}.intent-secondary{width:100%}#intentPause{grid-column:1/2}#intentViewDestinations{grid-column:2/4}.intent-track{margin-right:-12px;padding-right:44px;gap:12px}.intent-card{flex:0 0 min(82vw,330px);min-height:300px;padding:22px}.intent-card h3{font-size:27px}.intent-hint{font-size:12px}}
-@media(prefers-reduced-motion:reduce){.intent-track{scroll-behavior:auto}.intent-control,.intent-secondary{transition:none}}
+@media(max-width:760px){.intent-head{align-items:flex-start;flex-direction:column}.intent-toolbar{align-items:flex-start;flex-direction:column}.intent-actions{width:100%;display:grid;grid-template-columns:1fr auto 1fr;gap:7px}.intent-control{width:100%;padding:10px 8px}.intent-secondary{width:100%}#intentPause{grid-column:1/2}#intentViewDestinations{grid-column:2/4}.intent-track{margin-right:-12px;padding-right:52px;gap:12px}.intent-card{flex:0 0 min(84vw,350px);min-height:405px}.intent-card-body{padding:18px 18px 20px}.intent-card-heading h3{font-size:27px}.intent-card-visual{aspect-ratio:16/10.5}.intent-card-visual-label{left:15px;bottom:14px}.intent-hint{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.intent-track{scroll-behavior:auto}.intent-control,.intent-secondary,.intent-card,.intent-card-visual img,.intent-card-action span{transition:none}.intent-card:hover{transform:none}.intent-card:hover .intent-card-visual img{transform:none}}
