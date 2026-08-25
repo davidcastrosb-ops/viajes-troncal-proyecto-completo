@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="assets/css/public-audit-v1.css" />
   <link rel="stylesheet" href="assets/css/quote-modal-v1.css" />
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"Organization","name":"Trhoncal Travel","email":"viajestroncal@gmail.com","logo":"https://viajes.trhoncalhomes.com.mx/assets/images/trhoncal-travel-logo.svg"}
+  {"@context":"https://schema.org","@graph":[{"@type":"TravelAgency","@id":"https://viajes.trhoncalhomes.com.mx/#agency","name":"Trhoncal Travel","url":"https://viajes.trhoncalhomes.com.mx/","logo":"https://viajes.trhoncalhomes.com.mx/assets/images/trhoncal-travel-logo.svg","email":"viajestroncal@gmail.com","telephone":"+52 33 2933 5952","areaServed":{"@type":"Country","name":"México"}},{"@type":"WebSite","@id":"https://viajes.trhoncalhomes.com.mx/#website","url":"https://viajes.trhoncalhomes.com.mx/","name":"Trhoncal Travel","publisher":{"@id":"https://viajes.trhoncalhomes.com.mx/#agency"}},{"@type":"WebPage","@id":"https://viajes.trhoncalhomes.com.mx/#home","url":"https://viajes.trhoncalhomes.com.mx/","name":"Atrévete a viajar | Trhoncal Travel","description":"Inspírate con destinos de México, información revisada y asesoría humana para convertir una idea de viaje en una experiencia real con Trhoncal Travel.","isPartOf":{"@id":"https://viajes.trhoncalhomes.com.mx/#website"},"about":{"@id":"https://viajes.trhoncalhomes.com.mx/#agency"}}]}
   </script>
 </head>
 <body>
@@ -94,10 +94,11 @@
     <section class="quote-cta-section" id="cotizar"><div class="container"><div class="quote-cta-card"><div class="quote-cta-copy"><span class="eyebrow">Tu viaje, a tu medida</span><h2>¿Listo para convertir la idea en viaje?</h2><p>Cuéntanos lo esencial: a dónde quieres ir, fechas aproximadas, cuántas personas viajan y desde dónde sales. Nosotros nos encargamos de ayudarte con el siguiente paso.</p></div><div class="quote-cta-action"><a class="btn btn-primary" href="https://form.jotform.com/261127730314044" data-quote-launch>Solicita tu viaje a tu medida →</a><small>Es una solicitud breve. No necesitas tener todo decidido.</small></div></div></div></section>
   </main>
 
-  <div id="quoteModal" class="quote-modal" hidden aria-hidden="false"><div class="quote-modal-backdrop" data-quote-close></div><section class="quote-modal-panel" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle"><button class="quote-modal-close" type="button" data-quote-close aria-label="Cerrar solicitud">×</button><header class="quote-modal-head"><span class="eyebrow">Trhoncal Travel</span><h2 id="quoteModalTitle">Solicita tu viaje a tu medida</h2><p id="quoteModalCopy">Cuéntanos lo esencial. Nosotros te ayudamos a convertirlo en un viaje real.</p><div id="quoteSelectedDestination" class="quote-modal-destination" hidden></div></header><div class="quote-modal-frame-wrap"><iframe id="quoteModalFrame" class="quote-modal-frame" title="Solicita tu viaje con Trhoncal Travel" src="about:blank" loading="lazy"></iframe></div><p class="quote-modal-fallback">Si el formulario no carga, <a id="quoteModalFallbackLink" href="https://form.jotform.com/261127730314044" target="_blank" rel="noopener noreferrer">ábrelo aquí</a>.</p></section></div>
+  <div id="quoteModal" class="quote-modal" hidden aria-hidden="true"><div class="quote-modal-backdrop" data-quote-close></div><section class="quote-modal-panel" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle"><button class="quote-modal-close" type="button" data-quote-close aria-label="Cerrar solicitud">×</button><header class="quote-modal-head"><span class="eyebrow">Trhoncal Travel</span><h2 id="quoteModalTitle">Solicita tu viaje a tu medida</h2><p id="quoteModalCopy">Cuéntanos lo esencial. Nosotros te ayudamos a convertirlo en un viaje real.</p><div id="quoteSelectedDestination" class="quote-modal-destination" hidden></div></header><div class="quote-modal-frame-wrap"><iframe id="quoteModalFrame" class="quote-modal-frame" title="Solicita tu viaje con Trhoncal Travel" src="about:blank" loading="lazy"></iframe></div><p class="quote-modal-fallback">Si el formulario no carga, <a id="quoteModalFallbackLink" href="https://form.jotform.com/261127730314044" target="_blank" rel="noopener noreferrer">ábrelo aquí</a>.</p></section></div>
 
   <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel" /><p>Información útil para elegir mejor y asesoría humana para convertir la idea en un viaje real.</p></div><div><h4>Explora</h4><p><a href="#destinos">Destinos</a></p><p><a href="#promociones">Ofertas</a></p><p><a href="#faq">Preguntas frecuentes</a></p><p><a href="#fuentes">Fuentes</a></p></div><div><h4>Contacto</h4><p><a id="footerWhatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a></p><p><a id="footerMail" href="#">viajestroncal@gmail.com</a></p></div></div></footer>
   <a id="whatsFloat" class="whatsapp-float" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+  <script src="assets/js/tracking-v1.js"></script>
   <script src="assets/js/site.js"></script>
   <script src="assets/js/seo-host.js"></script>
   <script src="assets/js/detail-v2.js"></script>
@@ -106,5 +107,6 @@
   <script src="assets/js/hero-v4.js"></script>
   <script src="assets/js/public-audit-v1.js"></script>
   <script src="assets/js/quote-modal-v1.js"></script>
+  <script src="assets/js/modal-a11y-v1.js"></script>
 </body>
 </html>
