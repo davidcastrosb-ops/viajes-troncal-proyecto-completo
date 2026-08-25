@@ -3,6 +3,16 @@
   function validHttp(value=''){
     try{const u=new URL(String(value));return /^https?:$/.test(u.protocol)?u.toString():'';}catch(_){return '';}
   }
+  function loadPromoMakerAssets(){
+    if(!document.querySelector('link[data-promo-maker-v1]')){
+      const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/promo-maker-v1.css';link.dataset.promoMakerV1='';document.head.appendChild(link);
+    }
+    if(document.querySelector('script[data-promo-maker-v1]'))return;
+    const script=document.createElement('script');
+    script.src='/assets/js/promo-maker-v1.js';script.dataset.promoMakerV1='';
+    script.onload=()=>{try{if(typeof renderOffers==='function')renderOffers();}catch(_){/* datos aún cargando */}};
+    document.head.appendChild(script);
+  }
   function destinationText(d){
     return [
       ...(Array.isArray(d.segments)?d.segments:[]),d.travelerProfile||'',d.type||'',d.summary||'',d.whyGo||'',d.gastronomy||'',
@@ -78,6 +88,7 @@
   }
 
   function boot(){
+    loadPromoMakerAssets();
     let tries=0;
     const timer=setInterval(()=>{
       tries++;
