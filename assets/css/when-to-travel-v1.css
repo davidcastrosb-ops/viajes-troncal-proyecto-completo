@@ -1,20 +1,31 @@
-.when-travel-section{background:linear-gradient(180deg,#f7f1e6,#fff);padding:44px 0 52px;border-top:1px solid #eee2cf;border-bottom:1px solid #eee2cf}
-.when-travel-home-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.8fr) auto;gap:26px;align-items:end;margin-bottom:22px}
-.when-travel-home-head h2{margin:5px 0 0;font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:clamp(34px,4vw,52px);line-height:1}
-.when-travel-home-head p{margin:0;color:#5f747b;line-height:1.55;max-width:560px}
+.when-travel-section{background:linear-gradient(180deg,#f7f1e6,#fff);padding:48px 0 58px;border-top:1px solid #eee2cf;border-bottom:1px solid #eee2cf}
+.when-travel-home-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.86fr) auto;gap:28px;align-items:end;margin-bottom:24px}
+.when-travel-home-head h2{margin:5px 0 0;font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:clamp(36px,4vw,54px);line-height:.98}
+.when-travel-home-head p{margin:0;color:#5f747b;line-height:1.55;max-width:590px;font-size:15px}
 .when-travel-home-link{white-space:nowrap;color:var(--primary);font-weight:900;text-decoration:none;padding-bottom:5px}.when-travel-home-link:hover{text-decoration:underline}
 .when-travel-carousel{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:12px;align-items:stretch}
-.when-travel-arrow{border:1px solid #d9ccb6;border-radius:18px;background:#fff;color:var(--primary);font-size:23px;font-weight:900;cursor:pointer;box-shadow:0 10px 26px rgba(3,46,62,.06)}
-.when-travel-arrow:hover{border-color:#c39b4b;background:#fffaf0}
-.travel-home-track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 10px}.travel-home-track::-webkit-scrollbar{display:none}
-.travel-home-card{flex:0 0 calc((100% - 32px)/3);min-width:0;scroll-snap-align:start;border:1px solid #dfd4c3;border-radius:24px;background:#fff;padding:20px;box-shadow:0 14px 36px rgba(3,46,62,.07);display:flex;flex-direction:column;min-height:230px}
-.travel-home-card.is-featured{border-color:#d8af58;background:linear-gradient(180deg,#fff,#fffaf1)}
-.travel-home-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
-.travel-home-card h3{margin:0 0 9px;font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:25px;line-height:1.04}
-.travel-home-card p{margin:0;color:#5f747b;line-height:1.45;font-size:13px}
-.travel-home-card .travel-home-promo{margin-top:15px;padding-top:13px;border-top:1px solid #eee4d6;color:#3d5c65;font-size:12px;font-weight:800}
-.travel-home-card .travel-home-promo strong{display:block;margin-top:4px;color:var(--primary);font-size:18px}
+.when-travel-arrow{border:1px solid #d9ccb6;border-radius:18px;background:#fff;color:var(--primary);font-size:23px;font-weight:900;cursor:pointer;box-shadow:0 10px 26px rgba(3,46,62,.06);transition:.18s ease}
+.when-travel-arrow:hover{border-color:#c39b4b;background:#fffaf0;transform:translateY(-2px)}
+.travel-home-track{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 3px 14px}.travel-home-track::-webkit-scrollbar{display:none}
+.travel-home-card{flex:0 0 calc((100% - 36px)/3);min-width:0;scroll-snap-align:start;border:1px solid #dfd4c3;border-radius:26px;background:#fff;box-shadow:0 18px 46px rgba(3,46,62,.09);display:flex;flex-direction:column;overflow:hidden;min-height:390px;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.travel-home-card:hover{transform:translateY(-4px);box-shadow:0 24px 56px rgba(3,46,62,.14);border-color:#cfb678}
+.travel-home-card.is-featured{border-color:#d8af58;box-shadow:0 22px 58px rgba(151,111,35,.15)}
+.travel-home-image{position:relative;aspect-ratio:16/9;overflow:hidden;background:linear-gradient(145deg,#0d5264,#063f53)}
+.travel-home-image:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,46,62,.02),rgba(3,46,62,.2));pointer-events:none}
+.travel-home-image img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .4s ease}
+.travel-home-card:hover .travel-home-image img{transform:scale(1.035)}
+.travel-home-image-placeholder{background:linear-gradient(135deg,#0a5d70,#063f53 56%,#c99d48)}
+.travel-home-image-credit{position:absolute;z-index:2;left:9px;bottom:7px;padding:3px 6px;border-radius:6px;background:rgba(3,46,62,.7);color:#fff;font-size:8px;line-height:1.15}
+.travel-home-body{display:flex;flex-direction:column;flex:1;padding:18px 19px 20px}
+.travel-home-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:11px}
+.travel-home-card h3{margin:0 0 8px;font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:25px;line-height:1.04}
+.travel-home-card p{margin:0;color:#5f747b;line-height:1.42;font-size:13px}
+.travel-home-options{display:grid;gap:7px;margin-top:15px;padding-top:13px;border-top:1px solid #eee4d6}
+.travel-home-option{display:flex;align-items:baseline;justify-content:space-between;gap:12px;color:#3d5c65;font-size:11px}.travel-home-option strong{color:var(--primary);font-size:12px}.travel-home-option span{text-align:right;color:#6c7f84;font-weight:800}
+.travel-home-more{font-size:10px;color:#8a611b;font-weight:900}
+.travel-home-idea{margin-top:15px;padding-top:13px;border-top:1px solid #eee4d6;color:#4e6b73;font-size:11px;font-weight:800}
 .travel-home-card>a,.travel-home-card .home-quote-link{margin-top:auto;padding-top:16px;color:#8a611b;font-size:12px;font-weight:950;text-decoration:none}.travel-home-card>a:hover,.travel-home-card .home-quote-link:hover{text-decoration:underline}
+.travel-home-card-weekend .travel-home-image:before{content:"Escápate cuando quieras";position:absolute;z-index:3;right:12px;top:12px;padding:7px 10px;border-radius:999px;background:rgba(255,250,240,.94);color:#6e511d;font-size:10px;font-weight:950}
 .travel-home-status{text-align:center;margin-top:12px;color:#7a8d92;font-size:11px}
 
 .travel-home-grid,.travel-page-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
@@ -23,7 +34,7 @@
 .travel-opportunity-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .travel-type-pill{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;background:#eef4f5;color:#063f53}
 .type-descanso_obligatorio{background:#f7ecd2;color:#815f20}.type-vacaciones_escolares{background:#e7f0fa;color:#245578}.type-dia_sin_clases{background:#e7f5f1;color:#236052}.type-receso_escolar{background:#f2eef8;color:#5e4676}.type-idea{background:#edf2ee;color:#3f6250}
-.travel-date-range{font-size:12px;font-weight:800;color:#72868c;text-align:right}
+.travel-date-range{font-size:11px;font-weight:800;color:#72868c;text-align:right}
 .travel-opportunity-card h3{margin:0 0 8px;font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:28px;line-height:1.08}
 .travel-opportunity-card>p{margin:0;color:#5e737a;line-height:1.55}
 .travel-offers-list{margin-top:18px;display:grid;gap:14px}
@@ -38,6 +49,7 @@
 .travel-section-more{text-align:center;margin-top:24px}
 .when-travel-hero{padding:84px 0 48px;background:linear-gradient(135deg,#032e3e,#063f53);color:#fff}.when-travel-hero .eyebrow{color:#d8af58}.when-travel-hero h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,6vw,78px);line-height:.98;margin:12px 0 18px}.when-travel-hero p{max-width:760px;font-size:18px;line-height:1.6;color:#dce7ea}.when-travel-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}.when-travel-meta span{padding:8px 11px;border:1px solid rgba(255,255,255,.22);border-radius:999px;font-size:12px}
 .when-travel-page-section{padding:58px 0 80px}.when-travel-page-intro{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:28px}.when-travel-page-intro p{max-width:620px;color:#62777e;line-height:1.55}
-@media(max-width:1050px){.travel-home-card{flex-basis:calc((100% - 16px)/2)}.when-travel-home-head{grid-template-columns:1fr 1fr}.when-travel-home-link{grid-column:1/-1}}
-@media(max-width:800px){.travel-home-grid,.travel-page-grid{grid-template-columns:1fr}.travel-opportunity-top,.travel-idea-actions{align-items:flex-start;flex-direction:column}.travel-date-range{text-align:left}.travel-offer-actions{flex-direction:column}.travel-offer-actions .btn{width:100%}.when-travel-page-intro{align-items:flex-start;flex-direction:column}.travel-opportunity-card h3{font-size:25px}.when-travel-home-head{grid-template-columns:1fr;gap:10px}.when-travel-home-link{grid-column:auto}.when-travel-carousel{grid-template-columns:minmax(0,1fr)}.when-travel-arrow{display:none}.travel-home-card{flex-basis:84%;min-height:220px}}
-@media(max-width:520px){.when-travel-section{padding:34px 0 42px}.travel-home-card{flex-basis:90%;padding:18px}.travel-home-card h3{font-size:23px}}
+@media(max-width:1050px){.travel-home-card{flex-basis:calc((100% - 18px)/2)}.when-travel-home-head{grid-template-columns:1fr 1fr}.when-travel-home-link{grid-column:1/-1}}
+@media(max-width:800px){.travel-home-grid,.travel-page-grid{grid-template-columns:1fr}.travel-opportunity-top,.travel-idea-actions{align-items:flex-start;flex-direction:column}.travel-date-range{text-align:left}.travel-offer-actions{flex-direction:column}.travel-offer-actions .btn{width:100%}.when-travel-page-intro{align-items:flex-start;flex-direction:column}.travel-opportunity-card h3{font-size:25px}.when-travel-home-head{grid-template-columns:1fr;gap:10px}.when-travel-home-link{grid-column:auto}.when-travel-carousel{grid-template-columns:minmax(0,1fr)}.when-travel-arrow{display:none}.travel-home-card{flex-basis:84%;min-height:380px}.travel-home-image{aspect-ratio:16/8.8}}
+@media(max-width:520px){.when-travel-section{padding:36px 0 44px}.travel-home-card{flex-basis:91%}.travel-home-card h3{font-size:23px}.travel-home-body{padding:16px}.travel-home-option{align-items:flex-start;flex-direction:column;gap:2px}.travel-home-option span{text-align:left}}
+@media(prefers-reduced-motion:reduce){.travel-home-card,.travel-home-image img,.when-travel-arrow{transition:none}.travel-home-card:hover{transform:none}.travel-home-card:hover .travel-home-image img{transform:none}}
