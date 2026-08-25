@@ -1,6 +1,6 @@
 # Trhoncal Travel V2 — Estado actual
 
-Fecha de corte: 2026-08-24 17:28 (America/Mexico_City)
+Fecha de corte: 2026-08-24 18:05 (America/Mexico_City)
 
 ## Producción
 - Host público activo: `https://viajes.trhoncalhomes.com.mx/`.
@@ -9,7 +9,8 @@ Fecha de corte: 2026-08-24 17:28 (America/Mexico_City)
 - `main` contiene la web nueva de Trhoncal Travel.
 - PR #2 integrado: portal editorial + Archivo Maestro.
 - PR #4 integrado: fichas server-rendered + slugs estables.
-- Commit SSR de producción: `5fb975f48b05acaa06f68473e20f8590453e7115`.
+- PR #5 integrado: carrusel visible/móvil + FAQ + corrección visual H1 en fichas.
+- Commit UX producción: `dc07891f8447ba1a064bda1472924071fb17b804`.
 - Vercel reportó SUCCESS para ese commit.
 - La página antigua quedó preservada en `legacy/viajes-3dhomes-2026-08-24`.
 - Snapshot de seguridad de la nueva web: `snapshot/trhoncal-travel-v2-2026-08-24`.
@@ -61,6 +62,16 @@ Fecha de corte: 2026-08-24 17:28 (America/Mexico_City)
 - Ofertas públicas: 0.
 - Acapulco permanece fuera hasta revisión operativa/producto.
 
+## UX / descubrimiento
+- La biblioteca secundaria ahora usa un carrusel híbrido controlado por los destinos públicos del Maestro.
+- Desktop: muestra varias tarjetas y ofrece controles con texto `Anterior` / `Siguiente`, contador y `Ver todos`.
+- Móvil: swipe horizontal y una fracción de la siguiente tarjeta visible para indicar continuidad.
+- Autoplay cada ~5.5 s solamente cuando no hay interacción; se pausa con hover, foco, touch o uso manual.
+- Botón explícito para `Pausar movimiento` / `Reanudar movimiento`.
+- `prefers-reduced-motion` desactiva autoplay y movimiento suave.
+- Se agregó FAQ pública con 6 preguntas sobre cotización, producto, ofertas, datos necesarios, fuentes y asesoría sin destino definido.
+- Se corrigió el contraste del H1/H2 de las fichas SSR para que el nombre del destino sea visible sobre fondo petróleo.
+
 ## SEO/AEO
 - Home con title, description, Open Graph y JSON-LD básico de Organization.
 - `robots.txt` permite rastreo sólo en el host público.
@@ -75,7 +86,7 @@ Fecha de corte: 2026-08-24 17:28 (America/Mexico_City)
 - `docs/PRODUCTION_AUDIT_2026-08-24.md`.
 - `docs/SEO_SSR_PREVIEW_2026-08-24.md` — rollout integrado.
 - `docs/CHECKPOINT_MAESTRO_2026-08-24.md`.
-- `10_Revisiones`: REV-037 salida a producción; REV-038 auditoría SEO/AEO; REV-039 slugs estables; REV-040 SSR integrado a `main`; REV-041 Apps Script v4 + endpoint confirmado.
+- `10_Revisiones`: REV-037 salida a producción; REV-038 auditoría SEO/AEO; REV-039 slugs estables; REV-040 SSR integrado a `main`; REV-041 Apps Script v4 + endpoint confirmado; REV-042 corrección CSS SSR; REV-043 carrusel + FAQ + UX móvil.
 
 ## Jotform / conversión
 - Jotform ID `261127730314044`.
@@ -99,9 +110,9 @@ Fecha de corte: 2026-08-24 17:28 (America/Mexico_City)
 - Imágenes y licencias listas; `Mostrar_Web` permanece en No hasta validación comercial.
 
 ## Siguiente bloque
-1. Verificación visual final de Cancún, Puerto Vallarta y Tulum en producción después del SSR.
-2. Comprobar `/api/master`, `robots.txt` y `sitemap.xml` desde el host público cuando el resolver externo ya responda de forma estable.
-3. Pulir copy público de los 6 destinos destacados.
+1. Revisión visual en producción del carrusel en escritorio y celular.
+2. Pulir copy público de los 6 destinos destacados.
+3. Diseñar el segundo carrusel por intención de viaje (familia, pareja, playa, cultura, naturaleza) sin inventario vivo.
 4. Evaluar comercialmente Guadalajara + Tequila antes de activar la cuarta ola.
 5. Después: Search Console / Bing Webmaster y Open Graph social propio.
 
