@@ -112,9 +112,13 @@
         const name=card.querySelector('h3')?.textContent?.trim();
         const d=DESTINATIONS.find(x=>(id&&x.id===id)||x.name===name);if(!d)return;
         const foot=card.querySelector('.card-foot');if(!foot)return;
-        const link=document.createElement('a');link.className='detail-link';link.textContent='Ver ficha completa →';link.href=`/mexico/${encodeURIComponent(routeSlug(d))}`;
-        link.addEventListener('click',e=>{e.preventDefault();openModal(d);});
-        foot.insertBefore(link,foot.querySelector('a'));card.dataset.detailReady='1';
+        const link=document.createElement('a');
+        link.className='detail-link';
+        link.textContent='Ver ficha completa →';
+        link.href=`/mexico/${encodeURIComponent(routeSlug(d))}`;
+        link.setAttribute('aria-label',`Ver ficha completa de ${d.name}`);
+        foot.insertBefore(link,foot.querySelector('a'));
+        card.dataset.detailReady='1';
       });
     });
     openFromRoute();
