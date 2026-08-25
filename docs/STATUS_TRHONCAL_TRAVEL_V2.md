@@ -1,6 +1,6 @@
 # Trhoncal Travel V2 — Estado actual
 
-Fecha de corte: 2026-08-24 18:08 (America/Mexico_City)
+Fecha de corte: 2026-08-24 20:21 (America/Mexico_City)
 
 ## Producción
 - Host público activo: `https://viajes.trhoncalhomes.com.mx/`.
@@ -10,11 +10,11 @@ Fecha de corte: 2026-08-24 18:08 (America/Mexico_City)
 - PR #2 integrado: portal editorial + Archivo Maestro.
 - PR #4 integrado: fichas server-rendered + slugs estables.
 - PR #5 integrado: carrusel visible/móvil + FAQ + corrección visual H1 en fichas.
-- PR #6 integrado: carrusel por intención de viaje + filtros Familia/Pareja/Gastronomía.
-- Commit UX actual de producción: `4cf798554d99e7e700b9a3889885c1295ee27e26`.
+- PR #6 integrado: carrusel por intención de viaje + filtros comerciales.
+- PR #7 integrado: favicon global + títulos comerciales + hero emocional + arquitectura segura de promos.
+- Commit actual de producción: `dc6bd77b228ed2ebb3e9f6e832d847fd9afe13b4`.
 - Vercel reportó SUCCESS para ese commit.
 - La página antigua quedó preservada en `legacy/viajes-3dhomes-2026-08-24`.
-- Snapshot de seguridad de la nueva web: `snapshot/trhoncal-travel-v2-2026-08-24`.
 - `viajes.3dhomes.com.mx` ya no está asociado como dominio personalizado del proyecto Vercel.
 
 ## Archivo Maestro / CMS inicial
@@ -22,21 +22,15 @@ Fecha de corte: 2026-08-24 18:08 (America/Mexico_City)
 - Spreadsheet ID: `1jVIIMyQuNseDidYkErYDd58Ha3yxJA9oFXleFPjmUJw`.
 - Zona horaria: `America/Mexico_City`.
 - `Modo_actual = PRODUCCIÓN`.
-- `Slug_Web` agregado y cargado para 30/30 destinos sin cambiar las URLs públicas actuales.
-- `Mostrar_Web` controla biblioteca pública.
-- `Destacado_Home` controla escaparate principal.
-- `Orden_Home` controla orden.
+- `Slug_Web` cargado para 30/30 destinos sin cambiar URLs públicas.
+- `Mostrar_Web` controla biblioteca pública; `Destacado_Home` y `Orden_Home` controlan escaparate.
 - Imágenes sólo salen cuando tienen permiso, fuente/licencia, crédito, alt y verificación.
+- `07_Ofertas_Vigentes` conserva `URL_Promo_Compartir` y agrega `Enlace_Publico_Autorizado` como gate para futuros enlaces externos.
 
 ## Flujo de datos
-- Archivo Maestro → Apps Script → `/api/master` → frontend/SSR.
+- Archivo Maestro → Apps Script v4 → `/api/master` → frontend/SSR.
 - Apps Script es de solo lectura hacia la web.
-- `api/master.js` no expone previews del upstream ni detalles internos de errores.
-- Apps Script Web App actualizado a versión 4 el 2026-08-24.
-- La implementación conserva el mismo ID y la misma URL `/exec` usada por Vercel.
-- El endpoint desplegado ya usa `Slug_Web` con fallback a `Nombre` y caché `public-payload-v2`.
-- Respuesta JSON confirmada después del despliegue: 16 destinos públicos, slugs estables y 0 ofertas.
-- Slugs de control confirmados en la respuesta: `cancun`, `puerto-vallarta` y `tulum`.
+- Respuesta JSON confirmada: 16 destinos públicos, slugs estables y 0 ofertas.
 
 ## Contenido público
 ### Destacados — 6
@@ -61,44 +55,41 @@ Fecha de corte: 2026-08-24 18:08 (America/Mexico_City)
 
 - Total público: 16 destinos.
 - Ofertas públicas: 0.
-- Acapulco permanece fuera hasta revisión operativa/producto.
 
 ## UX / descubrimiento
-- La biblioteca secundaria usa un carrusel híbrido controlado por los destinos públicos del Maestro.
-- Desktop: varias tarjetas + controles `Anterior` / `Siguiente`, contador y `Ver todos`.
-- Móvil: swipe horizontal y una fracción de la siguiente tarjeta visible para indicar continuidad.
-- Autoplay cada ~5.5 s solamente cuando no hay interacción; se pausa con hover, foco, touch o uso manual.
-- Botón explícito para `Pausar movimiento` / `Reanudar movimiento`.
-- `prefers-reduced-motion` desactiva autoplay y movimiento suave.
-- FAQ pública con 6 preguntas sobre cotización, producto, ofertas, datos necesarios, fuentes y asesoría sin destino definido.
-- H1/H2 de fichas SSR con contraste corregido sobre fondo petróleo.
-- Segunda capa de descubrimiento activa: `Viaja según lo que buscas`.
-- Intenciones visibles: Familia, Pareja, Playa, Cultura, Naturaleza y Gastronomía.
-- Cada tarjeta calcula destinos a partir del contenido público actual, muestra ejemplos y lleva a un filtro real de destinos.
-- Los filtros públicos ahora incluyen también `Familia`, `Pareja` y `Gastronomía`.
-- El carrusel por intención usa controles escritos, contador, autoplay suave (~6.2 s), pausa por interacción, swipe móvil y soporte `prefers-reduced-motion`.
-- Botón `Ver todos los destinos` regresa a la vista completa sin inventar inventario o disponibilidad.
+- Biblioteca secundaria con carrusel híbrido: Anterior/Siguiente, contador, Ver todos, autoplay pausado por interacción, swipe móvil y reduced-motion.
+- Segunda capa `Viaja según lo que buscas`: Familia, Pareja, Playa, Cultura, Naturaleza y Gastronomía.
+- FAQ pública con 6 preguntas comerciales.
+- Home renovada con hero emocional basado en imágenes de destinos públicos con derechos verificados, en lugar de usar el logo grande como único protagonista.
+- El logo permanece como sello de marca discreto dentro del hero.
+- Título comercial de home: `Atrévete a viajar | Trhoncal Travel`.
+- Fichas usan formato: `<Destino>: inspírate y viaja | Trhoncal Travel`.
+- Favicon/logo cargado en home, fichas y páginas de error de destino.
+
+## Promociones dinámicas
+- El hero ya contiene una franja de promociones oculta mientras no existan ofertas públicas.
+- Cuando existan ofertas publicables puede mostrar destino, precio/precio desde, noches y vigencia.
+- CTA por defecto permanece en Trhoncal/WhatsApp.
+- Un link externo sólo debe salir si llega como `publicUrl` autorizado desde la capa pública.
+- Regla: un link público normal de PriceTravel no se activa automáticamente como CTA de Trhoncal; debe validarse que conserve relación/comisión o que sea un enlace de cliente/agencia autorizado.
+- Documento de decisión: `docs/DECISION_HERO_PROMOS_2026-08-24.md`.
 
 ## SEO/AEO
 - Home con title, description, Open Graph y JSON-LD básico de Organization.
-- `robots.txt` permite rastreo sólo en el host público.
-- `sitemap.xml` toma dinámicamente los destinos públicos desde `/api/master`.
-- Canonical y `og:url` se fijan al host público.
-- Las fichas `/mexico/<slug>` ya se renderizan desde servidor mediante `api/destination.js`.
-- Cada ficha SSR incluye HTML principal, title, description, canonical, Open Graph, robots, JSON-LD `TouristDestination` y `BreadcrumbList`, fuentes y CTA.
+- `robots.txt`, `sitemap.xml`, canonical y `og:url` configurados para host público.
+- Fichas `/mexico/<slug>` renderizadas desde servidor con `TouristDestination` + `BreadcrumbList`.
 - Previews mantienen `noindex,nofollow`.
 - Regla permanente: `Slug_Web` no cambia después de publicar sin plan 301.
 
 ## Auditorías y checkpoints
 - `docs/PRODUCTION_AUDIT_2026-08-24.md`.
-- `docs/SEO_SSR_PREVIEW_2026-08-24.md` — rollout integrado.
+- `docs/SEO_SSR_PREVIEW_2026-08-24.md`.
 - `docs/CHECKPOINT_MAESTRO_2026-08-24.md`.
-- `10_Revisiones`: REV-037 salida a producción; REV-038 auditoría SEO/AEO; REV-039 slugs estables; REV-040 SSR integrado a `main`; REV-041 Apps Script v4 + endpoint confirmado; REV-042 corrección CSS SSR; REV-043 carrusel + FAQ + UX móvil; REV-044 carrusel por intención de viaje.
+- `docs/DECISION_HERO_PROMOS_2026-08-24.md`.
+- `10_Revisiones`: REV-037 a REV-045; REV-045 registra favicon + títulos + hero emocional + gate de promos.
 
 ## Jotform / conversión
-- Jotform ID `261127730314044`.
-- Título: `Cotiza tu viaje con Trhoncal Travel`.
-- Estado ENABLED.
+- Jotform ID `261127730314044` — `Cotiza tu viaje con Trhoncal Travel` — ENABLED.
 - WhatsApp configurado: `523329335952`.
 - CTA por destino genera mensaje contextual.
 
@@ -114,21 +105,21 @@ Fecha de corte: 2026-08-24 18:08 (America/Mexico_City)
 - Tequila.
 - Oaxaca de Juárez.
 - Mérida.
-- Imágenes y licencias listas; `Mostrar_Web` permanece en No hasta validación comercial.
+- Imágenes/licencias listas; `Mostrar_Web` permanece en No hasta validación comercial.
 
 ## Siguiente bloque
-1. Revisión visual del carrusel por intención en escritorio y celular.
-2. Pulir copy público de los 6 destinos destacados y verificar que las etiquetas de intención sean comercialmente útiles.
-3. Evaluar comercialmente Guadalajara + Tequila antes de activar la cuarta ola.
-4. Preparar arquitectura de tours/circuitos sin inventario vivo y sin exponer mayoristas.
-5. Después: Search Console / Bing Webmaster y Open Graph social propio.
+1. Revisión visual de hero emocional en desktop y celular.
+2. Definir/validar el primer enlace de cliente de PriceAgencies/PriceTravel antes de exponer proveedor directo.
+3. Cuando exista la primera oferta real, actualizar Apps Script para exponer `publicUrl` sólo si `Enlace_Publico_Autorizado = Sí`.
+4. Pulir copy de los 6 destinos destacados.
+5. Evaluar Guadalajara + Tequila y luego arquitectura de tours/circuitos.
 
 ## Reglas comerciales vigentes
-- Un destino no se publica sólo por ser atractivo: debe tener información suficiente y sentido comercial/operativo.
+- Un destino no se publica sólo por ser atractivo: debe tener sentido comercial/operativo.
 - Precio, cupo y condiciones permanecen separados del contenido estable.
-- Muestras de PriceAgencies no se convierten en ofertas automáticamente.
+- Muestras de proveedores no se convierten en ofertas automáticamente.
 - Ofertas públicas continúan en 0 hasta selección y reconfirmación expresa.
 
 ## Continuidad
 - El historial del chat no es fuente única del proyecto.
-- Decisiones estructurales y avances materiales deben quedar en GitHub y/o Archivo Maestro.
+- Decisiones estructurales y avances materiales quedan en GitHub y/o Archivo Maestro.
