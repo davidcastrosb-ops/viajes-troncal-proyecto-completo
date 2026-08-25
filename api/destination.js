@@ -129,6 +129,7 @@ export default async function handler(req, res) {
   <link rel="stylesheet" href="/assets/css/styles.css">
   <link rel="stylesheet" href="/assets/css/brand-v2.css">
   <link rel="stylesheet" href="/assets/css/detail-v2.css">
+  <script>if('scrollRestoration' in history)history.scrollRestoration='manual';window.scrollTo(0,0);</script>
   <script type="application/ld+json">${structured}</script>
 </head>
 <body class="destination-route">
@@ -138,15 +139,15 @@ export default async function handler(req, res) {
       <div class="detail-route-bar"><a class="detail-route-brand" href="/#destinos"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><div class="detail-route-context"><span>México · ${esc(d.state || '')}</span><a class="detail-route-back" href="/#destinos">← Volver a destinos</a></div></div>
       <header class="detail-header ${image ? 'with-photo' : ''}">${photo}<div class="detail-header-copy"><span class="eyebrow">${esc(d.state || '')} · ${esc(d.country || 'México')}${d.puebloMagico ? ' · Pueblo Mágico' : ''}</span><h1 id="detailTitle">${esc(d.name)}</h1><p>${esc(description)}</p></div></header>
       <div class="detail-body">
-        <div class="detail-summary-grid"><div class="detail-stat"><small>Estancia sugerida</small><b>${esc(d.recommendedStay || 'Estancia según itinerario')}</b></div><div class="detail-stat"><small>Tipo de viaje</small><b>${esc((d.segments || []).slice(0,4).join(' · ') || d.type || 'Viaje personalizado')}</b></div><div class="detail-stat"><small>Última verificación</small><b>${esc(d.lastVerified || 'Información revisada')}</b></div></div>
+        <div class="detail-summary-grid"><div class="detail-stat"><small>Estancia sugerida</small><b>${esc(d.recommendedStay || 'Estancia según itinerario')}</b></div><div class="detail-stat"><small>Tipo de viaje</small><b>${esc((d.segments || []).slice(0,4).join(' · ') || d.type || 'Viaje personalizado')}</b></div><div class="detail-stat"><small>Información revisada</small><b>${esc(d.lastVerified || 'Revisada por Trhoncal Travel')}</b></div></div>
         <div class="detail-columns">
           <div><section class="detail-block"><h2>Por qué ir</h2><p>${esc(d.whyGo || '')}</p></section><section class="detail-block"><h2>Historia y contexto</h2><p>${esc(d.history || '')}</p></section><section class="detail-block"><h2>Atractivos clave</h2>${list(d.attractions)}</section><section class="detail-block"><h2>Experiencias</h2>${list(d.experiences)}</section></div>
-          <div><section class="detail-block"><h2>¿Para quién funciona?</h2><p>${esc(d.travelerProfile || '')}</p></section><section class="detail-block"><h2>Clima y temporadas</h2><p>${esc(d.climateSeasons || '')}</p></section><section class="detail-block"><h2>Cómo llegar y moverse</h2><p>${esc(d.connectivity || '')}</p></section><section class="detail-block"><h2>Qué combinar</h2>${list(d.combinations)}</section></div>
+          <div><section class="detail-block"><h2>¿Es para ti?</h2><p>${esc(d.travelerProfile || '')}</p></section><section class="detail-block"><h2>Clima y temporadas</h2><p>${esc(d.climateSeasons || '')}</p></section><section class="detail-block"><h2>Cómo llegar y moverse</h2><p>${esc(d.connectivity || '')}</p></section><section class="detail-block"><h2>Qué combinar</h2>${list(d.combinations)}</section></div>
         </div>
         <section class="detail-block"><h2>Gastronomía</h2><p>${esc(d.gastronomy || '')}</p></section>
         <section class="detail-block"><h2>Patrimonio y reconocimientos</h2>${list(d.recognitions)}<p>${esc(d.sustainabilityHeritage || '')}</p></section>
         <section class="detail-sources"><h2>Fuentes que respaldan esta ficha</h2>${sourceHtml}</section>
-        <section class="detail-conversion"><div><span class="eyebrow">Asesoría Trhoncal Travel</span><h2>¿Quieres convertir ${esc(d.name)} en un viaje real?</h2><p>Cuéntanos fechas, viajeros y estilo de viaje. Revisamos producto disponible y confirmamos condiciones antes de que pagues.</p></div><div class="detail-conversion-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar por WhatsApp</a><a class="btn btn-soft" href="/#cotizar">Solicitar cotización</a></div></section>
+        <section class="detail-conversion"><div><span class="eyebrow">Asesoría Trhoncal Travel</span><h2>¿Quieres convertir ${esc(d.name)} en un viaje real?</h2><p>Cuéntanos fechas, viajeros y estilo de viaje. Buscamos opciones disponibles y confirmamos precio y condiciones antes de que pagues.</p></div><div class="detail-conversion-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar por WhatsApp</a><a class="btn btn-soft" href="/#cotizar">Solicitar cotización</a></div></section>
       </div>
     </article></div>
   </main>
