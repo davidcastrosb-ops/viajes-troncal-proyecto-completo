@@ -27,14 +27,20 @@ function safeHttpUrl(value = '') {
 
 async function loadMaster() {
   const separator = MASTER_ENDPOINT.includes('?') ? '&' : '?';
-  const response = await fetch(`${MASTER_ENDPOINT}${separator}_ts=${Date.now()}`, {
-    method: 'GET', redirect: 'follow', cache: 'no-store',
-    headers: { 'User-Agent': 'TrhoncalTravel-SSR/1.0', 'Cache-Control': 'no-cache' }
-  });
-  if (!response.ok) throw new Error(`Master ${response.status}`);
-  const payload = await response.json();
-  if (!payload || typeof payload !== 'object') throw new Error('Invalid Master payload');
-  return payload;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch(`${MASTER_ENDPOINT}${separator}_ts=${Date.now()}`, {
+      method: 'GET', redirect: 'follow', cache: 'no-store', signal: controller.signal,
+      headers: { 'User-Agent': 'TrhoncalTravel-SSR/1.1', 'Cache-Control': 'no-cache' }
+    });
+    if (!response.ok) throw new Error(`Master ${response.status}`);
+    const payload = await response.json();
+    if (!payload || typeof payload !== 'object') throw new Error('Invalid Master payload');
+    return payload;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function render404(res, publicHost) {
@@ -87,7 +93,27 @@ export default async function handler(req, res) {
     '@context': 'https://schema.org',
     '@graph': [
       {
+        '@type': 'TravelAgency',
+        '@id': `https://${PUBLIC_HOST}/#agency`,
+        name: 'Trhoncal Travel',
+        url: `https://${PUBLIC_HOST}/`,
+        logo: `https://${PUBLIC_HOST}/assets/images/trhoncal-travel-logo.svg`,
+        email: 'viajestroncal@gmail.com',
+        telephone: '+52 33 2933 5952',
+        areaServed: { '@type': 'Country', name: 'México' }
+      },
+      {
+        '@type': 'WebPage',
+        '@id': `${canonical}#page`,
+        url: canonical,
+        name: title,
+        description,
+        about: { '@id': `${canonical}#destination` },
+        provider: { '@id': `https://${PUBLIC_HOST}/#agency` }
+      },
+      {
         '@type': 'TouristDestination',
+        '@id': `${canonical}#destination`,
         name: d.name,
         description,
         url: canonical,
@@ -125,7 +151,8 @@ export default async function handler(req, res) {
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(description)}">
   <meta property="og:url" content="${esc(canonical)}">
-  ${image ? `<meta property="og:image" content="${esc(image)}">` : ''}
+  ${image ? `<meta property="og:image" content="${esc(image)}"><meta property="og:image:alt" content="${esc(d.imageAlt || d.name)}">` : ''}
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/assets/css/styles.css">
   <link rel="stylesheet" href="/assets/css/brand-v2.css">
   <link rel="stylesheet" href="/assets/css/detail-v2.css">
@@ -134,7 +161,7 @@ export default async function handler(req, res) {
   <script type="application/ld+json">${structured}</script>
 </head>
 <body class="destination-route">
-  <header class="site-header"><div class="container header-inner"><a class="brand" href="/#inicio" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/#inspiracion">Inspírate</a><a href="/#fuentes">Fuentes</a><a href="/#cotizar">Cotizar</a></nav><a class="btn btn-outline" href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
+  <header class="site-header"><div class="container header-inner"><a class="brand" href="/#inicio" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#inspiracion">Inspírate</a><a href="/#fuentes">Fuentes</a><a href="/#cotizar">Cotizar</a></nav><a class="btn btn-outline" href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
   <main>
     <div class="destination-detail-overlay open route-page" aria-hidden="false"><article class="destination-detail" aria-labelledby="detailTitle">
       <div class="detail-route-bar"><a class="detail-route-brand" href="/#destinos"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><div class="detail-route-context"><span>México · ${esc(d.state || '')}</span><a class="detail-route-back" href="/#destinos">← Volver a destinos</a></div></div>
@@ -148,16 +175,17 @@ export default async function handler(req, res) {
         <section class="detail-block"><h2>Gastronomía</h2><p>${esc(d.gastronomy || '')}</p></section>
         <section class="detail-block"><h2>Patrimonio y reconocimientos</h2>${list(d.recognitions)}<p>${esc(d.sustainabilityHeritage || '')}</p></section>
         <section class="detail-sources"><h2>Fuentes que respaldan esta ficha</h2>${sourceHtml}</section>
-        <section class="detail-conversion"><div><span class="eyebrow">Tu viaje, a tu medida</span><h2>¿Te imaginas en ${esc(d.name)}?</h2><p>Ya conocemos el destino. Sólo cuéntanos tus fechas, cuántas personas viajan y desde dónde sales para empezar.</p></div><div class="detail-conversion-actions"><a class="btn btn-primary quote-link" href="/#cotizar" data-destination="${esc(d.name)}">Solicita tu viaje a ${esc(d.name)}</a><a class="btn btn-soft" href="${wa}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a></div></section>
+        <section class="detail-conversion"><div><span class="eyebrow">Tu viaje, a tu medida</span><h2>¿Te imaginas en ${esc(d.name)}?</h2><p>Ya conocemos el destino. Sólo cuéntanos tus fechas, cuántas personas viajan y desde dónde sales para empezar.</p></div><div class="detail-conversion-actions"><a class="btn btn-primary quote-link" href="/#cotizar" data-destination="${esc(d.name)}" data-cta-origen="ficha_destino">Solicita tu viaje a ${esc(d.name)}</a><a class="btn btn-soft" href="${wa}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a></div></section>
       </div>
     </article></div>
   </main>
 
-  <div id="quoteModal" class="quote-modal" hidden aria-hidden="true"><div class="quote-modal-backdrop" data-quote-close></div><section class="quote-modal-panel" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle"><button class="quote-modal-close" type="button" data-quote-close aria-label="Cerrar solicitud">×</button><header class="quote-modal-head"><span class="eyebrow">Trhoncal Travel</span><h2 id="quoteModalTitle">Tu viaje a ${esc(d.name)}</h2><p id="quoteModalCopy">Ya sabemos a dónde quieres ir. Cuéntanos fechas, viajeros y lo esencial para empezar.</p><div id="quoteSelectedDestination" class="quote-modal-destination">Destino seleccionado: ${esc(d.name)}</div></header><div class="quote-modal-frame-wrap"><iframe id="quoteModalFrame" class="quote-modal-frame" title="Solicita tu viaje con Trhoncal Travel" src="about:blank" loading="lazy"></iframe></div><p class="quote-modal-fallback">Si el formulario no carga, <a id="quoteModalFallbackLink" href="https://form.jotform.com/261127730314044?destinoDeseado=${encodeURIComponent(d.name)}" target="_blank" rel="noopener noreferrer">ábrelo aquí</a>.</p></section></div>
+  <div id="quoteModal" class="quote-modal" hidden aria-hidden="true"><div class="quote-modal-backdrop" data-quote-close></div><section class="quote-modal-panel" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle"></section></div>
 
-  <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"><p>Información útil para elegir mejor y asesoría humana para convertir la idea en un viaje real.</p></div><div><h3>Explora</h3><p><a href="/#destinos">Destinos</a></p><p><a href="/#fuentes">Fuentes</a></p></div><div><h3>Contacto</h3><p><a href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a></p><p><a href="mailto:viajestroncal@gmail.com">viajestroncal@gmail.com</a></p></div></div></footer>
+  <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"><p>Información útil para elegir mejor y asesoría humana para convertir la idea en un viaje real.</p></div><div><h3>Explora</h3><p><a href="/#destinos">Destinos</a></p><p><a href="/cuando-viajar/">Cuándo viajar</a></p><p><a href="/#fuentes">Fuentes</a></p></div><div><h3>Contacto</h3><p><a href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a></p><p><a href="mailto:viajestroncal@gmail.com">viajestroncal@gmail.com</a></p></div></div></footer>
   <script src="/assets/js/tracking-v1.js"></script>
   <script src="/assets/js/quote-modal-v1.js"></script>
+  <script src="/assets/js/quote-context-v1.js"></script>
   <script src="/assets/js/modal-a11y-v1.js"></script>
 </body></html>`);
 }
