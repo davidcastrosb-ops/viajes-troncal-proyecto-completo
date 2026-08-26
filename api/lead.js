@@ -12,31 +12,50 @@ function clean(value = '', max = 200) {
     .slice(0, max);
 }
 
+function safeText(value = '', max = 200) {
+  const text = clean(value, max);
+  return /^[=+\-@]/.test(text) ? `'${text}` : text;
+}
+
 function normalize(body = {}) {
   return {
     action: 'submitLead',
     website: clean(body.website, 120),
-    nombre: clean(body.nombre, 80),
-    apellido: clean(body.apellido, 80),
+    nombre: safeText(body.nombre, 80),
+    apellido: safeText(body.apellido, 80),
     whatsapp: clean(body.whatsapp, 30),
-    destino: clean(body.destino, 140),
-    ciudadSalida: clean(body.ciudadSalida, 120),
+    destino: safeText(body.destino, 140),
+    ciudadSalida: safeText(body.ciudadSalida, 120),
     fechaSalida: clean(body.fechaSalida, 20),
     fechaRegreso: clean(body.fechaRegreso, 20),
     personas: clean(body.personas, 8),
-    hospedaje: clean(body.hospedaje, 40),
-    origen: clean(body.origen, 50),
-    urlOrigen: clean(body.urlOrigen, 500),
-    slugDestino: clean(body.slugDestino, 160),
-    utmSource: clean(body.utmSource, 120),
-    utmMedium: clean(body.utmMedium, 120),
-    utmCampaign: clean(body.utmCampaign, 160),
-    ocasionId: clean(body.ocasionId, 120),
-    ofertaId: clean(body.ofertaId, 120),
-    promoUrl: clean(body.promoUrl, 500),
-    ctaOrigen: clean(body.ctaOrigen, 120),
+    hospedaje: safeText(body.hospedaje, 40),
+    origen: safeText(body.origen, 50),
+    urlOrigen: safeText(body.urlOrigen, 500),
+    slugDestino: safeText(body.slugDestino, 160),
+    utmSource: safeText(body.utmSource, 120),
+    utmMedium: safeText(body.utmMedium, 120),
+    utmCampaign: safeText(body.utmCampaign, 160),
+    ocasionId: safeText(body.ocasionId, 120),
+    ofertaId: safeText(body.ofertaId, 120),
+    promoUrl: safeText(body.promoUrl, 500),
+    ctaOrigen: safeText(body.ctaOrigen, 120),
     consentimiento: body.consentimiento === true
   };
+}
+
+function validISODate(value = '') {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T12:00:00`);
+  return !Number.isNaN(date.getTime());
+}
+
+function todayISO() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 function validate(lead) {
@@ -45,15 +64,23 @@ function validate(lead) {
   if (digits.length < 8 || digits.length > 15) return 'Revisa tu WhatsApp.';
   if (!lead.destino) return 'Indica el destino o escribe “Ayúdame a elegir”.';
   if (!lead.ciudadSalida) return 'Indica tu ciudad de salida.';
-  if (!lead.fechaSalida) return 'Indica una fecha aproximada de salida.';
+  if (!lead.fechaSalida || !validISODate(lead.fechaSalida)) return 'Indica una fecha aproximada de salida válida.';
+  if (lead.fechaSalida < todayISO()) return 'La fecha de salida no puede estar en el pasado.';
+  if (lead.fechaRegreso) {
+    if (!validISODate(lead.fechaRegreso)) return 'Revisa la fecha aproximada de regreso.';
+    if (lead.fechaRegreso < lead.fechaSalida) return 'La fecha de regreso no puede ser anterior a la salida.';
+  }
   const people = Number(lead.personas);
   if (!Number.isFinite(people) || people < 1 || people > 99) return 'Revisa el número de viajeros.';
-  if (!['Todo incluido', 'Sin todo incluido', 'Recomiéndame'].includes(lead.hospedaje)) return 'Elige una preferencia de hospedaje.';
+  if (!['Todo incluido', 'Sin todo incluido', 'Recomiéndame'].includes(lead.hospedaje.replace(/^'/, ''))) return 'Elige una preferencia de hospedaje.';
   if (!lead.consentimiento) return 'Necesitamos tu autorización para contactarte.';
   return '';
 }
 
 export default async function handler(req, res) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
   if (req.method === 'GET') {
     return res.status(200).json({ ok: true, message: 'Trhoncal Travel lead endpoint activo' });
   }
@@ -65,6 +92,11 @@ export default async function handler(req, res) {
   const origin = String(req.headers.origin || '');
   if (origin && origin !== PUBLIC_ORIGIN && !origin.endsWith('.vercel.app')) {
     return res.status(403).json({ ok: false, error: 'Origen no permitido.' });
+  }
+
+  const contentType = String(req.headers['content-type'] || '').toLowerCase();
+  if (contentType && !contentType.includes('application/json')) {
+    return res.status(415).json({ ok: false, error: 'Formato no permitido.' });
   }
 
   const lead = normalize(req.body || {});
@@ -81,7 +113,7 @@ export default async function handler(req, res) {
       redirect: 'follow',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'TrhoncalTravel-Lead/2.1'
+        'User-Agent': 'TrhoncalTravel-Lead/2.2'
       },
       body: JSON.stringify(lead),
       signal: controller.signal
