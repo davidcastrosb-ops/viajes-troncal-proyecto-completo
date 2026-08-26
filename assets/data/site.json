@@ -15,8 +15,7 @@
   },
   "forms": {
     "mode": "native",
-    "leadEndpoint": "/api/lead",
-    "legacyJotformFormId": "262364782762062"
+    "leadEndpoint": "/api/lead"
   },
   "data": {
     "mode": "master-with-local-fallback",
