@@ -12,6 +12,15 @@
     '[tabindex]:not([tabindex="-1"])'
   ].join(',');
 
+  function loadCalendarSourcesHelper(){
+    if(document.querySelector('script[data-calendar-sources-v1]') || window.__trhoncalCalendarSourcesV1) return;
+    const script=document.createElement('script');
+    script.src='/assets/js/calendar-sources-v1.js';
+    script.defer=true;
+    script.dataset.calendarSourcesV1='';
+    document.head.appendChild(script);
+  }
+
   function modal(){ return document.querySelector(SELECTOR); }
 
   function visibleFocusable(root){
@@ -34,6 +43,7 @@
   }
 
   function init(){
+    loadCalendarSourcesHelper();
     const root = modal();
     if (!root) return;
     sync(root);
