@@ -10,7 +10,6 @@ async function loadJSON(path){
 }
 function setText(id,text){const el=document.getElementById(id);if(el)el.textContent=text||''}
 function setHref(id,href){const el=document.getElementById(id);if(el)el.href=href||'#'}
-function setSrc(id,src,alt=''){const el=document.getElementById(id);if(el&&src){el.src=src;if(alt)el.alt=alt}}
 function escapeHTML(value=''){return String(value).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]))}
 function destinationSlug(d={}){return String(d.slug||d.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
 
@@ -42,10 +41,6 @@ function applyConfig(){
   setHref('headerWhatsapp',wa);setHref('footerWhatsapp',wa);setHref('whatsFloat',wa);
   setText('footerWhatsapp',SITE.contact.phoneDisplay||'WhatsApp');
   setHref('footerMail',`mailto:${SITE.contact.email}`);setText('footerMail',SITE.contact.email||'Correo');
-
-  const frame=document.getElementById('jotform-frame');
-  const jotformUrl=SITE.forms?.jotformUrl||'https://form.jotform.com/261127730314044';
-  if(frame)frame.src=jotformUrl;setHref('jotformLink',jotformUrl);
 }
 
 async function loadPublicData(){
@@ -128,7 +123,7 @@ function destinationCard(d,{featured=false}={}){
         <span class="card-stay">${escapeHTML(stay)}</span>
         <div class="card-actions">
           <a class="detail-link" href="/mexico/${encodeURIComponent(slug)}" aria-label="Ver ficha completa de ${escapeHTML(d.name)}">Ver ficha completa →</a>
-          <a class="quote-link" href="#cotizar" data-destination="${escapeHTML(d.name)}">Quiero cotizar →</a>
+          <a class="quote-link" href="#cotizar" data-destination="${escapeHTML(d.name)}" data-cta-origen="tarjeta_destino">Quiero cotizar →</a>
         </div>
       </div>
     </div>
@@ -238,11 +233,11 @@ function renderOffers(){
   if(footerLink)footerLink.closest('p')?.removeAttribute('hidden');
   publishable.forEach(entry=>{
     const title=escapeHTML(entry.title||'Promoción especial');
-    const desc=escapeHTML(entry.description||'Cotiza disponibilidad y condiciones vigentes.');
+    const desc=escapeHTML(entry.description||entry.note||'Cotiza disponibilidad y condiciones vigentes.');
     const image=escapeHTML(entry.image||'');
     const price=entry.price?`<div class="promo-price">${escapeHTML(entry.price)}</div>`:'';
-    const wa=whatsappLink(`Hola, quiero información de la promoción: ${entry.title||'viaje'}.`);
-    grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}">`:''}<h3>${title}</h3>${price}<p>${desc}</p><div class="promo-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener noreferrer">Cotizar con Trhoncal</a></div></article>`);
+    const destination=DESTINATIONS.find(d=>d.id===entry.destinationId)?.name||entry.leadDestinationVerified||'';
+    grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}" loading="lazy">`:''}<h3>${title}</h3>${price}<p>${desc}</p><div class="promo-actions"><a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destination)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}" data-promo-url="${escapeHTML(entry.publicPromoUrl||entry.sharePromoUrl||'')}" data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a></div></article>`);
   });
 }
 
