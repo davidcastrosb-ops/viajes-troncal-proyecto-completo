@@ -20,7 +20,7 @@
       const o=byCal.get(e.id)||{};
       const start=o.start||e.suggestedStart||e.start;
       const end=o.end||e.suggestedEnd||e.end||e.start;
-      return {id:o.id||e.id,eventId:e.id,title:o.title||e.name,subtitle:o.subtitle||o.note||e.note||'',start,end,offerIds:o.offerIds||[],featuredHome:!!o.featuredHome,order:o.order??9999,heroHeadline:o.heroHeadline||'',sourceType:e.type};
+      return {id:o.id||e.id,eventId:e.id,title:o.title||e.name,subtitle:o.subtitle||o.note||e.note||'',start,end,offerIds:o.offerIds||[],featuredHome:!!o.featuredHome,order:o.order??9999,heroHeadline:o.heroHeadline||o.emotionalCopy||'',sourceType:e.type};
     }).filter(x=>parseDate(x.end)>=today).sort((a,b)=>Number(b.featuredHome)-Number(a.featuredHome)||(a.order-b.order)||parseDate(a.start)-parseDate(b.start));
   }
   function minPrice(list){
@@ -64,12 +64,16 @@
     if(/verano/i.test(title))return 'Verano';
     return title.length>22?`${title.slice(0,21).trim()}…`:title;
   }
-  function quoteHref(destination,opp){
+  function quoteHref(destination,opp,offer=null){
     const p=new URLSearchParams({travelQuote:'1'});
     if(destination)p.set('destino',destination);
     if(opp.start)p.set('salida',opp.start);
     if(opp.end)p.set('regreso',opp.end);
     if(opp.id)p.set('ocasion',opp.id);
+    if(offer?.id)p.set('oferta',offer.id);
+    const promo=offer?.publicPromoUrl||offer?.sharePromoUrl||'';
+    if(promo)p.set('promo',promo);
+    p.set('cta',offer?'oferta_calendario':'calendario');
     return `/?${p.toString()}`;
   }
   function renderCard(opportunity,offerMap,destinations,index){
@@ -116,11 +120,11 @@
     const meta=[offer.days?`${offer.days} días`:'',offer.nights?`${offer.nights} noches`:'',offer.plan||''].filter(Boolean).join(' · ');
     const price=offer.price?money(offer.price):'';
     const detail=offer.publicPromoUrl||offer.sharePromoUrl||'';
-    const quote=quoteHref(group.name,opp);
+    const quote=quoteHref(group.name,opp,offer);
     return `<div class="calendar-offer-mini">
       <div class="calendar-offer-mini-copy"><strong>${esc(title)}</strong>${meta?`<span>${esc(meta)}</span>`:''}</div>
       ${price?`<b>${esc(price)}</b>`:''}
-      <div class="calendar-offer-mini-actions">${detail?`<a href="${esc(detail)}" target="_blank" rel="noopener noreferrer">Ver promoción ↗</a>`:''}<a class="calendar-offer-quote" href="${esc(quote)}">Quiero este viaje →</a></div>
+      <div class="calendar-offer-mini-actions">${detail?`<a href="${esc(detail)}" target="_blank" rel="noopener noreferrer nofollow sponsored" data-offer="${esc(offer.id||'')}" data-occasion="${esc(opp.id||'')}">Ver promoción ↗</a>`:''}<a class="calendar-offer-quote" href="${esc(quote)}">Quiero este viaje →</a></div>
     </div>`;
   }
   function compactOpportunityCard(opp,offerMap,destinations){
