@@ -15,19 +15,16 @@
   }
   function promoCard(entry){
     const destination=destinationFor(entry);
-    const destinationName=destination?.name||entry.destinationName||'Viaje seleccionado';
+    const destinationName=destination?.name||entry.leadDestinationVerified||entry.destinationName||'Viaje seleccionado';
     const image=validHttp(entry.image||destination?.mainImage||'');
     const publicUrl=entry.directLinkAuthorized===true?validHttp(entry.publicPromoUrl||entry.sharePromoUrl||''):'';
-    const leadUrl=entry.directLinkAuthorized===true?validHttp(entry.leadFormUrl||''):'';
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero asesoría sobre la promoción ${entry.title||destinationName} con Trhoncal Travel.`):'#cotizar';
-    const primaryHref=publicUrl||wa;
-    const primaryLabel=publicUrl?'Ver promoción →':'Cotizar con Trhoncal →';
     const price=money(entry.price);
     const duration=[entry.days?`${entry.days} días`:'',entry.nights?`${entry.nights} noches`:''].filter(Boolean).join(' · ');
     const expiry=entry.expiresAt||'';
     const verified=entry.verifiedAt||'';
     const title=entry.title||destinationName;
-    const externalAttrs=publicUrl?' target="_blank" rel="noopener noreferrer nofollow sponsored"':' target="_blank" rel="noopener noreferrer"';
+    const promoAttr=publicUrl?` data-promo-url="${escapeHTML(publicUrl)}"`:'';
     return `<article class="promo-maker-card">
       ${image?`<div class="promo-maker-image"><img src="${escapeHTML(image)}" alt="${escapeHTML(title)}" loading="lazy"></div>`:''}
       <div class="promo-maker-body">
@@ -38,9 +35,9 @@
         <div class="promo-maker-meta">${duration?`<span>${escapeHTML(duration)}</span>`:''}${expiry?`<span>Vigente hasta ${escapeHTML(expiry)}</span>`:''}${verified?`<span>Precio confirmado ${escapeHTML(verified)}</span>`:''}</div>
         ${entry.note?`<p class="promo-maker-note">${escapeHTML(entry.note)}</p>`:''}
         <div class="promo-maker-actions">
-          <a class="btn btn-primary" href="${escapeHTML(primaryHref)}"${externalAttrs}>${primaryLabel}</a>
-          ${publicUrl?`<a class="promo-maker-secondary" href="${escapeHTML(wa)}" target="_blank" rel="noopener noreferrer">Quiero asesoría</a>`:''}
-          ${leadUrl?`<a class="promo-maker-secondary" href="${escapeHTML(leadUrl)}" target="_blank" rel="noopener noreferrer nofollow sponsored">Dejar mis datos</a>`:''}
+          ${publicUrl?`<a class="promo-maker-secondary" href="${escapeHTML(publicUrl)}" target="_blank" rel="noopener noreferrer nofollow sponsored" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}">Ver promoción ↗</a>`:''}
+          <a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destinationName)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}"${promoAttr} data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a>
+          <a class="promo-maker-secondary" href="${escapeHTML(wa)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a>
         </div>
         <p class="promo-maker-disclaimer">Precio, disponibilidad y condiciones se reconfirman antes de reservar.</p>
       </div>
