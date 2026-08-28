@@ -10,6 +10,16 @@
     if (wrapper && !wrapper.children.length) wrapper.remove();
   });
 
+  // El ID de oferta conserva la trazabilidad; no exponemos la URL del proveedor
+  // dentro de la barra del navegador al pasar a la cotización Trhoncal.
+  document.querySelectorAll('a[href*="travelQuote=1"]').forEach(link => {
+    try {
+      const u = new URL(link.href, location.origin);
+      u.searchParams.delete('promo');
+      link.href = `${u.pathname}${u.search}${u.hash}`;
+    } catch (_) {}
+  });
+
   const title = card.dataset.shareTitle || document.title;
   const text = card.dataset.shareText || 'Mira esta opción de viaje de Trhoncal Travel.';
   const url = card.dataset.shareUrl || location.href;
