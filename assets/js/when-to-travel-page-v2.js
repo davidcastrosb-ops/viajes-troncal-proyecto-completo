@@ -71,7 +71,7 @@
     if(opp.end)p.set('regreso',opp.end);
     if(opp.id)p.set('ocasion',opp.id);
     if(offer?.id)p.set('oferta',offer.id);
-    const promo=offer?.publicPromoUrl||offer?.sharePromoUrl||'';
+    const promo=offer?.leadFormUrl||offer?.publicPromoUrl||offer?.sharePromoUrl||'';
     if(promo)p.set('promo',promo);
     p.set('cta',offer?'oferta_calendario':'calendario');
     return `/?${p.toString()}`;
@@ -119,7 +119,7 @@
     const title=offer.hotel||offer.title||'Opción de viaje';
     const meta=[offer.days?`${offer.days} días`:'',offer.nights?`${offer.nights} noches`:'',offer.plan||''].filter(Boolean).join(' · ');
     const price=offer.price?money(offer.price):'';
-    const detail=offer.publicPromoUrl||offer.sharePromoUrl||'';
+    const detail=offer.leadFormUrl||offer.sharePromoUrl||offer.publicPromoUrl||'';
     const quote=quoteHref(group.name,opp,offer);
     return `<div class="calendar-offer-mini">
       <div class="calendar-offer-mini-copy"><strong>${esc(title)}</strong>${meta?`<span>${esc(meta)}</span>`:''}</div>
