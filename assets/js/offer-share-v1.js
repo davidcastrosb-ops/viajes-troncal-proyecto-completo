@@ -2,6 +2,14 @@
   const card = document.querySelector('.offer-actions-card');
   if (!card) return;
 
+  // El proveedor queda como fuente operativa interna. La experiencia pública compartible
+  // permanece bajo el dominio y la marca de Trhoncal Travel.
+  document.querySelectorAll('a[href*="travelpromomaker.com"],a[href*="priceagencies.com"]').forEach(link => {
+    const wrapper = link.closest('.offer-final-actions');
+    link.remove();
+    if (wrapper && !wrapper.children.length) wrapper.remove();
+  });
+
   const title = card.dataset.shareTitle || document.title;
   const text = card.dataset.shareText || 'Mira esta opción de viaje de Trhoncal Travel.';
   const url = card.dataset.shareUrl || location.href;
