@@ -34,10 +34,15 @@
   function sync(root){
     if (!root) return;
     const isOpen = !root.hidden;
-    root.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+    const desiredAriaHidden = isOpen ? 'false' : 'true';
+    if (root.getAttribute('aria-hidden') !== desiredAriaHidden) {
+      root.setAttribute('aria-hidden', desiredAriaHidden);
+    }
+
     const panel = root.querySelector('.quote-modal-panel');
     if (panel && !panel.hasAttribute('tabindex')) panel.setAttribute('tabindex', '-1');
     if (!isOpen || root.contains(document.activeElement)) return;
+
     const items = visibleFocusable(root);
     (items[0] || panel)?.focus({ preventScroll: true });
   }
@@ -47,8 +52,17 @@
     const root = modal();
     if (!root) return;
     sync(root);
+
+    // Observe only state/content changes that can affect focusability. Watching aria-hidden
+    // while also writing aria-hidden can create a MutationObserver feedback loop and freeze
+    // the browser when the modal opens.
     const observer = new MutationObserver(() => sync(root));
-    observer.observe(root, { attributes: true, attributeFilter: ['hidden', 'aria-hidden'], childList: true, subtree: true });
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ['hidden'],
+      childList: true,
+      subtree: true
+    });
   }
 
   document.addEventListener('keydown', event => {
