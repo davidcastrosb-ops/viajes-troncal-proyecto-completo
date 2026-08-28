@@ -17,14 +17,17 @@
     const destination=destinationFor(entry);
     const destinationName=destination?.name||entry.leadDestinationVerified||entry.destinationName||'Viaje seleccionado';
     const image=validHttp(entry.image||destination?.mainImage||'');
-    const publicUrl=entry.directLinkAuthorized===true?validHttp(entry.publicPromoUrl||entry.sharePromoUrl||''):'';
+    const promoDetailUrl=entry.directLinkAuthorized===true?validHttp(entry.publicPromoUrl||''):'';
+    const contactUrl=entry.directLinkAuthorized===true?validHttp(entry.leadFormUrl||entry.sharePromoUrl||''):'';
+    const publicUrl=contactUrl||promoDetailUrl;
+    const trackingPromoUrl=promoDetailUrl||publicUrl;
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero asesoría sobre la promoción ${entry.title||destinationName} con Trhoncal Travel.`):'#cotizar';
     const price=money(entry.price);
     const duration=[entry.days?`${entry.days} días`:'',entry.nights?`${entry.nights} noches`:''].filter(Boolean).join(' · ');
     const expiry=entry.expiresAt||'';
     const verified=entry.verifiedAt||'';
     const title=entry.title||destinationName;
-    const promoAttr=publicUrl?` data-promo-url="${escapeHTML(publicUrl)}"`:'';
+    const promoAttr=trackingPromoUrl?` data-promo-url="${escapeHTML(trackingPromoUrl)}"`:'';
     return `<article class="promo-maker-card">
       ${image?`<div class="promo-maker-image"><img src="${escapeHTML(image)}" alt="${escapeHTML(title)}" loading="lazy"></div>`:''}
       <div class="promo-maker-body">
