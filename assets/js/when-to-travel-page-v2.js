@@ -73,8 +73,12 @@
     if(offer?.id)p.set('oferta',offer.id);
     const promo=offer?.leadFormUrl||offer?.publicPromoUrl||offer?.sharePromoUrl||'';
     if(promo)p.set('promo',promo);
+    if(offer?.plan)p.set('plan',offer.plan);
     p.set('cta',offer?'oferta_calendario':'calendario');
     return `/?${p.toString()}`;
+  }
+  function shareHref(offer){
+    return offer?.id?`/oferta/${encodeURIComponent(offer.id)}`:'';
   }
   function renderCard(opportunity,offerMap,destinations,index){
     const offers=(opportunity.offerIds||[]).map(id=>offerMap.get(id)).filter(Boolean);
@@ -119,12 +123,16 @@
     const title=offer.hotel||offer.title||'Opción de viaje';
     const meta=[offer.days?`${offer.days} días`:'',offer.nights?`${offer.nights} noches`:'',offer.plan||''].filter(Boolean).join(' · ');
     const price=offer.price?money(offer.price):'';
-    const detail=offer.leadFormUrl||offer.sharePromoUrl||offer.publicPromoUrl||'';
+    const branded=shareHref(offer);
     const quote=quoteHref(group.name,opp,offer);
     return `<div class="calendar-offer-mini">
       <div class="calendar-offer-mini-copy"><strong>${esc(title)}</strong>${meta?`<span>${esc(meta)}</span>`:''}</div>
       ${price?`<b>${esc(price)}</b>`:''}
-      <div class="calendar-offer-mini-actions">${detail?`<a href="${esc(detail)}" target="_blank" rel="noopener noreferrer nofollow sponsored" data-offer="${esc(offer.id||'')}" data-occasion="${esc(opp.id||'')}">Ver promoción ↗</a>`:''}<a class="calendar-offer-quote" href="${esc(quote)}">Quiero este viaje →</a></div>
+      <div class="calendar-offer-mini-actions">
+        ${branded?`<a href="${esc(branded)}" data-offer="${esc(offer.id||'')}" data-occasion="${esc(opp.id||'')}">Ver promoción →</a>`:''}
+        <a class="calendar-offer-quote" href="${esc(quote)}">Quiero este viaje →</a>
+        ${branded?`<a class="offer-share-link offer-share-pill" href="${esc(branded)}" data-offer-share="${esc(offer.id||'')}">Compartir promoción</a>`:''}
+      </div>
     </div>`;
   }
   function compactOpportunityCard(opp,offerMap,destinations){
