@@ -20,12 +20,12 @@
     document.head.appendChild(style);
   }
 
-  function loadCalendarSourcesHelper(){
-    if(document.querySelector('script[data-calendar-sources-v1]') || window.__trhoncalCalendarSourcesV1) return;
+  function loadHelper(src,dataKey,globalKey){
+    if(document.querySelector(`script[${dataKey}]`) || window[globalKey]) return;
     const script=document.createElement('script');
-    script.src='/assets/js/calendar-sources-v1.js';
+    script.src=src;
     script.defer=true;
-    script.dataset.calendarSourcesV1='';
+    script.setAttribute(dataKey,'');
     document.head.appendChild(script);
   }
 
@@ -57,7 +57,9 @@
 
   function init(){
     ensureModalFixStyles();
-    loadCalendarSourcesHelper();
+    loadHelper('/assets/js/calendar-sources-v1.js','data-calendar-sources-v1','__trhoncalCalendarSourcesV1');
+    loadHelper('/assets/js/calendar-guard-v1.js','data-calendar-guard-v1','__trhoncalCalendarGuardV1');
+
     const root = modal();
     if (!root) return;
     sync(root);
