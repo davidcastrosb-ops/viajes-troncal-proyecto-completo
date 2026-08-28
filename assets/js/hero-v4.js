@@ -22,6 +22,12 @@
     script.onload=()=>{try{if(typeof renderOffers==='function')renderOffers();}catch(_){/* datos aún cargando */}};
     document.head.appendChild(script);
   }
+  function loadOfferLinksAssets(){
+    if(document.querySelector('script[data-offer-links-v1],script[src="/assets/js/offer-links-v1.js"]'))return;
+    const script=document.createElement('script');
+    script.src='/assets/js/offer-links-v1.js';script.defer=true;script.dataset.offerLinksV1='';
+    document.head.appendChild(script);
+  }
   function destinationText(d){
     return [
       ...(Array.isArray(d.segments)?d.segments:[]),d.travelerProfile||'',d.type||'',d.summary||'',d.whyGo||'',d.gastronomy||'',
@@ -127,6 +133,7 @@
     loadHeroV5Assets();
     loadWhenTravelAssets();
     loadPromoMakerAssets();
+    loadOfferLinksAssets();
     let tries=0;
     const timer=setInterval(()=>{
       tries++;
