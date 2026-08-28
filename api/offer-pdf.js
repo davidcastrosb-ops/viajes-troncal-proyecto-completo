@@ -118,7 +118,6 @@ export default async function handler(req, res) {
   const destination = destinations.find(d => d && d.id === offer.destinationId) || null;
   const destinationName = clean(destination?.name || offer.leadDestinationVerified || 'Viaje especial');
   const canonical = `https://${PUBLIC_HOST}/oferta/${encodeURIComponent(offer.id)}`;
-  const externalPromo = safeHttpUrl(offer.leadFormUrl || offer.sharePromoUrl || offer.publicPromoUrl || '');
   const imageUrl = safeHttpUrl(offer.image || destination?.mainImage || '');
   const title = clean(offer.title || destinationName);
   const price = money(offer.price);
@@ -212,7 +211,7 @@ export default async function handler(req, res) {
   page.drawText('Trhoncal Travel', { x: 42, y: 55, font: bold, size: 10, color: navy });
   page.drawText('WhatsApp 33 2933 5952  |  viajestroncal@gmail.com', { x: 42, y: 40, font: regular, size: 8.8, color: gray });
   page.drawText('Consulta siempre la versión vigente antes de pagar o reservar.', { x: 42, y: 26, font: regular, size: 8.3, color: gray });
-  if (externalPromo) page.drawText('La ficha enlazada muestra la promoción vigente del proveedor.', { x: 312, y: 26, font: regular, size: 7.3, color: gray });
+  page.drawText('El QR abre la versión vigente de esta promoción en Trhoncal Travel.', { x: 312, y: 26, font: regular, size: 7.3, color: gray });
 
   const bytes = await pdfDoc.save();
   const safeName = clean(destinationName).replace(/[^A-Za-z0-9áéíóúÁÉÍÓÚñÑ]+/g, '-').replace(/^-|-$/g, '') || 'oferta';
