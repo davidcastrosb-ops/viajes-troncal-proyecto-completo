@@ -12,6 +12,14 @@
     '[tabindex]:not([tabindex="-1"])'
   ].join(',');
 
+  function ensureModalFixStyles(){
+    if(document.getElementById('trhoncal-modal-fix-styles')) return;
+    const style=document.createElement('style');
+    style.id='trhoncal-modal-fix-styles';
+    style.textContent='.quote-modal-destination[hidden]{display:none!important}';
+    document.head.appendChild(style);
+  }
+
   function loadCalendarSourcesHelper(){
     if(document.querySelector('script[data-calendar-sources-v1]') || window.__trhoncalCalendarSourcesV1) return;
     const script=document.createElement('script');
@@ -48,20 +56,18 @@
   }
 
   function init(){
+    ensureModalFixStyles();
     loadCalendarSourcesHelper();
     const root = modal();
     if (!root) return;
     sync(root);
 
-    // Observe only state/content changes that can affect focusability. Watching aria-hidden
-    // while also writing aria-hidden can create a MutationObserver feedback loop and freeze
-    // the browser when the modal opens.
+    // Only the hidden state needs observation. Observing aria-hidden while also writing it
+    // created a feedback loop that could freeze the browser as soon as the modal opened.
     const observer = new MutationObserver(() => sync(root));
     observer.observe(root, {
       attributes: true,
-      attributeFilter: ['hidden'],
-      childList: true,
-      subtree: true
+      attributeFilter: ['hidden']
     });
   }
 
