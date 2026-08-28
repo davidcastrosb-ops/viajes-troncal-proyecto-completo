@@ -4,6 +4,15 @@
 
   let decorating = false;
 
+  function ensureStyles() {
+    if (document.querySelector('link[data-offer-actions-v1]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/assets/css/offer-actions-v1.css';
+    link.dataset.offerActionsV1 = '';
+    document.head.appendChild(link);
+  }
+
   function shareHref(id) {
     return `/oferta/${encodeURIComponent(String(id || '').trim())}`;
   }
@@ -51,6 +60,7 @@
   }
 
   function init() {
+    ensureStyles();
     decorate();
     const observer = new MutationObserver(() => requestAnimationFrame(decorate));
     observer.observe(document.body, { childList: true, subtree: true });
