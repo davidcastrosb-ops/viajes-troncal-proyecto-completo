@@ -2,25 +2,10 @@
   if (window.__trhoncalOfferLinksV1) return;
   window.__trhoncalOfferLinksV1 = true;
 
-  const MASTER_URL = '/api/master';
-  let offerMap = new Map();
   let decorating = false;
 
-  const safeUrl = value => {
-    try {
-      const u = new URL(String(value || ''), location.origin);
-      return /^https?:$/.test(u.protocol) ? u.toString() : '';
-    } catch (_) {
-      return '';
-    }
-  };
-
-  function bestProviderLink(offer) {
-    return safeUrl(offer?.leadFormUrl || offer?.sharePromoUrl || offer?.publicPromoUrl || '');
-  }
-
   function shareHref(id) {
-    return `/oferta/${encodeURIComponent(id)}`;
+    return `/oferta/${encodeURIComponent(String(id || '').trim())}`;
   }
 
   function addShare(container, id) {
@@ -28,27 +13,33 @@
     const a = document.createElement('a');
     a.href = shareHref(id);
     a.dataset.offerShare = id;
-    a.textContent = 'Compartir ↗';
+    a.textContent = 'Compartir promoción';
+    a.setAttribute('aria-label', 'Compartir esta promoción de Trhoncal Travel');
 
-    if (container.classList.contains('promo-maker-actions')) a.className = 'promo-maker-secondary';
-    else if (container.classList.contains('travel-offer-actions')) a.className = 'btn btn-soft';
-    else a.className = 'offer-share-link';
+    if (container.classList.contains('promo-maker-actions')) {
+      a.className = 'promo-maker-secondary offer-share-pill';
+    } else if (container.classList.contains('travel-offer-actions')) {
+      a.className = 'btn btn-soft offer-share-pill';
+    } else {
+      a.className = 'offer-share-link offer-share-pill';
+    }
 
     container.appendChild(a);
   }
 
   function decorate() {
-    if (decorating || !offerMap.size) return;
+    if (decorating) return;
     decorating = true;
     try {
       document.querySelectorAll('[data-offer]').forEach(node => {
-        const id = node.dataset.offer;
-        const offer = offerMap.get(id);
-        if (!offer) return;
+        const id = String(node.dataset.offer || '').trim();
+        if (!id) return;
 
         if (node.tagName === 'A' && /ver promoción/i.test(node.textContent || '')) {
-          const target = bestProviderLink(offer);
-          if (target) node.href = target;
+          node.href = shareHref(id);
+          node.textContent = 'Ver promoción →';
+          node.removeAttribute('target');
+          node.removeAttribute('rel');
         }
 
         const container = node.closest('.promo-maker-actions,.calendar-offer-mini-actions,.travel-offer-actions');
@@ -59,16 +50,10 @@
     }
   }
 
-  async function init() {
-    try {
-      const response = await fetch(MASTER_URL, { cache: 'no-store' });
-      if (!response.ok) return;
-      const master = await response.json();
-      offerMap = new Map((master.offers || []).map(o => [o.id, o]));
-      decorate();
-      const observer = new MutationObserver(() => requestAnimationFrame(decorate));
-      observer.observe(document.body, { childList: true, subtree: true });
-    } catch (_) {}
+  function init() {
+    decorate();
+    const observer = new MutationObserver(() => requestAnimationFrame(decorate));
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
