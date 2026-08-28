@@ -13,14 +13,17 @@
   function destinationFor(entry){
     return (typeof DESTINATIONS!=='undefined'?DESTINATIONS:[]).find(d=>d.id===entry.destinationId)||null;
   }
+  function brandedOfferUrl(entry){
+    return entry?.id?`/oferta/${encodeURIComponent(entry.id)}`:'';
+  }
   function promoCard(entry){
     const destination=destinationFor(entry);
     const destinationName=destination?.name||entry.leadDestinationVerified||entry.destinationName||'Viaje seleccionado';
     const image=validHttp(entry.image||destination?.mainImage||'');
-    const promoDetailUrl=entry.directLinkAuthorized===true?validHttp(entry.publicPromoUrl||''):'';
-    const contactUrl=entry.directLinkAuthorized===true?validHttp(entry.leadFormUrl||entry.sharePromoUrl||''):'';
-    const publicUrl=contactUrl||promoDetailUrl;
-    const trackingPromoUrl=promoDetailUrl||publicUrl;
+    const providerDetailUrl=entry.directLinkAuthorized===true?validHttp(entry.publicPromoUrl||''):'';
+    const providerContactUrl=entry.directLinkAuthorized===true?validHttp(entry.leadFormUrl||entry.sharePromoUrl||''):'';
+    const brandedUrl=brandedOfferUrl(entry);
+    const trackingPromoUrl=providerDetailUrl||providerContactUrl||'';
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero asesoría sobre la promoción ${entry.title||destinationName} con Trhoncal Travel.`):'#cotizar';
     const price=money(entry.price);
     const duration=[entry.days?`${entry.days} días`:'',entry.nights?`${entry.nights} noches`:''].filter(Boolean).join(' · ');
@@ -28,6 +31,7 @@
     const verified=entry.verifiedAt||'';
     const title=entry.title||destinationName;
     const promoAttr=trackingPromoUrl?` data-promo-url="${escapeHTML(trackingPromoUrl)}"`:'';
+    const planAttr=entry.plan?` data-plan="${escapeHTML(entry.plan)}"`:'';
     return `<article class="promo-maker-card">
       ${image?`<div class="promo-maker-image"><img src="${escapeHTML(image)}" alt="${escapeHTML(title)}" loading="lazy"></div>`:''}
       <div class="promo-maker-body">
@@ -38,8 +42,9 @@
         <div class="promo-maker-meta">${duration?`<span>${escapeHTML(duration)}</span>`:''}${expiry?`<span>Vigente hasta ${escapeHTML(expiry)}</span>`:''}${verified?`<span>Precio confirmado ${escapeHTML(verified)}</span>`:''}</div>
         ${entry.note?`<p class="promo-maker-note">${escapeHTML(entry.note)}</p>`:''}
         <div class="promo-maker-actions">
-          ${publicUrl?`<a class="promo-maker-secondary" href="${escapeHTML(publicUrl)}" target="_blank" rel="noopener noreferrer nofollow sponsored" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}">Ver promoción ↗</a>`:''}
-          <a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destinationName)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}"${promoAttr} data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a>
+          ${brandedUrl?`<a class="promo-maker-secondary" href="${escapeHTML(brandedUrl)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}">Ver promoción →</a>`:''}
+          <a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destinationName)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}"${promoAttr}${planAttr} data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a>
+          ${brandedUrl?`<a class="promo-maker-secondary offer-share-pill" href="${escapeHTML(brandedUrl)}" data-offer-share="${escapeHTML(entry.id||'')}">Compartir promoción</a>`:''}
           <a class="promo-maker-secondary" href="${escapeHTML(wa)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a>
         </div>
         <p class="promo-maker-disclaimer">Precio, disponibilidad y condiciones se reconfirman antes de reservar.</p>
