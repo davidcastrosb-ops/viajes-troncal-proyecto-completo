@@ -71,8 +71,6 @@
     if(opp.end)p.set('regreso',opp.end);
     if(opp.id)p.set('ocasion',opp.id);
     if(offer?.id)p.set('oferta',offer.id);
-    const promo=offer?.leadFormUrl||offer?.publicPromoUrl||offer?.sharePromoUrl||'';
-    if(promo)p.set('promo',promo);
     if(offer?.plan)p.set('plan',offer.plan);
     p.set('cta',offer?'oferta_calendario':'calendario');
     return `/?${p.toString()}`;
