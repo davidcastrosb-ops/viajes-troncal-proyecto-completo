@@ -16,6 +16,10 @@
     return String(value == null ? '' : value).trim().slice(0, max);
   }
 
+  function resetContext(){
+    Object.keys(state).forEach(key => { state[key] = ''; });
+  }
+
   function readQuery() {
     const p = new URLSearchParams(location.search);
     return {
@@ -93,8 +97,13 @@
   function captureClick(event) {
     const el = event.target.closest('[data-quote-launch],.quote-link,[data-travel-quote],.calendar-offer-quote');
     if (!el) return;
+
+    // Every new CTA starts a fresh commercial context. Otherwise a previous destination,
+    // occasion or offer could leak into a later generic quote request.
+    resetContext();
     mergeContext(contextFromElement(el));
-    if (!state.ctaOrigin) state.ctaOrigin = inferCtaOrigin(el);
+    state.ctaOrigin = state.ctaOrigin || inferCtaOrigin(el);
+
     setTimeout(applyContextToForm, 40);
     setTimeout(applyContextToForm, 140);
   }
@@ -123,8 +132,10 @@
   function openIncomingQuote() {
     const p = new URLSearchParams(location.search);
     if (p.get('travelQuote') !== '1') return;
+
+    resetContext();
     mergeContext(readQuery());
-    if (!state.ctaOrigin) state.ctaOrigin = 'cuando_viajar';
+    state.ctaOrigin = state.ctaOrigin || 'cuando_viajar';
 
     const launch = () => {
       const trigger = document.querySelector('[data-quote-launch],.quote-link');
@@ -148,14 +159,14 @@
 
   document.addEventListener('click', captureClick, true);
   document.addEventListener('DOMContentLoaded', () => {
-    mergeContext(readQuery());
     installLeadPatch();
     openIncomingQuote();
   });
 
   window.TrhoncalQuoteContext = {
     get: () => ({ ...state }),
-    set: mergeContext,
-    apply: applyContextToForm
+    set: next => { resetContext(); mergeContext(next); },
+    apply: applyContextToForm,
+    reset: resetContext
   };
 })();
