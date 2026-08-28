@@ -9,6 +9,14 @@
       "destination": "/api/robots"
     },
     {
+      "source": "/oferta/:id.pdf",
+      "destination": "/api/offer-pdf?id=:id"
+    },
+    {
+      "source": "/oferta/:id",
+      "destination": "/api/offer?id=:id"
+    },
+    {
       "source": "/mexico/:slug",
       "destination": "/api/destination?slug=:slug"
     }
