@@ -69,6 +69,44 @@
     if (trigger) trigger.classList.add('has-value');
   }
 
+  function normalizePlan(value = '') {
+    const plan = clean(value, 80).toLowerCase();
+    if (!plan) return '';
+    if (/sin\s+todo\s+incluido/.test(plan)) return 'Sin todo incluido';
+    if (/todo\s+incluido/.test(plan)) return 'Todo incluido';
+    if (/recom/i.test(plan)) return 'Recomiéndame';
+    return '';
+  }
+
+  function selectPlan(plan = '') {
+    const normalized = normalizePlan(plan);
+    if (!normalized) return false;
+    const form = document.getElementById('travelQuoteForm');
+    if (!form) return false;
+    const radio = Array.from(form.querySelectorAll('[name="hospedaje"]')).find(input => input.value === normalized);
+    if (!radio) return false;
+    radio.checked = true;
+    return true;
+  }
+
+  async function applyOfferPlan() {
+    if (!state.offerId) return false;
+
+    let offer = null;
+    if (typeof OFFERS !== 'undefined' && Array.isArray(OFFERS)) {
+      offer = OFFERS.find(item => item && item.id === state.offerId) || null;
+    }
+
+    if (!offer && window.TrhoncalMasterData?.load) {
+      try {
+        const master = await window.TrhoncalMasterData.load();
+        offer = (master?.offers || []).find(item => item && item.id === state.offerId) || null;
+      } catch (_) {}
+    }
+
+    return offer ? selectPlan(offer.plan || '') : false;
+  }
+
   function applyContextToForm() {
     const form = document.getElementById('travelQuoteForm');
     if (!form) return false;
@@ -77,6 +115,7 @@
     }
     setDateField('fechaSalida', state.start);
     setDateField('fechaRegreso', state.end);
+    applyOfferPlan().catch(()=>{});
     return true;
   }
 
@@ -106,6 +145,7 @@
 
     setTimeout(applyContextToForm, 40);
     setTimeout(applyContextToForm, 140);
+    setTimeout(applyContextToForm, 500);
   }
 
   function installLeadPatch() {
@@ -150,6 +190,7 @@
       trigger.click();
       setTimeout(applyContextToForm, 100);
       setTimeout(applyContextToForm, 220);
+      setTimeout(applyContextToForm, 650);
       history.replaceState({}, '', location.pathname + '#cotizar');
       return true;
     };
