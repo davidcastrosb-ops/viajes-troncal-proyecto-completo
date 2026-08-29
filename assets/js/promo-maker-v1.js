@@ -19,31 +19,29 @@
   function promoCard(entry){
     const destination=destinationFor(entry);
     const destinationName=destination?.name||entry.leadDestinationVerified||entry.destinationName||'Viaje seleccionado';
-    const image=validHttp(entry.image||destination?.mainImage||'');
-    const providerDetailUrl=entry.directLinkAuthorized===true?validHttp(entry.publicPromoUrl||''):'';
-    const providerContactUrl=entry.directLinkAuthorized===true?validHttp(entry.leadFormUrl||entry.sharePromoUrl||''):'';
+    // Una oferta de hotel necesita su propia imagen de promoción. No mostramos otra
+    // propiedad ni una foto genérica de destino si Imagen_Promo_URL está vacía.
+    const image=validHttp(entry.image||(!entry.hotel?destination?.mainImage:'')||'');
     const brandedUrl=brandedOfferUrl(entry);
-    const trackingPromoUrl=providerDetailUrl||providerContactUrl||'';
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero asesoría sobre la promoción ${entry.title||destinationName} con Trhoncal Travel.`):'#cotizar';
     const price=money(entry.price);
     const duration=[entry.days?`${entry.days} días`:'',entry.nights?`${entry.nights} noches`:''].filter(Boolean).join(' · ');
     const expiry=entry.expiresAt||'';
     const verified=entry.verifiedAt||'';
     const title=entry.title||destinationName;
-    const promoAttr=trackingPromoUrl?` data-promo-url="${escapeHTML(trackingPromoUrl)}"`:'';
     const planAttr=entry.plan?` data-plan="${escapeHTML(entry.plan)}"`:'';
     return `<article class="promo-maker-card">
-      ${image?`<div class="promo-maker-image"><img src="${escapeHTML(image)}" alt="${escapeHTML(title)}" loading="lazy"></div>`:''}
+      ${image?`<div class="promo-maker-image"><img src="${escapeHTML(image)}" alt="${escapeHTML(entry.hotel?`${entry.hotel} en ${destinationName}`:title)}" loading="lazy"></div>`:`<div class="promo-maker-image promo-maker-image-missing"><span>TRHONCAL TRAVEL</span><strong>${escapeHTML(entry.hotel||destinationName)}</strong><small>Imagen de esta promoción pendiente</small></div>`}
       <div class="promo-maker-body">
         <span class="promo-maker-destination">${escapeHTML(destinationName)}</span>
-        <h3>${escapeHTML(title)}</h3>
-        ${entry.hotel?`<p class="promo-maker-hotel">${escapeHTML(entry.hotel)}</p>`:''}
+        <h3${entry.hotel?' translate="no" class="notranslate"':''}>${escapeHTML(title)}</h3>
+        ${entry.hotel?`<p class="promo-maker-hotel notranslate" translate="no">${escapeHTML(entry.hotel)}</p>`:''}
         ${price?`<div class="promo-maker-price"><small>Desde</small><strong>${escapeHTML(price)}</strong>${entry.priceUnit?`<span>${escapeHTML(entry.priceUnit)}</span>`:''}</div>`:''}
         <div class="promo-maker-meta">${duration?`<span>${escapeHTML(duration)}</span>`:''}${expiry?`<span>Vigente hasta ${escapeHTML(expiry)}</span>`:''}${verified?`<span>Precio confirmado ${escapeHTML(verified)}</span>`:''}</div>
         ${entry.note?`<p class="promo-maker-note">${escapeHTML(entry.note)}</p>`:''}
         <div class="promo-maker-actions">
           ${brandedUrl?`<a class="promo-maker-secondary" href="${escapeHTML(brandedUrl)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}">Ver promoción →</a>`:''}
-          <a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destinationName)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}"${promoAttr}${planAttr} data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a>
+          <a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destinationName)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}"${planAttr} data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a>
           ${brandedUrl?`<a class="promo-maker-secondary offer-share-pill" href="${escapeHTML(brandedUrl)}" data-offer-share="${escapeHTML(entry.id||'')}">Compartir promoción</a>`:''}
           <a class="promo-maker-secondary" href="${escapeHTML(wa)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a>
         </div>
