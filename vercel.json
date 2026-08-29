@@ -9,6 +9,10 @@
       "destination": "/api/robots"
     },
     {
+      "source": "/hotel-v2/:slug",
+      "destination": "/api/hotel-v2?slug=:slug"
+    },
+    {
       "source": "/oferta/:id.pdf",
       "destination": "/api/offer-pdf?id=:id"
     },
