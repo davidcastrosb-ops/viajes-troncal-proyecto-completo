@@ -9,7 +9,7 @@ const HOTELS = {
     officialUrl:'https://hotelfriendlyfun.com/',
     description:'Hotel todo incluido en la zona hotelera de Puerto Vallarta, con acceso a playa, habitaciones con vistas parciales o totales al mar y actividades para familias, parejas y amigos.',
     features:['Alimentos y bebidas 24 horas','Acceso a playa y Beach Club','Actividades recreativas','Wi-Fi','Gimnasio y SPA','Kids Club'],
-    room:{name:'Habitación Estándar',note:'Referencia del hotel; la categoría exacta incluida depende de cada promoción.',details:['1 o 2 camas','Vista parcial al mar o alberca','Balcón o terraza']},
+    room:{name:'Habitación Estándar',note:'Referencia del hotel; la categoría exacta incluida depende de cada promoción.',details:['1 o 2 camas','42 m²','Vista parcial al mar o alberca','Hasta 4 personas','Balcón o terraza']},
     offerIds:['OF-PA-PVR-REV26-001'],
     images:[
       ['https://hotelfriendlyfun.com/wp-content/uploads/elementor/thumbs/Nuestro-Hotel-1-scaled-rkpk2mkfr6ub38b0at452nihyyvtpleyvscw855o6w.jpg','Vista del hotel Friendly Fun Vallarta','hotel'],
@@ -22,20 +22,20 @@ const HOTELS = {
   },
   'barcelo-puerto-vallarta': {
     id:'HOT-PVR-BARCELO-001', name:'Barceló Puerto Vallarta', destinationName:'Puerto Vallarta', category:'5 estrellas',
-    address:'Zona Hotelera Sur Km 11.5, 48294, Puerto Vallarta, Jalisco, México', officialUrl:'https://www.barcelo.com/es-mx/barcelo-puerto-vallarta/',
+    address:'Zona Hotelera Sur Km 11.5, 48294, Puerto Vallarta, Jalisco, México', officialUrl:'https://www.barcelo.com/en-us/barcelo-puerto-vallarta/',
     description:'Resort todo incluido frente a la playa de Mismaloya, rodeado de montañas y con vistas a la Bahía de Banderas. Cuenta con suites, albercas, restaurantes y servicios para familias y parejas.',
-    features:['Acceso directo a Playa Mismaloya','4 albercas','Restaurantes a la carta y buffet','Spa','Servicios para familias','Habitaciones tipo suite'],
-    room:{name:'Habitación según promoción',note:'La categoría exacta incluida depende de la promoción vigente.',details:['Categoría según promoción','Todo incluido','2 adultos en la promoción actual']},
+    features:['Acceso directo a Playa Mismaloya','4 albercas','Restaurantes a la carta y buffet','Spa','Ideal para familias','Habitaciones tipo suite'],
+    room:{name:'Habitación de la promoción',note:'La promoción vigente indica Estándar Run of House; el hotel maneja distintas categorías de suite.',details:['Categoría según promoción','Todo incluido','2 adultos']},
     offerIds:['OF-PA-PVR-SEP26-002'],
     images:[['https://raw.githubusercontent.com/davidcastrosb-ops/viajes-troncal-proyecto-completo/main/assets/images/promos/barcelo-puerto-vallarta.jpg','Vista exterior de Barceló Puerto Vallarta','hotel']],
-    sources:['https://www.barcelo.com/es-mx/barcelo-puerto-vallarta/']
+    sources:['https://www.barcelo.com/en-us/barcelo-puerto-vallarta/']
   },
   'grand-decameron-bucerias': {
     id:'HOT-NAY-DECAMERON-001', name:'Grand Decameron Complex, A Trademark All Inclusive', destinationName:'Bucerías', category:'3 estrellas',
     address:'Avenida Lázaro Cárdenas #150, Bucerías, Nayarit, México', officialUrl:'https://www.decameron.com/es/hoteles/bucerias/decameron-complex/',
-    description:'Complejo todo incluido en Bucerías con playa, piscinas, restaurantes, bares y actividades para familias.',
-    features:['5 piscinas','Playa','Restaurantes','Bares','Gimnasio y SPA','Actividades y entretenimiento'],
-    room:{name:'Habitación Estándar',note:'Los detalles de habitación deben coincidir con la promoción vigente.',details:['Promoción de prueba: Estándar 2 queens','Check-in 15:00','Check-out 12:00','Vista exterior']},
+    description:'Complejo todo incluido en Bucerías integrado por las unidades Flamingos, Tropical y Royal, con una extensa playa, cinco piscinas, restaurantes, bares y actividades para familias.',
+    features:['5 piscinas','Extensa playa','5 restaurantes a la carta y 3 buffet','7 bares','Gimnasio y SPA','Actividades y entretenimiento'],
+    room:{name:'Habitación Estándar',note:'La promoción vigente indica Estándar 2 queens.',details:['2 camas dobles o 1 King','Hasta 4 personas','Vista al jardín','Aire acondicionado','Check-in 15:00 · Check-out 12:00']},
     offerIds:['OF-PA-NAY-REV26-003'],
     images:[['https://www.decameron.com/media/uploads/cms_apps/imagenes/complex-2026_7M6lI68.webp?q=pr%3Asharp%2Frs%3Afill%2Fw%3A1920%2Fh%3A600%2Fg%3Ace%2Ff%3Ajpg','Grand Decameron Complex en Bucerías','hotel']],
     sources:['https://www.decameron.com/es/hoteles/bucerias/decameron-complex/','https://www.decameron.com/es/hoteles/bucerias/decameron-complex/galeria/']
@@ -46,46 +46,23 @@ function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt
 function safe(v=''){try{const u=new URL(String(v));return /^https?:$/.test(u.protocol)?u.toString():'';}catch(_){return '';}}
 function money(v){const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n):String(v||'');}
 function dateMx(v=''){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return String(v||'');const d=new Date(`${v}T12:00:00`);return new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric'}).format(d);}
-async function loadMaster(){const s=MASTER_ENDPOINT.includes('?')?'&':'?';const c=new AbortController();const t=setTimeout(()=>c.abort(),10000);try{const r=await fetch(`${MASTER_ENDPOINT}${s}_ts=${Date.now()}`,{cache:'no-store',redirect:'follow',signal:c.signal,headers:{'User-Agent':'TrhoncalTravel-HotelPreview/1.1','Cache-Control':'no-cache'}});if(!r.ok)throw new Error(`Master ${r.status}`);return await r.json();}finally{clearTimeout(t);}}
+async function loadMaster(){const s=MASTER_ENDPOINT.includes('?')?'&':'?';const c=new AbortController();const t=setTimeout(()=>c.abort(),10000);try{const r=await fetch(`${MASTER_ENDPOINT}${s}_ts=${Date.now()}`,{cache:'no-store',redirect:'follow',signal:c.signal,headers:{'User-Agent':'TrhoncalTravel-HotelPreview/1.0','Cache-Control':'no-cache'}});if(!r.ok)throw new Error(`Master ${r.status}`);return await r.json();}finally{clearTimeout(t);}}
 function galleryButton(img,i,total){const more=i===4&&total>5?`<span class="hotel-v2-gallery-more">Ver ${total} fotos</span>`:'';return `<button type="button" data-gallery-index="${i}" aria-label="Abrir foto ${i+1}"><img src="${esc(img[0])}" alt="${esc(img[1])}" loading="${i?'lazy':'eager'}">${more}</button>`;}
-function splitText(v){return String(v||'').split(/;|\n/).map(x=>x.trim()).filter(Boolean);}
 
 export default async function handler(req,res){
   if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).send('Method not allowed');}
-  const slug=String(req.query.slug||'').trim();const fallback=HOTELS[slug];
-  if(!fallback){res.setHeader('X-Robots-Tag','noindex,nofollow');return res.status(404).send('Hotel de prueba no disponible');}
+  const slug=String(req.query.slug||'').trim();const hotel=HOTELS[slug];
+  if(!hotel){res.setHeader('X-Robots-Tag','noindex,nofollow');return res.status(404).send('Hotel de prueba no disponible');}
   let payload={offers:[]};try{payload=await loadMaster();}catch(_){}
   const offers=Array.isArray(payload.offers)?payload.offers:[];
-  const masterHotels=Array.isArray(payload.hotels)?payload.hotels:[];
-  const masterImages=Array.isArray(payload.hotelImages)?payload.hotelImages:[];
-  const masterHotel=masterHotels.find(h=>h&&h.slug===slug)||null;
-  const masterGallery=masterHotel?masterImages.filter(img=>img&&img.hotelId===masterHotel.id&&safe(img.url)).sort((a,b)=>(a.order||999)-(b.order||999)).map(img=>[img.url,img.alt||masterHotel.name,String(img.type||'').toLowerCase()]):[];
-  const hotel={
-    ...fallback,
-    ...(masterHotel?{
-      id:masterHotel.id||fallback.id,
-      name:masterHotel.name||fallback.name,
-      destinationName:masterHotel.destinationName||fallback.destinationName,
-      address:masterHotel.address||fallback.address,
-      category:masterHotel.category||fallback.category,
-      officialUrl:masterHotel.officialUrl||fallback.officialUrl,
-      description:masterHotel.description||fallback.description,
-      features:Array.isArray(masterHotel.amenities)&&masterHotel.amenities.length?masterHotel.amenities:fallback.features,
-      room:masterHotel.room&&typeof masterHotel.room==='object'?{name:masterHotel.room.name||fallback.room.name,note:masterHotel.room.note||fallback.room.note,details:Array.isArray(masterHotel.room.details)&&masterHotel.room.details.length?masterHotel.room.details:fallback.room.details}:fallback.room,
-      images:masterGallery.length?masterGallery:fallback.images,
-      sources:[masterHotel.officialUrl,...fallback.sources].filter(Boolean)
-    }:{}),
-  };
   const requested=String(req.query.oferta||'').trim();
-  const validOfferIds=new Set(fallback.offerIds||[]);
-  const belongs=o=>o&&(o.hotelId===hotel.id||validOfferIds.has(o.id));
-  const offer=offers.find(o=>belongs(o)&&(requested?o.id===requested:true))||offers.find(belongs)||null;
+  const validOfferIds=new Set(hotel.offerIds||[]);
+  const offer=offers.find(o=>o&&validOfferIds.has(o.id)&&(requested?o.id===requested:true))||offers.find(o=>o&&validOfferIds.has(o.id))||null;
   const images=(hotel.images||[]).filter(x=>safe(x[0]));
-  const hero=images[0]||null;const roomImage=images.find(x=>String(x[2]||'').includes('habit'))||images[1]||hero;
+  const hero=images[0]||null;const roomImage=images.find(x=>x[2]==='habitacion')||images[1]||hero;
   const destinationName=offer?.leadDestinationVerified||hotel.destinationName;
   const title=offer?.title||hotel.name;
-  const requestHost=String(req.headers.host||PUBLIC_HOST).split(':')[0];
-  const previewUrl=`https://${requestHost}/hotel-v2/${encodeURIComponent(slug)}${offer?`?oferta=${encodeURIComponent(offer.id)}`:''}`;
+  const previewUrl=`https://${PUBLIC_HOST}/hotel-v2/${encodeURIComponent(slug)}${offer?`?oferta=${encodeURIComponent(offer.id)}`:''}`;
   const quote=new URLSearchParams({cta:'hotel_minisite_v2',destino:destinationName});
   if(offer?.travelStart)quote.set('salida',offer.travelStart);if(offer?.travelEnd)quote.set('regreso',offer.travelEnd);if(offer?.occasionId)quote.set('ocasion',offer.occasionId);if(offer?.id)quote.set('oferta',offer.id);if(offer?.plan)quote.set('plan',offer.plan);
   const quoteUrl=`/cotizar-v2/?${quote.toString()}`;
@@ -102,7 +79,7 @@ export default async function handler(req,res){
   const roomDetails=(hotel.room?.details||[]).map(x=>`<li>${esc(x)}</li>`).join('');
   const offerEssentials=includes.length?includes.map(x=>`<li>${esc(x)}</li>`).join(''):`${offer?.hotel?`<li>Hotel: <span translate="no" class="notranslate">${esc(offer.hotel)}</span></li>`:''}${duration?`<li>Estancia: ${esc(duration)}</li>`:''}${offer?.plan?`<li>Plan: ${esc(offer.plan)}</li>`:''}${offer?.occupancy?`<li>Viajeros: ${esc(offer.occupancy)}</li>`:''}`;
   const mapSrc=`https://www.google.com/maps?q=${encodeURIComponent(hotel.address)}&output=embed`;
-  const sourceLinks=[...new Set(hotel.sources||[])].map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">Fuente ${i+1}</a>`).join(' · ');
+  const sourceLinks=(hotel.sources||[]).map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">Fuente ${i+1}</a>`).join(' · ');
   const galleryData=JSON.stringify(images.map(x=>({url:x[0],alt:x[1]}))).replace(/</g,'\\u003c');
   const mobilePrice=price||'Consultar';
   res.setHeader('Content-Type','text/html; charset=utf-8');res.setHeader('X-Robots-Tag','noindex,nofollow');res.setHeader('Cache-Control','public, s-maxage=60, stale-while-revalidate=180');
