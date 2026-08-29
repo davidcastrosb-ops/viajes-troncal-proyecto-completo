@@ -9,6 +9,22 @@
       "destination": "/api/robots"
     },
     {
+      "source": "/destinos-v2",
+      "destination": "/api/destinations-v2"
+    },
+    {
+      "source": "/destinos-v2/",
+      "destination": "/api/destinations-v2"
+    },
+    {
+      "source": "/ofertas-v2",
+      "destination": "/api/offers-v2"
+    },
+    {
+      "source": "/ofertas-v2/",
+      "destination": "/api/offers-v2"
+    },
+    {
       "source": "/destino-v2/:slug",
       "destination": "/api/destination-hub-v4?slug=:slug"
     },
