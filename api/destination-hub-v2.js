@@ -157,8 +157,8 @@ export default async function handler(req, res) {
   const groups = groupOffers(destinationOffers);
   const hasAny = Array.from(groups.values()).some(rows => rows.length);
   const image = safeHttpUrl(d.mainImage);
-  const quote = new URLSearchParams({ travelQuote: '1', cta: 'destination_hub_v2', destino: d.name });
-  const quoteUrl = `https://${PUBLIC_HOST}/?${quote.toString()}`;
+  const quote = new URLSearchParams({ cta: 'destination_hub_v2', destino: d.name });
+  const quoteUrl = `/cotizar-v2/?${quote.toString()}`;
   const wa = `https://wa.me/523329335952?text=${encodeURIComponent(`Hola, quiero opciones para viajar a ${d.name} con Trhoncal Travel.`)}`;
   const sourceSet = new Set(Array.isArray(d.sourceIds) ? d.sourceIds : []);
   const sourceRows = sources.filter(s => s && sourceSet.has(s.id));
