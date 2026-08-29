@@ -83,7 +83,10 @@ export default async function handler(req, res) {
   const destinationName = destination?.name || offer.leadDestinationVerified || 'Viaje especial';
   const canonical = `https://${PUBLIC_HOST}/oferta/${encodeURIComponent(offer.id)}`;
   const shareText = `${destinationName}: ${offer.title || 'promoción de viaje'}${offer.price ? ` desde ${money(offer.price)}` : ''}. Consulta disponibilidad y condiciones actuales con Trhoncal Travel.`;
-  const image = safeHttpUrl(offer.image || destination?.mainImage || '');
+  // Una promoción de hotel debe usar su propia imagen. Si falta, mostramos fallback de marca;
+  // nunca sustituimos silenciosamente con la foto genérica del destino.
+  const image = safeHttpUrl(offer.image || (!offer.hotel ? destination?.mainImage : '') || '');
+  const imageAlt = offer.hotel ? `${offer.hotel} en ${destinationName}` : (destination?.imageAlt || offer.title || destinationName);
   const externalPromo = safeHttpUrl(offer.leadFormUrl || offer.sharePromoUrl || offer.publicPromoUrl || '');
   const plan = String(offer.plan || '');
   const quoteParams = new URLSearchParams({ travelQuote: '1', cta: 'oferta_compartida' });
@@ -92,7 +95,6 @@ export default async function handler(req, res) {
   if (offer.travelEnd) quoteParams.set('regreso', offer.travelEnd);
   if (offer.occasionId) quoteParams.set('ocasion', offer.occasionId);
   if (offer.id) quoteParams.set('oferta', offer.id);
-  if (externalPromo) quoteParams.set('promo', externalPromo);
   if (plan) quoteParams.set('plan', plan);
   const quoteUrl = `https://${PUBLIC_HOST}/?${quoteParams.toString()}`;
   const pdfUrl = `https://${PUBLIC_HOST}/oferta/${encodeURIComponent(offer.id)}.pdf`;
@@ -147,7 +149,7 @@ export default async function handler(req, res) {
   <meta property="og:title" content="${esc(offer.title || destinationName)}">
   <meta property="og:description" content="${esc(shareText)}">
   <meta property="og:url" content="${esc(canonical)}">
-  ${image ? `<meta property="og:image" content="${esc(image)}"><meta property="og:image:alt" content="${esc(destination?.imageAlt || offer.title || destinationName)}">` : ''}
+  ${image ? `<meta property="og:image" content="${esc(image)}"><meta property="og:image:alt" content="${esc(imageAlt)}">` : ''}
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/assets/css/styles.css">
   <link rel="stylesheet" href="/assets/css/brand-v2.css">
@@ -162,7 +164,8 @@ export default async function handler(req, res) {
       <div class="container offer-hero-grid">
         <div class="offer-copy">
           <span class="eyebrow">Una opción para compartir</span>
-          <h1>${esc(offer.title || destinationName)}</h1>
+          <h1${offer.hotel ? ' translate="no" class="notranslate"' : ''}>${esc(offer.title || destinationName)}</h1>
+          ${offer.hotel ? `<p class="offer-hotel" translate="no"><strong>Hotel: ${esc(offer.hotel)}</strong></p>` : ''}
           <p>${esc(description)}</p>
           <div class="offer-tags">
             ${dates.length ? `<span>${esc(dates.join(' - '))}</span>` : ''}
@@ -173,7 +176,7 @@ export default async function handler(req, res) {
           ${price ? `<div class="offer-price"><small>${esc(offer.priceUnit || 'Precio publicado')}</small><strong>${esc(price)}</strong><span>MXN</span></div>` : ''}
           <p class="offer-disclaimer">Precio, disponibilidad y condiciones se reconfirman antes de reservar.</p>
         </div>
-        <div class="offer-visual">${image ? `<img src="${esc(image)}" alt="${esc(destination?.imageAlt || offer.title || destinationName)}">` : `<div class="offer-image-fallback"><span>TRHONCAL TRAVEL</span><strong>${esc(destinationName)}</strong></div>`}${destination?.imageCredit ? `<small>${esc(destination.imageCredit)}</small>` : ''}</div>
+        <div class="offer-visual">${image ? `<img src="${esc(image)}" alt="${esc(imageAlt)}">` : `<div class="offer-image-fallback"><span>TRHONCAL TRAVEL</span><strong>${esc(offer.hotel || destinationName)}</strong><small>Imagen de esta promoción pendiente de cargar</small></div>`}</div>
       </div>
     </section>
 
@@ -193,6 +196,7 @@ export default async function handler(req, res) {
 
     <section class="section"><div class="container offer-details-grid">
       <article class="offer-detail-card"><span class="eyebrow">Tu opción</span><h2>${esc(destinationName)}</h2><dl>
+        ${offer.hotel ? `<div><dt>Hotel</dt><dd translate="no" class="notranslate">${esc(offer.hotel)}</dd></div>` : ''}
         ${duration ? `<div><dt>Duración</dt><dd>${esc(duration)}</dd></div>` : ''}
         ${plan ? `<div><dt>Plan</dt><dd>${esc(plan)}</dd></div>` : ''}
         ${offer.occupancy ? `<div><dt>Viajeros</dt><dd>${esc(offer.occupancy)}</dd></div>` : ''}
@@ -202,7 +206,7 @@ export default async function handler(req, res) {
       <article class="offer-detail-card"><span class="eyebrow">Qué incluye</span><h2>Lo esencial de esta promoción</h2>${includes.length ? `<ul>${includes.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p>Consulta el detalle de servicios en la promoción vigente.</p>'}${excludes.length ? `<h3>No incluye</h3><ul>${excludes.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</article>
     </div></section>
 
-    <section class="offer-final"><div class="container offer-final-card"><div><span class="eyebrow">Siguiente paso</span><h2>¿Quieres avanzar con este viaje?</h2><p>Revisamos disponibilidad y condiciones actuales antes de cualquier pago.</p></div><div class="offer-final-actions">${externalPromo ? `<a class="btn btn-soft" href="${esc(externalPromo)}" target="_blank" rel="noopener noreferrer nofollow sponsored">Ver promoción oficial ↗</a>` : ''}<a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a></div></div></section>
+    <section class="offer-final"><div class="container offer-final-card"><div><span class="eyebrow">Siguiente paso</span><h2>¿Quieres avanzar con este viaje?</h2><p>Revisamos disponibilidad y condiciones actuales antes de cualquier pago.</p></div><div class="offer-final-actions"><a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a></div></div></section>
   </main>
 
   <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"><p>Tu viaje comienza desde que lo imaginas.</p></div><div><h3>Contacto</h3><p><a href="https://wa.me/523329335952" target="_blank" rel="noopener noreferrer">WhatsApp 33 2933 5952</a></p><p><a href="mailto:viajestroncal@gmail.com">viajestroncal@gmail.com</a></p></div></div></footer>
