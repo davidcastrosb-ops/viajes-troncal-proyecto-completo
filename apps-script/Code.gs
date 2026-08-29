@@ -6,7 +6,10 @@ const CONFIG = {
     sources: '05_Fuentes',
     offers: '07_Ofertas_Vigentes',
     calendar: '14_Calendario_MX',
-    occasions: '15_Ocasiones_Viaje'
+    occasions: '15_Ocasiones_Viaje',
+    hotels: '21_Hoteles_Maestro',
+    hotelImages: '22_Hotel_Imagenes',
+    offerSegments: '23_Oferta_Segmentos'
   }
 };
 
@@ -21,6 +24,8 @@ function doGet(e) {
     if (type === 'offers') output = { generatedAt: payload.generatedAt, offers: payload.offers };
     if (type === 'calendar') output = { generatedAt: payload.generatedAt, calendar: payload.calendar };
     if (type === 'occasions') output = { generatedAt: payload.generatedAt, occasions: payload.occasions };
+    if (type === 'hotels') output = { generatedAt: payload.generatedAt, hotels: payload.hotels, hotelImages: payload.hotelImages };
+    if (type === 'segments') output = { generatedAt: payload.generatedAt, offerSegments: payload.offerSegments };
 
     return ContentService
       .createTextOutput(JSON.stringify(output))
@@ -34,7 +39,7 @@ function doGet(e) {
 
 function buildPublicPayload_() {
   const cache = CacheService.getScriptCache();
-  const cached = cache.get('public-payload-v5');
+  const cached = cache.get('public-payload-v6');
   if (cached) return JSON.parse(cached);
 
   const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
@@ -44,6 +49,9 @@ function buildPublicPayload_() {
   const offerRows = sheetObjects_(ss, CONFIG.sheets.offers);
   const calendarRows = sheetObjects_(ss, CONFIG.sheets.calendar);
   const occasionRows = sheetObjects_(ss, CONFIG.sheets.occasions);
+  const hotelRows = sheetObjects_(ss, CONFIG.sheets.hotels);
+  const hotelImageRows = sheetObjects_(ss, CONFIG.sheets.hotelImages);
+  const offerSegmentRows = sheetObjects_(ss, CONFIG.sheets.offerSegments);
 
   const fichaByDestination = {};
   fichaRows.forEach(row => {
@@ -70,6 +78,29 @@ function buildPublicPayload_() {
     .map(publicOffer_)
     .sort((a, b) => (a.ordenWeb || 9999) - (b.ordenWeb || 9999));
 
+  const visibleHotels = hotelRows
+    .filter(row => yes_(row.Mostrar_Web) && text_(row.Estado).toLowerCase() === 'activo')
+    .map(publicHotel_)
+    .filter(row => row.id && row.slug);
+
+  const visibleHotelIds = {};
+  visibleHotels.forEach(hotel => visibleHotelIds[hotel.id] = true);
+
+  const visibleHotelImages = hotelImageRows
+    .filter(row => visibleHotelIds[text_(row.Hotel_ID)] && yes_(row.Activa) && yes_(row.Permiso_Uso_Web))
+    .map(publicHotelImage_)
+    .filter(row => row.id && row.hotelId && row.url)
+    .sort((a, b) => (a.order || 9999) - (b.order || 9999));
+
+  const visibleOfferIds = {};
+  visibleOffers.forEach(offer => visibleOfferIds[offer.id] = true);
+
+  const visibleOfferSegments = offerSegmentRows
+    .filter(row => visibleOfferIds[text_(row.Oferta_ID)] && yes_(row.Mostrar_Hub))
+    .map(publicOfferSegment_)
+    .filter(row => row.offerId && row.segmentKey)
+    .sort((a, b) => (a.priority || 9999) - (b.priority || 9999));
+
   const calendarEvents = calendarRows
     .filter(row => yes_(row.Mostrar_Web))
     .map(publicCalendarEvent_)
@@ -87,6 +118,9 @@ function buildPublicPayload_() {
     destinations: visibleDestinations,
     sources: visibleSources,
     offers: visibleOffers,
+    hotels: visibleHotels,
+    hotelImages: visibleHotelImages,
+    offerSegments: visibleOfferSegments,
     calendar: {
       country: 'MX',
       label: 'México',
@@ -95,7 +129,7 @@ function buildPublicPayload_() {
     occasions: visibleOccasions
   };
 
-  cache.put('public-payload-v5', JSON.stringify(payload), 60);
+  cache.put('public-payload-v6', JSON.stringify(payload), 60);
   return payload;
 }
 
@@ -190,6 +224,7 @@ function publicOffer_(row) {
     id: text_(row.Oferta_ID),
     providerId: text_(row.Proveedor_ID),
     destinationId: text_(row.Destino_ID),
+    hotelId: text_(row.Hotel_ID),
     occasionId: text_(row.Ocasion_ID),
     title: text_(row.Título),
     hotel: text_(row.Hotel),
@@ -215,6 +250,55 @@ function publicOffer_(row) {
     travelStart: dateText_(row.Fecha_Viaje_Inicio),
     travelEnd: dateText_(row.Fecha_Viaje_Fin),
     directLinkAuthorized: directAuthorized
+  };
+}
+
+function publicHotel_(row) {
+  return {
+    id: text_(row.Hotel_ID),
+    name: text_(row.Nombre_Comercial),
+    slug: slug_(row.Slug_Hotel || row.Nombre_Comercial),
+    destinationId: text_(row.Destino_ID),
+    destinationName: text_(row.Destino_Publico),
+    address: text_(row.Direccion),
+    category: text_(row.Categoria),
+    description: text_(row.Descripcion_Publica),
+    officialUrl: httpUrl_(row.Sitio_Oficial),
+    source: text_(row.Fuente_Datos),
+    verifiedAt: dateText_(row.Fecha_Verificacion),
+    assetPath: text_(row.Ruta_Assets),
+    mainImageFile: text_(row.Imagen_Principal)
+  };
+}
+
+function publicHotelImage_(row) {
+  return {
+    id: text_(row.Imagen_ID),
+    hotelId: text_(row.Hotel_ID),
+    type: text_(row.Tipo),
+    order: number_(row.Orden),
+    url: httpUrl_(row.URL),
+    alt: text_(row.Alt),
+    source: text_(row.Fuente),
+    rightsVerifiedAt: dateText_(row.Fecha_Verificacion)
+  };
+}
+
+function publicOfferSegment_(row) {
+  return {
+    id: text_(row.Segmento_ID),
+    offerId: text_(row.Oferta_ID),
+    segmentKey: segmentKey_(row.Segmento_Publico),
+    segmentLabel: text_(row.Segmento_Publico),
+    adults: number_(row.Adultos),
+    children: number_(row.Menores),
+    childAges: splitComma_(row.Edades_Menores),
+    childFareType: text_(row.Tipo_Tarifa_Menores),
+    childBenefit: text_(row.Beneficio_Menores),
+    publicText: text_(row.Texto_Publico),
+    priority: number_(row.Prioridad),
+    verifiedAt: dateText_(row.Fecha_Verificacion),
+    source: text_(row.Fuente_Condicion)
   };
 }
 
@@ -271,6 +355,13 @@ function split_(value) {
     .filter(Boolean);
 }
 
+function splitComma_(value) {
+  return text_(value)
+    .split(/[,;|\n]/)
+    .map(v => v.trim())
+    .filter(Boolean);
+}
+
 function text_(value) {
   return value == null ? '' : String(value).trim();
 }
@@ -286,6 +377,14 @@ function status_(value) {
   if (v === 'aprobado') return 'approved';
   if (v === 'publicado') return 'published';
   return v || 'draft';
+}
+
+function segmentKey_(value) {
+  const v = slug_(value);
+  if (v.indexOf('pareja') !== -1) return 'pareja';
+  if (v.indexOf('junior') !== -1) return 'juniors';
+  if (v.indexOf('beneficio') !== -1 || v.indexOf('gratis') !== -1) return 'familia-beneficio';
+  return v;
 }
 
 function slug_(value) {
@@ -334,4 +433,5 @@ function clearPublicCache_() {
   cache.remove('public-payload-v3');
   cache.remove('public-payload-v4');
   cache.remove('public-payload-v5');
+  cache.remove('public-payload-v6');
 }
