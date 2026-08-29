@@ -1,0 +1,19 @@
+{
+  "hotelId": "HOT-PVR-FRIENDLY-001",
+  "hotel": "Friendly Fun Vallarta",
+  "slug": "friendly-fun-vallarta",
+  "status": "preview",
+  "naming": "NN-tipo-descripcion.ext",
+  "planned": [
+    "01-portada.jpg",
+    "02-alberca.jpg",
+    "03-playa.jpg",
+    "04-habitacion-estandar.jpg",
+    "05-restaurante.jpg",
+    "06-amenidades.jpg",
+    "07-exterior.jpg",
+    "08-lobby.jpg"
+  ],
+  "sourcePolicy": "Usar solo fotografías reales del hotel con fuente y permiso de uso registrados en 22_Hotel_Imagenes. No usar IA para representar instalaciones reales.",
+  "officialSource": "https://hotelfriendlyfun.com/"
+}
