@@ -20,6 +20,64 @@
     } catch (_) {}
   });
 
+  function offerIdFromPath() {
+    const match = location.pathname.match(/\/oferta\/([^/.?#]+)/i);
+    return match ? decodeURIComponent(match[1]) : '';
+  }
+
+  function protectBrand(element) {
+    if (!element) return;
+    element.setAttribute('translate', 'no');
+    element.classList.add('notranslate');
+  }
+
+  async function hydrateHotelBrand() {
+    const offerId = offerIdFromPath();
+    if (!offerId) return;
+    try {
+      const response = await fetch('/api/master', { cache: 'no-store' });
+      if (!response.ok) return;
+      const master = await response.json();
+      const offer = (master.offers || []).find(item => item && item.id === offerId);
+      const hotel = String(offer?.hotel || '').trim();
+      if (!hotel) return;
+
+      const heading = document.querySelector('.offer-copy h1');
+      if (heading && heading.textContent.includes(hotel)) protectBrand(heading);
+
+      if (!document.querySelector('.offer-hotel-brand')) {
+        const line = document.createElement('p');
+        line.className = 'offer-hotel-brand';
+        line.style.margin = '-6px 0 14px';
+        line.style.fontSize = '18px';
+        line.style.fontWeight = '800';
+        line.style.color = '#8a611b';
+        const label = document.createElement('span');
+        label.textContent = 'Hotel: ';
+        const strong = document.createElement('strong');
+        strong.textContent = hotel;
+        protectBrand(strong);
+        line.append(label, strong);
+        heading?.insertAdjacentElement('afterend', line);
+      }
+
+      const dl = document.querySelector('.offer-detail-card dl');
+      if (dl && !dl.querySelector('[data-hotel-brand]')) {
+        const row = document.createElement('div');
+        row.dataset.hotelBrand = '1';
+        const dt = document.createElement('dt');
+        dt.textContent = 'Hotel';
+        const dd = document.createElement('dd');
+        dd.textContent = hotel;
+        protectBrand(dd);
+        row.append(dt, dd);
+        dl.prepend(row);
+      }
+    } catch (_) {}
+  }
+
+  hydrateHotelBrand();
+
   const title = card.dataset.shareTitle || document.title;
   const text = card.dataset.shareText || 'Mira esta opción de viaje de Trhoncal Travel.';
   const url = card.dataset.shareUrl || location.href;
