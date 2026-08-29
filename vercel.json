@@ -14,19 +14,19 @@
     },
     {
       "source": "/cotizar-v2",
-      "destination": "/api/quote-v3"
+      "destination": "/api/quote-v2"
     },
     {
       "source": "/cotizar-v2/",
-      "destination": "/api/quote-v3"
+      "destination": "/api/quote-v2"
     },
     {
       "source": "/cotizar-v2/:slug",
-      "destination": "/api/quote-v3?slug=:slug"
+      "destination": "/api/quote-v2?slug=:slug"
     },
     {
       "source": "/cotizar-v2/:slug/",
-      "destination": "/api/quote-v3?slug=:slug"
+      "destination": "/api/quote-v2?slug=:slug"
     },
     {
       "source": "/hotel-v2/:slug",
