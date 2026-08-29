@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Arma tu viaje | Trhoncal Travel</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/trhoncal-travel-logo.svg">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/brand-v2.css">
+  <link rel="stylesheet" href="/assets/css/quote-v2.css">
+</head>
+<body class="quote-v2-page">
+  <header class="site-header"><div class="container header-inner"><a class="brand" href="/"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#promociones">Ofertas</a></nav><a class="btn btn-outline" href="https://wa.me/523329335952">WhatsApp</a></div></header>
+  <div class="quote-v2-preview">VISTA PREVIA · FORMULARIO FAMILIAR V2 · el formulario actual sigue intacto</div>
+  <main class="quote-v2-main"><div class="container quote-v2-wrap">
+    <section class="quote-v2-intro"><span class="eyebrow">TRHONCAL TRAVEL</span><h1>Armemos el viaje que sí encaja contigo</h1><p>Si ninguna de las opciones listas te funcionó, dinos quiénes viajan y cuándo. El destino ya puede venir precargado desde la ficha que estabas viendo.</p><div id="contextPills" class="quote-context-pills"></div></section>
+
+    <form id="quoteV2Form" class="quote-v2-form" novalidate>
+      <input type="text" name="website" tabindex="-1" autocomplete="off" class="quote-honeypot" aria-hidden="true">
+      <div class="quote-v2-grid">
+        <label>Nombre *<input name="nombre" required autocomplete="given-name"></label>
+        <label>Apellido<input name="apellido" autocomplete="family-name"></label>
+        <label>WhatsApp *<input name="whatsapp" required inputmode="tel" autocomplete="tel" placeholder="Ej. 33 1234 5678"></label>
+        <label>Destino *<input name="destino" required placeholder="Ej. Cancún"></label>
+        <label>Ciudad de salida *<input name="ciudadSalida" required placeholder="Ej. Guadalajara"></label>
+        <label>Fecha aproximada de salida *<input name="fechaSalida" type="date" required></label>
+        <label>Fecha aproximada de regreso<input name="fechaRegreso" type="date"></label>
+      </div>
+
+      <section class="quote-v2-travelers"><div class="quote-v2-section-head"><div><span class="eyebrow">¿Quiénes viajan?</span><h2>Adultos, menores y edades</h2></div><div class="quote-total"><small>Total</small><strong id="totalTravelers">2</strong><span>viajeros</span></div></div>
+        <div class="quote-v2-counts"><label>Adultos *<input id="adultos" name="adultos" type="number" min="1" max="20" value="2" required></label><label>Menores<input id="menores" name="menores" type="number" min="0" max="20" value="0"></label></div>
+        <div id="agesWrap" class="quote-v2-ages" hidden><p>Indica la edad de cada menor. Esto es importante porque los hoteles cambian beneficios y tarifas según la edad.</p><div id="ageInputs" class="quote-v2-age-grid"></div></div>
+      </section>
+
+      <fieldset class="quote-v2-lodging"><legend>¿Cómo prefieres hospedarte? *</legend><label><input type="radio" name="hospedaje" value="Todo incluido">Todo incluido</label><label><input type="radio" name="hospedaje" value="Sin todo incluido">Sin todo incluido</label><label><input type="radio" name="hospedaje" value="Recomiéndame" checked>Recomiéndame</label></fieldset>
+
+      <label class="quote-v2-consent"><input type="checkbox" name="consentimiento" required><span><strong>Autorizo el contacto.</strong> Acepto que Trhoncal Travel me contacte para dar seguimiento a esta solicitud.</span></label>
+      <div id="formMessage" class="quote-v2-message" role="status" aria-live="polite"></div>
+      <div class="quote-v2-submit"><button class="btn btn-primary" type="submit">Solicitar mi viaje →</button><span>Sin compromiso. Confirmamos precio, disponibilidad y condiciones antes de cualquier pago.</span></div>
+    </form>
+  </div></main>
+
+<script>
+(function(){
+  const params=new URLSearchParams(location.search),form=document.getElementById('quoteV2Form'),adultos=document.getElementById('adultos'),menores=document.getElementById('menores'),total=document.getElementById('totalTravelers'),agesWrap=document.getElementById('agesWrap'),ageInputs=document.getElementById('ageInputs'),msg=document.getElementById('formMessage'),pills=document.getElementById('contextPills');
+  const prefill={destino:params.get('destino')||'',fechaSalida:params.get('salida')||'',fechaRegreso:params.get('regreso')||'',ofertaId:params.get('oferta')||'',ocasionId:params.get('ocasion')||'',plan:params.get('plan')||'',cta:params.get('cta')||'quote_v2'};
+  ['destino','fechaSalida','fechaRegreso'].forEach(k=>{if(prefill[k]&&form.elements[k])form.elements[k].value=prefill[k];});
+  if(prefill.plan&&['Todo incluido','Sin todo incluido','Recomiéndame'].includes(prefill.plan)){const r=form.querySelector('input[name="hospedaje"][value="'+CSS.escape(prefill.plan)+'"]');if(r)r.checked=true;}
+  const chipValues=[prefill.destino,prefill.fechaSalida&&('Salida '+prefill.fechaSalida),prefill.fechaRegreso&&('Regreso '+prefill.fechaRegreso),prefill.ofertaId&&'Promoción seleccionada'].filter(Boolean);pills.innerHTML=chipValues.map(x=>'<span>'+x.replace(/[&<>]/g,'')+'</span>').join('');
+  function renderAges(){const a=Math.max(1,Math.min(20,Number(adultos.value)||1)),m=Math.max(0,Math.min(20,Number(menores.value)||0));adultos.value=a;menores.value=m;total.textContent=a+m;agesWrap.hidden=m===0;const previous=[...ageInputs.querySelectorAll('input')].map(x=>x.value);ageInputs.innerHTML='';for(let i=0;i<m;i++){const label=document.createElement('label');label.textContent='Edad menor '+(i+1)+' *';const input=document.createElement('input');input.type='number';input.min='0';input.max='17';input.required=true;input.inputMode='numeric';input.value=previous[i]||'';label.appendChild(input);ageInputs.appendChild(label);}}
+  adultos.addEventListener('input',renderAges);menores.addEventListener('input',renderAges);renderAges();
+  form.elements.fechaSalida.min=new Date().toISOString().slice(0,10);form.elements.fechaSalida.addEventListener('change',()=>{form.elements.fechaRegreso.min=form.elements.fechaSalida.value;if(form.elements.fechaRegreso.value<form.elements.fechaSalida.value)form.elements.fechaRegreso.value='';});
+  form.addEventListener('submit',async e=>{e.preventDefault();msg.className='quote-v2-message';msg.textContent='';if(!form.reportValidity())return;const ageValues=[...ageInputs.querySelectorAll('input')].map(x=>String(x.value).trim());if(Number(menores.value)>0&&ageValues.some(x=>x==='')){msg.classList.add('error');msg.textContent='Indica la edad de cada menor.';return;}const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Registrando…';const data={website:form.elements.website.value,nombre:form.elements.nombre.value,apellido:form.elements.apellido.value,whatsapp:form.elements.whatsapp.value,destino:form.elements.destino.value,ciudadSalida:form.elements.ciudadSalida.value,fechaSalida:form.elements.fechaSalida.value,fechaRegreso:form.elements.fechaRegreso.value,personas:String(Number(adultos.value)+Number(menores.value)),adultos:String(adultos.value),menores:String(menores.value),edadesMenores:ageValues.join(','),hospedaje:form.querySelector('input[name="hospedaje"]:checked').value,origen:'cotizador_v2',urlOrigen:location.href,slugDestino:'',utmSource:params.get('utm_source')||'',utmMedium:params.get('utm_medium')||'',utmCampaign:params.get('utm_campaign')||'',ocasionId:prefill.ocasionId,ofertaId:prefill.ofertaId,promoUrl:'',ctaOrigen:prefill.cta,consentimiento:form.elements.consentimiento.checked};try{const r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}),j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'No pudimos registrar la solicitud.');form.innerHTML='<div class="quote-v2-success"><span class="eyebrow">Solicitud recibida</span><h2>Ya tenemos lo esencial de tu viaje.</h2><p>Folio <strong>'+String(j.leadId||'').replace(/[&<>]/g,'')+'</strong>. Revisaremos opciones y confirmaremos precio y disponibilidad antes de cualquier pago.</p><a class="btn btn-primary" href="/">Volver a Trhoncal Travel</a></div>';}catch(err){msg.classList.add('error');msg.textContent=err.message||'No pudimos registrar la solicitud.';button.disabled=false;button.textContent='Solicitar mi viaje →';}});
+})();
+</script>
+</body></html>
