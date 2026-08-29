@@ -1,0 +1,33 @@
+/* V2 polish: navigation, accessibility and responsive safety */
+:where(.destination-hub-v2,.hotel-v2-page,.qv2-page) a:focus-visible,
+:where(.destination-hub-v2,.hotel-v2-page,.qv2-page) button:focus-visible,
+:where(.destination-hub-v2,.hotel-v2-page,.qv2-page) input:focus-visible,
+:where(.destination-hub-v2,.hotel-v2-page,.qv2-page) select:focus-visible{
+  outline:3px solid #d8af58;
+  outline-offset:3px;
+}
+.v2-context-nav{background:#fff;border-bottom:1px solid rgba(6,63,83,.1)}
+.v2-context-nav-inner{min-height:50px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.v2-context-nav a{color:#063f53;text-decoration:none;font-weight:900;font-size:13px}
+.v2-context-nav a:hover{text-decoration:underline}
+.v2-context-group{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.v2-explore-more{padding:28px 0 40px;background:#fff}
+.v2-explore-card{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;border:1px solid rgba(6,63,83,.1);border-radius:24px;padding:24px 28px;background:#fbfaf6}
+.v2-explore-card h2{margin:4px 0 7px;font-size:clamp(25px,3vw,36px)}
+.v2-explore-card p{margin:0;color:#60747a;line-height:1.55}
+.v2-explore-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.v2-explore-actions a{white-space:nowrap}
+.v2-inline-link{display:inline-flex;align-items:center;gap:5px;font-weight:900;color:#063f53;text-decoration:none}
+.v2-inline-link:hover{text-decoration:underline}
+.v2-muted{color:#60747a}
+@media(max-width:760px){
+  .v2-context-nav-inner{align-items:flex-start;padding-top:10px;padding-bottom:10px}
+  .v2-context-group{gap:11px}
+  .v2-context-nav a{font-size:12px}
+  .v2-explore-card{grid-template-columns:1fr;padding:22px}
+  .v2-explore-actions{justify-content:flex-start}
+  .v2-explore-actions .btn{width:100%;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){
+  :where(.destination-hub-v2,.hotel-v2-page,.qv2-page) *{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
