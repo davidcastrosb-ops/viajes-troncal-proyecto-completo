@@ -10,7 +10,11 @@
     },
     {
       "source": "/destino-v2/:slug",
-      "destination": "/api/destination-hub-v3?slug=:slug"
+      "destination": "/api/destination-hub-v4?slug=:slug"
+    },
+    {
+      "source": "/cotizar-v2/:slug",
+      "destination": "/api/quote-v2?slug=:slug"
     },
     {
       "source": "/hotel-v2/:slug",
