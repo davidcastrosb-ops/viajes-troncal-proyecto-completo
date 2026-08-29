@@ -17,7 +17,15 @@
       "destination": "/api/quote-v2"
     },
     {
+      "source": "/cotizar-v2/",
+      "destination": "/api/quote-v2"
+    },
+    {
       "source": "/cotizar-v2/:slug",
+      "destination": "/api/quote-v2?slug=:slug"
+    },
+    {
+      "source": "/cotizar-v2/:slug/",
       "destination": "/api/quote-v2?slug=:slug"
     },
     {
