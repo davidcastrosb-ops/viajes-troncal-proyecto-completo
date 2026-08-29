@@ -14,23 +14,23 @@
     },
     {
       "source": "/cotizar-v2",
-      "destination": "/api/quote-v2"
+      "destination": "/api/quote-v3"
     },
     {
       "source": "/cotizar-v2/",
-      "destination": "/api/quote-v2"
+      "destination": "/api/quote-v3"
     },
     {
       "source": "/cotizar-v2/:slug",
-      "destination": "/api/quote-v2?slug=:slug"
+      "destination": "/api/quote-v3?slug=:slug"
     },
     {
       "source": "/cotizar-v2/:slug/",
-      "destination": "/api/quote-v2?slug=:slug"
+      "destination": "/api/quote-v3?slug=:slug"
     },
     {
       "source": "/hotel-v2/:slug",
-      "destination": "/api/hotel-v2?slug=:slug"
+      "destination": "/api/hotel-v3?slug=:slug"
     },
     {
       "source": "/oferta-v2/:id.pdf",
