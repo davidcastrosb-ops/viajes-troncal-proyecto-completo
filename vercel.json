@@ -10,7 +10,7 @@
     },
     {
       "source": "/destino-v2/:slug",
-      "destination": "/api/destination-hub-v2?slug=:slug"
+      "destination": "/api/destination-hub-v3?slug=:slug"
     },
     {
       "source": "/hotel-v2/:slug",
