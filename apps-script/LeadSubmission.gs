@@ -58,7 +58,10 @@ function doPost(e) {
         lead.ocasionId,
         lead.ofertaId,
         lead.promoUrl,
-        lead.ctaOrigen
+        lead.ctaOrigen,
+        lead.adultos,
+        lead.menores,
+        lead.edadesMenores
       ]);
     } finally {
       lock.releaseLock();
@@ -95,6 +98,9 @@ function normalizeLead_(body) {
     fechaSalida: cleanLead_(body.fechaSalida, 20),
     fechaRegreso: cleanLead_(body.fechaRegreso, 20),
     personas: cleanLead_(body.personas, 8),
+    adultos: cleanLead_(body.adultos, 4),
+    menores: cleanLead_(body.menores, 4),
+    edadesMenores: cleanLead_(body.edadesMenores, 120),
     hospedaje: cleanLead_(body.hospedaje, 40),
     origen: cleanLead_(body.origen, 50),
     urlOrigen: cleanLead_(body.urlOrigen, 500),
@@ -110,6 +116,14 @@ function normalizeLead_(body) {
   };
 }
 
+function parseAgesLead_(value) {
+  return cleanLead_(value, 120)
+    .split(/[,;|\s]+/)
+    .map(function(v) { return v.trim(); })
+    .filter(Boolean)
+    .map(Number);
+}
+
 function validateLead_(lead) {
   if (!lead.nombre) return 'Escribe tu nombre.';
   if (!lead.whatsapp) return 'Escribe tu WhatsApp.';
@@ -120,6 +134,19 @@ function validateLead_(lead) {
   if (!lead.fechaSalida) return 'Indica una fecha aproximada de salida.';
   const people = Number(lead.personas);
   if (!Number.isFinite(people) || people < 1 || people > 99) return 'Revisa el número de viajeros.';
+
+  const hasFamilyBreakdown = lead.adultos !== '' || lead.menores !== '' || lead.edadesMenores !== '';
+  if (hasFamilyBreakdown) {
+    const adults = Number(lead.adultos);
+    const children = Number(lead.menores || 0);
+    if (!Number.isInteger(adults) || adults < 1 || adults > 20) return 'Revisa el número de adultos.';
+    if (!Number.isInteger(children) || children < 0 || children > 20) return 'Revisa el número de menores.';
+    if (adults + children !== people) return 'El total de viajeros no coincide con adultos y menores.';
+    const ages = parseAgesLead_(lead.edadesMenores);
+    if (children > 0 && ages.length !== children) return 'Indica la edad de cada menor.';
+    if (ages.some(function(age) { return !Number.isInteger(age) || age < 0 || age > 17; })) return 'Revisa las edades de los menores.';
+  }
+
   if (!['Todo incluido', 'Sin todo incluido', 'Recomiéndame'].includes(lead.hospedaje)) {
     return 'Elige una preferencia de hospedaje.';
   }
@@ -155,6 +182,9 @@ function notifyLead_(lead, leadId) {
       'Salida: ' + lead.fechaSalida,
       'Regreso: ' + (lead.fechaRegreso || 'No definida'),
       'Viajeros: ' + lead.personas,
+      'Adultos: ' + (lead.adultos || 'No desglosado'),
+      'Menores: ' + (lead.menores || '0 / no desglosado'),
+      'Edades de menores: ' + (lead.edadesMenores || 'No aplica'),
       'Hospedaje: ' + lead.hospedaje,
       'Origen: ' + (lead.origen || 'web'),
       'Ocasión: ' + (lead.ocasionId || 'No aplica'),
