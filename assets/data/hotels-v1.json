@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "status": "preview",
+  "hotels": [
+    {
+      "id": "HOT-PVR-FRIENDLY-001",
+      "name": "Friendly Fun Vallarta",
+      "slug": "friendly-fun-vallarta",
+      "destinationId": "MX-JAL-PVR-001",
+      "destinationName": "Puerto Vallarta",
+      "address": "Zona Hotelera Norte, CP 48333 Puerto Vallarta, Jalisco, México",
+      "category": "",
+      "officialUrl": "https://hotelfriendlyfun.com/",
+      "description": "Hotel todo incluido en la zona hotelera de Puerto Vallarta, con acceso a playa, habitaciones con vistas parciales o totales al mar y actividades para familias, parejas y amigos.",
+      "features": ["Alimentos y bebidas 24 horas", "Acceso a playa y Beach Club", "Actividades recreativas", "Wi-Fi", "Gimnasio y SPA", "Kids Club"],
+      "roomReference": {
+        "name": "Habitación Estándar",
+        "note": "Referencia del hotel; la categoría exacta incluida depende de cada promoción.",
+        "details": ["1 o 2 camas", "42 m²", "Vista parcial al mar o alberca", "Hasta 4 personas", "Balcón o terraza"]
+      },
+      "offerIds": ["OF-PA-PVR-REV26-001"],
+      "images": [
+        {"url":"https://hotelfriendlyfun.com/wp-content/uploads/elementor/thumbs/Nuestro-Hotel-1-scaled-rkpk2mkfr6ub38b0at452nihyyvtpleyvscw855o6w.jpg","alt":"Vista del hotel Friendly Fun Vallarta","type":"hotel"},
+        {"url":"https://hotelfriendlyfun.com/wp-content/uploads/elementor/thumbs/Chica-2-scaled-rkpk1z2h0by50z9540ygubfz4c3nd5togk1r884iig.jpg","alt":"Área recreativa de Friendly Fun Vallarta","type":"amenidad"},
+        {"url":"https://hotelfriendlyfun.com/wp-content/uploads/elementor/thumbs/Columpio-3-scaled-rkpk1amo2n0on48n2qe61hlzobg3t14np734r14r08.jpg","alt":"Espacio exterior de Friendly Fun Vallarta","type":"amenidad"},
+        {"url":"https://hotelfriendlyfun.com/wp-content/uploads/2026/03/HAB-2423-06-02-2026-10.jpg","alt":"Habitación de Friendly Fun Vallarta","type":"habitacion"},
+        {"url":"https://hotelfriendlyfun.com/wp-content/uploads/2023/06/hotel-friendly-fun-puerto-vallarta-todo-incluido-nueva-26-1024x683.jpeg","alt":"Hotel Friendly Fun Vallarta","type":"hotel"}
+      ],
+      "sources": ["https://hotelfriendlyfun.com/nuestro-hotel/", "https://hotelfriendlyfun.com/estandar/", "https://hotelfriendlyfun.com/faqs/"]
+    },
+    {
+      "id": "HOT-PVR-BARCELO-001",
+      "name": "Barceló Puerto Vallarta",
+      "slug": "barcelo-puerto-vallarta",
+      "destinationId": "MX-JAL-PVR-001",
+      "destinationName": "Puerto Vallarta",
+      "address": "Zona Hotelera Sur Km 11.5, 48294, Puerto Vallarta, Jalisco, México",
+      "category": "5 estrellas",
+      "officialUrl": "https://www.barcelo.com/en-us/barcelo-puerto-vallarta/",
+      "description": "Resort todo incluido frente a la playa de Mismaloya, rodeado de montañas y con vistas a la Bahía de Banderas. El hotel cuenta con suites, albercas, restaurantes y servicios para familias y parejas.",
+      "features": ["Acceso directo a Playa Mismaloya", "4 albercas", "Restaurantes a la carta y buffet", "Spa", "Ideal para familias", "Habitaciones tipo suite"],
+      "roomReference": {
+        "name": "Habitación de la promoción",
+        "note": "La promoción vigente indica Estándar Run of House; el hotel maneja distintas categorías de suite.",
+        "details": ["Categoría según promoción", "Todo incluido", "2 adultos"]
+      },
+      "offerIds": ["OF-PA-PVR-SEP26-002"],
+      "images": [
+        {"url":"https://raw.githubusercontent.com/davidcastrosb-ops/viajes-troncal-proyecto-completo/main/assets/images/promos/barcelo-puerto-vallarta.jpg","alt":"Vista exterior de Barceló Puerto Vallarta","type":"hotel"}
+      ],
+      "sources": ["https://www.barcelo.com/en-us/barcelo-puerto-vallarta/"]
+    },
+    {
+      "id": "HOT-NAY-DECAMERON-001",
+      "name": "Grand Decameron Complex, A Trademark All Inclusive",
+      "slug": "grand-decameron-bucerias",
+      "destinationId": "MX-NAY-NN-001",
+      "destinationName": "Bucerías",
+      "address": "Avenida Lázaro Cárdenas #150, Bucerías, Nayarit, México",
+      "category": "3 estrellas",
+      "officialUrl": "https://www.decameron.com/es/hoteles/bucerias/decameron-complex/",
+      "description": "Complejo todo incluido en Bucerías integrado por las unidades Flamingos, Tropical y Royal, con una extensa playa, cinco piscinas, restaurantes, bares y actividades para familias.",
+      "features": ["5 piscinas", "Extensa playa", "5 restaurantes a la carta y 3 buffet", "7 bares", "Gimnasio y SPA", "Actividades y entretenimiento"],
+      "roomReference": {
+        "name": "Habitación Estándar",
+        "note": "La promoción vigente indica Estándar 2 queens.",
+        "details": ["2 camas dobles o 1 King", "Hasta 4 personas", "Vista al jardín", "Aire acondicionado", "Check-in 15:00 · Check-out 12:00"]
+      },
+      "offerIds": ["OF-PA-NAY-REV26-003"],
+      "images": [
+        {"url":"https://www.decameron.com/media/uploads/cms_apps/imagenes/complex-2026_7M6lI68.webp?q=pr%3Asharp%2Frs%3Afill%2Fw%3A1920%2Fh%3A600%2Fg%3Ace%2Ff%3Ajpg","alt":"Grand Decameron Complex en Bucerías","type":"hotel"}
+      ],
+      "sources": ["https://www.decameron.com/es/hoteles/bucerias/decameron-complex/", "https://www.decameron.com/es/hoteles/bucerias/decameron-complex/galeria/"]
+    }
+  ]
+}
