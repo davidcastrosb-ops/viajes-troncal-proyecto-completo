@@ -118,8 +118,11 @@ export default async function handler(req, res) {
   const destination = destinations.find(d => d && d.id === offer.destinationId) || null;
   const destinationName = clean(destination?.name || offer.leadDestinationVerified || 'Viaje especial');
   const canonical = `https://${PUBLIC_HOST}/oferta/${encodeURIComponent(offer.id)}`;
-  const imageUrl = safeHttpUrl(offer.image || destination?.mainImage || '');
+  // Igual que la ficha web: una oferta de hotel sólo usa la foto propia de esa promoción.
+  // Si falta, el PDF sale sin imagen antes que mostrar otro hotel o una foto genérica del destino.
+  const imageUrl = safeHttpUrl(offer.image || (!offer.hotel ? destination?.mainImage : '') || '');
   const title = clean(offer.title || destinationName);
+  const hotel = clean(offer.hotel || '');
   const price = money(offer.price);
   const dates = [offer.travelStart ? dateMx(offer.travelStart) : '', offer.travelEnd ? dateMx(offer.travelEnd) : ''].filter(Boolean).join(' - ');
   const duration = [offer.days ? `${offer.days} días` : '', offer.nights ? `${offer.nights} noches` : ''].filter(Boolean).join(' / ');
@@ -129,7 +132,7 @@ export default async function handler(req, res) {
   pdfDoc.setTitle(`${title} | Trhoncal Travel`);
   pdfDoc.setAuthor('Trhoncal Travel');
   pdfDoc.setSubject('Ficha compartible de promoción de viaje');
-  pdfDoc.setKeywords(['Trhoncal Travel', destinationName, 'viaje', 'promoción']);
+  pdfDoc.setKeywords(['Trhoncal Travel', destinationName, hotel, 'viaje', 'promoción'].filter(Boolean));
 
   const page = pdfDoc.addPage([595.28, 841.89]);
   const { width, height } = page.getSize();
@@ -167,6 +170,10 @@ export default async function handler(req, res) {
   }
 
   y = drawWrapped(page, title, { x: 42, y, font: bold, size: 23, maxWidth: width - 84, color: navyDark, lineHeight: 27, maxLines: 3 }) - 8;
+  if (hotel) {
+    page.drawText(`Hotel: ${hotel}`, { x: 42, y, font: bold, size: 12, color: navy });
+    y -= 19;
+  }
   page.drawText(destinationName, { x: 42, y, font: bold, size: 11, color: gold });
   y -= 24;
 
@@ -214,7 +221,7 @@ export default async function handler(req, res) {
   page.drawText('El QR abre la versión vigente de esta promoción en Trhoncal Travel.', { x: 312, y: 26, font: regular, size: 7.3, color: gray });
 
   const bytes = await pdfDoc.save();
-  const safeName = clean(destinationName).replace(/[^A-Za-z0-9áéíóúÁÉÍÓÚñÑ]+/g, '-').replace(/^-|-$/g, '') || 'oferta';
+  const safeName = clean(hotel || destinationName).replace(/[^A-Za-z0-9áéíóúÁÉÍÓÚñÑ]+/g, '-').replace(/^-|-$/g, '') || 'oferta';
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="Trhoncal-Travel-${safeName}.pdf"`);
   res.setHeader('Cache-Control', 'no-store, max-age=0');
