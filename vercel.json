@@ -34,7 +34,7 @@
     },
     {
       "source": "/oferta-v2/:id.pdf",
-      "destination": "/api/offer-pdf-v2?id=:id"
+      "destination": "/api/offer-pdf-v3?id=:id"
     },
     {
       "source": "/oferta/:id.pdf",
