@@ -11,20 +11,6 @@ const FALLBACK_HOTEL_ID = {
   'OF-PA-NAY-REV26-003': 'HOT-NAY-DECAMERON-001'
 };
 
-const FALLBACK_IMAGES = {
-  'HOT-PVR-FRIENDLY-001': [
-    'https://hotelfriendlyfun.com/wp-content/uploads/elementor/thumbs/Nuestro-Hotel-1-scaled-rkpk2mkfr6ub38b0at452nihyyvtpleyvscw855o6w.jpg',
-    'https://hotelfriendlyfun.com/wp-content/uploads/elementor/thumbs/Chica-2-scaled-rkpk1z2h0by50z9540ygubfz4c3nd5togk1r884iig.jpg',
-    'https://hotelfriendlyfun.com/wp-content/uploads/elementor/thumbs/Columpio-3-scaled-rkpk1amo2n0on48n2qe61hlzobg3t14np734r14r08.jpg',
-    'https://hotelfriendlyfun.com/wp-content/uploads/2026/03/HAB-2423-06-02-2026-10.jpg',
-    'https://hotelfriendlyfun.com/wp-content/uploads/2023/06/hotel-friendly-fun-puerto-vallarta-todo-incluido-nueva-26-1024x683.jpeg'
-  ],
-  'HOT-PVR-BARCELO-001': [
-    'https://raw.githubusercontent.com/davidcastrosb-ops/viajes-troncal-proyecto-completo/main/assets/images/promos/barcelo-puerto-vallarta.jpg'
-  ],
-  'HOT-NAY-DECAMERON-001': []
-};
-
 function clean(v=''){return String(v==null?'':v).replace(/[–—]/g,'-').replace(/[•·]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/→|↗/g,'').replace(/\s+/g,' ').trim();}
 function money(v){const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n):clean(v);}
 function dateMx(v=''){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return clean(v);return new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'long',year:'numeric'}).format(new Date(`${v}T12:00:00`));}
@@ -45,8 +31,7 @@ export default async function handler(req,res){
   const hotelId=offer.hotelId||FALLBACK_HOTEL_ID[offer.id]||'';
   const hotelProfile=hotels.find(h=>h&&h.id===hotelId)||null;
   const approved=hotelImages.filter(img=>img&&img.hotelId===hotelId&&safe(img.url)).sort((a,b)=>(a.order||999)-(b.order||999)).map(x=>x.url);
-  const fallbacks=FALLBACK_IMAGES[hotelId]||[];
-  const gallery=[];[offer.image,...approved,...fallbacks].forEach(u=>{const s=safe(u);if(s&&!gallery.includes(s))gallery.push(s);});
+  const gallery=[];[offer.image,...approved].forEach(u=>{const s=safe(u);if(s&&!gallery.includes(s))gallery.push(s);});
 
   const destinationName=clean(destination?.name||offer.leadDestinationVerified||'Viaje especial');
   const title=clean(offer.title||destinationName),hotel=clean(offer.hotel||hotelProfile?.name||''),price=money(offer.price);
@@ -60,7 +45,6 @@ export default async function handler(req,res){
   const navy=rgb(.024,.247,.325),navyDark=rgb(.012,.18,.243),gold=rgb(.847,.686,.345),cream=rgb(.969,.957,.925),gray=rgb(.36,.43,.46),white=rgb(1,1,1);
   const W=595.28,H=841.89;
 
-  // Página 1: promoción.
   const p1=pdf.addPage([W,H]);p1.drawRectangle({x:0,y:0,width:W,height:H,color:cream});p1.drawRectangle({x:0,y:H-92,width:W,height:92,color:navy});
   p1.drawText('TRHONCAL',{x:42,y:H-50,font:bold,size:23,color:white});p1.drawText('TRAVEL',{x:43,y:H-68,font:bold,size:10,color:gold});p1.drawText('Una opción para compartir',{x:385,y:H-55,font:regular,size:10,color:white});
   let y=H-126;const hero=await embedImage(pdf,gallery[0]||'');if(hero){cover(p1,hero,42,y-205,W-84,205);p1.drawRectangle({x:42,y:y-205,width:W-84,height:205,borderColor:rgb(.86,.82,.72),borderWidth:1});y-=229;}
@@ -71,14 +55,12 @@ export default async function handler(req,res){
   drawWrapped(p1,clean(offer.note||'Precio, disponibilidad y condiciones se reconfirman antes de reservar.'),{x:42,y,font:regular,size:9.5,maxWidth:W-84,color:gray,lineHeight:14,maxLines:5});
   p1.drawText('Trhoncal Travel · WhatsApp 33 2933 5952 · viajestroncal@gmail.com',{x:42,y:28,font:regular,size:8.4,color:gray});
 
-  // Página 2: galería real, sólo si logramos incrustar al menos dos imágenes.
   const embedded=[];for(const url of gallery.slice(0,7)){const img=await embedImage(pdf,url);if(img)embedded.push(img);}
-  if(embedded.length>=2){const p2=pdf.addPage([W,H]);p2.drawRectangle({x:0,y:0,width:W,height:H,color:cream});p2.drawText('CONOCE EL HOTEL',{x:42,y:H-58,font:bold,size:10,color:gold});p2.drawText(hotel||destinationName,{x:42,y:H-88,font:bold,size:28,color:navyDark});p2.drawText('Fotografías reales disponibles en la biblioteca aprobada del hotel.',{x:42,y:H-110,font:regular,size:10,color:gray});
+  if(embedded.length>=2){const p2=pdf.addPage([W,H]);p2.drawRectangle({x:0,y:0,width:W,height:H,color:cream});p2.drawText('CONOCE EL HOTEL',{x:42,y:H-58,font:bold,size:10,color:gold});p2.drawText(hotel||destinationName,{x:42,y:H-88,font:bold,size:28,color:navyDark});p2.drawText('Fotografías reales aprobadas para esta biblioteca del hotel.',{x:42,y:H-110,font:regular,size:10,color:gray});
     const slots=[[42,H-365,330,230],[384,H-245,169,110],[384,H-365,169,110],[42,H-540,245,150],[300,H-540,253,150]];embedded.slice(0,5).forEach((img,i)=>{const s=slots[i];cover(p2,img,s[0],s[1],s[2],s[3]);p2.drawRectangle({x:s[0],y:s[1],width:s[2],height:s[3],borderColor:white,borderWidth:2});});
-    p2.drawText(`${embedded.length} fotografía${embedded.length===1?'':'s'} disponible${embedded.length===1?'':'s'} en esta versión del PDF.`,{x:42,y:90,font:bold,size:10,color:navy});p2.drawText('La galería crecerá automáticamente conforme se aprueben nuevas imágenes reales del hotel.',{x:42,y:72,font:regular,size:9,color:gray});
+    p2.drawText(`${embedded.length} fotografía${embedded.length===1?'':'s'} disponible${embedded.length===1?'':'s'} en esta versión del PDF.`,{x:42,y:90,font:bold,size:10,color:navy});p2.drawText('La galería crecerá automáticamente conforme aprobemos nuevas imágenes reales del hotel.',{x:42,y:72,font:regular,size:9,color:gray});
   }
 
-  // Página 3: producto y condiciones. No inventa datos del hotel.
   const p3=pdf.addPage([W,H]);p3.drawRectangle({x:0,y:0,width:W,height:H,color:cream});p3.drawText('TU VIAJE',{x:42,y:H-58,font:bold,size:10,color:gold});p3.drawText('Lo esencial de esta promoción',{x:42,y:H-90,font:bold,size:28,color:navyDark});let py=H-130;
   const facts=[hotel?`Hotel: ${hotel}`:'',dates?`Fechas: ${dates}`:'',duration?`Estancia: ${duration}`:'',offer.plan?`Plan: ${clean(offer.plan)}`:'',offer.occupancy?`Viajeros: ${clean(offer.occupancy)}`:'',price?`Precio publicado: ${price} MXN`:'' ].filter(Boolean);
   facts.forEach(f=>{p3.drawText('•',{x:48,y:py,font:bold,size:12,color:gold});py=drawWrapped(p3,f,{x:62,y:py,font:regular,size:11,maxWidth:485,color:navy,lineHeight:15,maxLines:2})-8;});
