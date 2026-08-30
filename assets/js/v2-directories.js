@@ -14,7 +14,14 @@
   const priceUnit=o=>{const raw=String(o?.priceUnit||'').trim();if(/por\s*persona/i.test(raw))return 'Por persona';if(/total/i.test(raw))return 'Total publicado';if(/desde/i.test(raw))return 'Desde';return raw||'Precio publicado';};
   const dateMx=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v))?new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric'}).format(new Date(v+'T12:00:00')):String(v||'');
   const visible=o=>{if(!o)return false;if(o.showWeb===false||/^(no|false|0)$/i.test(String(o.showWeb||'').trim()))return false;const e=o.expirationDate||o.expiresAt||o.fechaExpiracionWeb||'';return !(/^\d{4}-\d{2}-\d{2}$/.test(String(e))&&new Date(e+'T23:59:59')<new Date());};
-  const offerTarget=(o,hotels)=>{const h=hotels.find(x=>x&&o.hotelId&&x.id===o.hotelId),s=h?.slug||(o.hotelId?hotelFallback[o.id]:'')||'';return s?{href:'/hotel-v2/'+encodeURIComponent(s)+'?oferta='+encodeURIComponent(o.id),label:'Conocer hotel y oferta →'}:{href:'/oferta/'+encodeURIComponent(o.id),label:'Ver promoción →'};};
+  const offerTarget=(o,hotels)=>{
+    const id=String(o?.id||'').trim();
+    const h=hotels.find(x=>x&&o.hotelId&&x.id===o.hotelId),s=h?.slug||hotelFallback[id]||'';
+    if(s)return {href:'/hotel-v2/'+encodeURIComponent(s)+'?oferta='+encodeURIComponent(id),label:'Conocer hotel y oferta →'};
+    const q=new URLSearchParams({cta:'offer_directory_without_hotel',oferta:id});
+    if(o?.leadDestinationVerified)q.set('destino',String(o.leadDestinationVerified));
+    return {href:'/cotizar-v2?'+q.toString(),label:'Cotizar esta opción →'};
+  };
   function renderDestinations(p){
     const offers=(Array.isArray(p.offers)?p.offers:[]).filter(visible),counts=new Map();offers.forEach(o=>counts.set(o.destinationId,(counts.get(o.destinationId)||0)+1));
     const destinations=(Array.isArray(p.destinations)?p.destinations:[]).filter(d=>d&&d.slug&&valid.has(d.status));
