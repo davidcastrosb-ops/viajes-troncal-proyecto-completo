@@ -26,7 +26,7 @@ function list(a=[]){return Array.isArray(a)&&a.length?`<ul>${a.slice(0,8).map(x=
 function yes(v){return v===true||/^(si|sí|yes|true|1)$/i.test(String(v||'').trim());}
 function previewBanner(){return process.env.VERCEL_ENV==='production'?'':'<div class="hub-preview">VISTA PREVIA · HUB COMERCIAL DE DESTINO V2 · producción actual sigue intacta</div>';}
 function priceUnit(o){const raw=String(o.priceUnit||'').trim();if(/por\s*persona/i.test(raw))return 'Por persona';if(/total/i.test(raw))return 'Total publicado';if(/desde/i.test(raw))return 'Desde';return raw||'Precio publicado';}
-async function master(){const sep=MASTER_ENDPOINT.includes('?')?'&':'?';const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);try{const r=await fetch(`${MASTER_ENDPOINT}${sep}_ts=${Date.now()}`,{cache:'no-store',redirect:'follow',signal:c.signal,headers:{'User-Agent':'TrhoncalTravel-HubV2/2.0'}});if(!r.ok)throw new Error('master');return await r.json();}finally{clearTimeout(t);}}
+async function master(){const sep=MASTER_ENDPOINT.includes('?')?'&':'?';const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);try{const r=await fetch(`${MASTER_ENDPOINT}${sep}_ts=${Date.now()}`,{cache:'no-store',redirect:'follow',signal:c.signal,headers:{'User-Agent':'TrhoncalTravel-HubV2/2.1'}});if(!r.ok)throw new Error('master');return await r.json();}finally{clearTimeout(t);}}
 function visibleOffer(o){
   if(!o)return false;
   if(o.showWeb===false||/^(no|false|0)$/i.test(String(o.showWeb||'').trim()))return false;
@@ -35,9 +35,14 @@ function visibleOffer(o){
   return true;
 }
 function hotelTarget(o,hotels){
+  const id=String(o?.id||'').trim();
   const h=hotels.find(x=>x&&o.hotelId&&x.id===o.hotelId);
-  const slug=h?.slug||(o.hotelId?HOTEL_FALLBACK[o.id]:'')||'';
-  return slug?{href:`/hotel-v2/${encodeURIComponent(slug)}?oferta=${encodeURIComponent(o.id)}`,label:'Conocer hotel y oferta →'}:{href:`/oferta/${encodeURIComponent(o.id)}`,label:'Ver promoción →'};
+  const slug=h?.slug||HOTEL_FALLBACK[id]||'';
+  if(slug)return {href:`/hotel-v2/${encodeURIComponent(slug)}?oferta=${encodeURIComponent(id)}`,label:'Conocer hotel y oferta →'};
+  const params=new URLSearchParams({cta:'offer_without_hotel',oferta:id});
+  const destination=String(o?.leadDestinationVerified||'').trim();
+  if(destination)params.set('destino',destination);
+  return {href:`/cotizar-v2?${params.toString()}`,label:'Cotizar esta opción →'};
 }
 function familyEvidence(s){
   if(!s)return false;
