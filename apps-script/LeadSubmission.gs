@@ -14,6 +14,8 @@ function doPost(e) {
     }
 
     const lead = normalizeLead_(body);
+    lead.hotel = cleanLead_(body.hotel, 140) || resolveHotelForLead_(lead.ofertaId);
+
     const validationError = validateLead_(lead);
     if (validationError) {
       return jsonLead_({ ok: false, error: validationError });
@@ -120,8 +122,38 @@ function normalizeLead_(body) {
     ofertaId: cleanLead_(body.ofertaId, 120),
     promoUrl: cleanLead_(body.promoUrl, 500),
     ctaOrigen: cleanLead_(body.ctaOrigen, 120),
+    hotel: cleanLead_(body.hotel, 140),
     consentimiento: body.consentimiento === true || String(body.consentimiento).toLowerCase() === 'true'
   };
+}
+
+function resolveHotelForLead_(offerId) {
+  const id = cleanLead_(offerId, 120);
+  if (!id) return '';
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
+    const offersSheetName = CONFIG && CONFIG.sheets && CONFIG.sheets.offers
+      ? CONFIG.sheets.offers
+      : '07_Ofertas_Vigentes';
+    const sheet = ss.getSheetByName(offersSheetName);
+    if (!sheet) return '';
+
+    const values = sheet.getDataRange().getDisplayValues();
+    if (values.length < 2) return '';
+    const headers = values[0].map(function(value) { return String(value || '').trim(); });
+    const offerIndex = headers.indexOf('Oferta_ID');
+    const hotelIndex = headers.indexOf('Hotel');
+    if (offerIndex < 0 || hotelIndex < 0) return '';
+
+    for (let i = 1; i < values.length; i++) {
+      if (cleanLead_(values[i][offerIndex], 120) === id) {
+        return cleanLead_(values[i][hotelIndex], 140);
+      }
+    }
+  } catch (error) {
+    console.warn('No se pudo resolver hotel por Oferta_ID', error);
+  }
+  return '';
 }
 
 function parseAgesLead_(value) {
@@ -178,7 +210,13 @@ function makeLeadId_() {
 
 function notifyLead_(lead, leadId) {
   try {
-    const subject = 'Nueva solicitud web | ' + lead.destino + ' | ' + leadId;
+    const hotelLabel = cleanLead_(lead.hotel, 140);
+    const subjectParts = ['Nueva solicitud web'];
+    if (hotelLabel) subjectParts.push(hotelLabel);
+    subjectParts.push(lead.destino);
+    subjectParts.push(leadId);
+    const subject = subjectParts.join(' | ');
+
     const body = [
       'Nueva solicitud recibida en Trhoncal Travel',
       '',
@@ -186,6 +224,7 @@ function notifyLead_(lead, leadId) {
       'Nombre: ' + lead.nombre + (lead.apellido ? ' ' + lead.apellido : ''),
       'WhatsApp: ' + lead.whatsapp,
       'Destino: ' + lead.destino,
+      'Hotel: ' + (hotelLabel || 'Por definir'),
       'Ciudad de salida: ' + lead.ciudadSalida,
       'Salida: ' + lead.fechaSalida,
       'Regreso: ' + (lead.fechaRegreso || 'No definida'),
