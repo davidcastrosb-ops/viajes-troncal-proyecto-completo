@@ -139,7 +139,7 @@ export default async function handler(req, res) {
       redirect: 'follow',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'TrhoncalTravel-Lead/2.3'
+        'User-Agent': 'TrhoncalTravel-Lead/2.4'
       },
       body: JSON.stringify(lead),
       signal: controller.signal
@@ -156,7 +156,11 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({ ok: true, leadId: payload.leadId || '' });
+    return res.status(200).json({
+      ok: true,
+      leadId: payload.leadId || '',
+      emailSent: payload.emailSent === true
+    });
   } catch (error) {
     const timeoutError = error && error.name === 'AbortError';
     return res.status(502).json({
