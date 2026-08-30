@@ -22,6 +22,7 @@ function doPost(e) {
     const lock = LockService.getScriptLock();
     lock.waitLock(8000);
     let leadId;
+    let rowNumber = 0;
     try {
       const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
       const sheet = ss.getSheetByName('13_Solicitudes_Web');
@@ -63,12 +64,19 @@ function doPost(e) {
         lead.menores,
         lead.edadesMenores
       ]);
+      rowNumber = sheet.getLastRow();
     } finally {
       lock.releaseLock();
     }
 
-    notifyLead_(lead, leadId);
-    return jsonLead_({ ok: true, leadId: leadId });
+    const notification = notifyLead_(lead, leadId);
+    recordLeadNotification_(rowNumber, notification);
+
+    return jsonLead_({
+      ok: true,
+      leadId: leadId,
+      emailSent: notification.ok === true
+    });
   } catch (error) {
     console.error('submitLead', error);
     return jsonLead_({
@@ -195,9 +203,34 @@ function notifyLead_(lead, leadId) {
       '',
       'La solicitud quedó registrada en 13_Solicitudes_Web.'
     ].join('\n');
+
+    const quotaBefore = MailApp.getRemainingDailyQuota();
     MailApp.sendEmail('viajestroncal@gmail.com', subject, body);
+
+    return {
+      ok: true,
+      quotaBefore: quotaBefore,
+      quotaAfter: MailApp.getRemainingDailyQuota()
+    };
   } catch (error) {
-    console.warn('No se pudo enviar aviso por correo', error);
+    const message = cleanLead_(error && error.message ? error.message : String(error || 'Error desconocido'), 180);
+    console.warn('No se pudo enviar aviso por correo', message);
+    return { ok: false, error: message };
+  }
+}
+
+function recordLeadNotification_(rowNumber, notification) {
+  if (!rowNumber) return;
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
+    const sheet = ss.getSheetByName('13_Solicitudes_Web');
+    if (!sheet) return;
+    const note = notification && notification.ok
+      ? 'Aviso correo: ENVIADO'
+      : 'Aviso correo: FALLÓ | ' + cleanLead_(notification && notification.error ? notification.error : 'Sin detalle', 180);
+    sheet.getRange(rowNumber, 20).setValue(note);
+  } catch (error) {
+    console.warn('No se pudo registrar estado del aviso', error);
   }
 }
 
