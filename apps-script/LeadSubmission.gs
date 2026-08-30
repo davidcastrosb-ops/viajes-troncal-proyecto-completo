@@ -1,10 +1,12 @@
 /* Trhoncal Travel — recepción de solicitudes web.
+ * v9: hotel + promo reconstruidos por Oferta_ID; promo pública sólo sharepromotions.
  * Este archivo complementa Code.gs y usa el mismo CONFIG.spreadsheetId.
  */
 
 function doPost(e) {
   try {
     const body = parseLeadBody_(e);
+
     if (String(body.action || '') !== 'submitLead') {
       return jsonLead_({ ok: false, error: 'Acción no válida.' });
     }
@@ -14,7 +16,11 @@ function doPost(e) {
     }
 
     const lead = normalizeLead_(body);
-    lead.hotel = cleanLead_(body.hotel, 140) || resolveHotelForLead_(lead.ofertaId);
+
+    // Reconstrucción robusta desde Oferta_ID.
+    const offerContext = resolveOfferContextForLead_(lead.ofertaId);
+    lead.hotel = cleanLead_(body.hotel, 140) || offerContext.hotel || '';
+    lead.promoUrl = safeProviderPromoLead_(lead.promoUrl) || offerContext.promoUrl || '';
 
     const validationError = validateLead_(lead);
     if (validationError) {
@@ -23,8 +29,10 @@ function doPost(e) {
 
     const lock = LockService.getScriptLock();
     lock.waitLock(8000);
+
     let leadId;
     let rowNumber = 0;
+
     try {
       const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
       const sheet = ss.getSheetByName('13_Solicitudes_Web');
@@ -32,6 +40,7 @@ function doPost(e) {
 
       leadId = makeLeadId_();
       const now = new Date();
+
       sheet.appendRow([
         Utilities.formatDate(now, Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss'),
         leadId,
@@ -66,7 +75,9 @@ function doPost(e) {
         lead.menores,
         lead.edadesMenores
       ]);
+
       rowNumber = sheet.getLastRow();
+
     } finally {
       lock.releaseLock();
     }
@@ -79,8 +90,10 @@ function doPost(e) {
       leadId: leadId,
       emailSent: notification.ok === true
     });
+
   } catch (error) {
     console.error('submitLead', error);
+
     return jsonLead_({
       ok: false,
       error: 'No pudimos registrar la solicitud en este momento.'
@@ -89,8 +102,13 @@ function doPost(e) {
 }
 
 function parseLeadBody_(e) {
-  const raw = e && e.postData && e.postData.contents ? e.postData.contents : '';
+  const raw =
+    e && e.postData && e.postData.contents
+      ? e.postData.contents
+      : '';
+
   if (!raw) return {};
+
   try {
     return JSON.parse(raw);
   } catch (_) {
@@ -123,74 +141,205 @@ function normalizeLead_(body) {
     promoUrl: cleanLead_(body.promoUrl, 500),
     ctaOrigen: cleanLead_(body.ctaOrigen, 120),
     hotel: cleanLead_(body.hotel, 140),
-    consentimiento: body.consentimiento === true || String(body.consentimiento).toLowerCase() === 'true'
+    consentimiento:
+      body.consentimiento === true ||
+      String(body.consentimiento).toLowerCase() === 'true'
   };
 }
 
-function resolveHotelForLead_(offerId) {
+/* Obtiene Hotel y URL pública correcta directamente del Maestro.
+ * Nunca usa URL_proveedor_interna ni formulario de contacto como promo.
+ */
+function resolveOfferContextForLead_(offerId) {
   const id = cleanLead_(offerId, 120);
-  if (!id) return '';
+
+  const result = {
+    hotel: '',
+    promoUrl: ''
+  };
+
+  if (!id) return result;
+
   try {
     const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
-    const offersSheetName = CONFIG && CONFIG.sheets && CONFIG.sheets.offers
-      ? CONFIG.sheets.offers
-      : '07_Ofertas_Vigentes';
+
+    const offersSheetName =
+      CONFIG && CONFIG.sheets && CONFIG.sheets.offers
+        ? CONFIG.sheets.offers
+        : '07_Ofertas_Vigentes';
+
     const sheet = ss.getSheetByName(offersSheetName);
-    if (!sheet) return '';
+    if (!sheet) return result;
 
     const values = sheet.getDataRange().getDisplayValues();
-    if (values.length < 2) return '';
-    const headers = values[0].map(function(value) { return String(value || '').trim(); });
+    if (values.length < 2) return result;
+
+    const headers = values[0].map(function(value) {
+      return String(value || '').trim();
+    });
+
     const offerIndex = headers.indexOf('Oferta_ID');
     const hotelIndex = headers.indexOf('Hotel');
-    if (offerIndex < 0 || hotelIndex < 0) return '';
+    const publicPromoIndex = headers.indexOf('URL_Promo_Publica');
+    const sharePromoIndex = headers.indexOf('URL_Promo_Compartir');
+
+    if (offerIndex < 0) return result;
 
     for (let i = 1; i < values.length; i++) {
-      if (cleanLead_(values[i][offerIndex], 120) === id) {
-        return cleanLead_(values[i][hotelIndex], 140);
+      if (cleanLead_(values[i][offerIndex], 120) !== id) continue;
+
+      if (hotelIndex >= 0) {
+        result.hotel = cleanLead_(values[i][hotelIndex], 140);
       }
+
+      const publicCandidate =
+        publicPromoIndex >= 0
+          ? safeProviderPromoLead_(values[i][publicPromoIndex])
+          : '';
+
+      const shareCandidate =
+        sharePromoIndex >= 0
+          ? safeProviderPromoLead_(values[i][sharePromoIndex])
+          : '';
+
+      result.promoUrl = publicCandidate || shareCandidate || '';
+      break;
     }
+
   } catch (error) {
-    console.warn('No se pudo resolver hotel por Oferta_ID', error);
+    console.warn('No se pudo resolver contexto por Oferta_ID', error);
   }
-  return '';
+
+  return result;
+}
+
+/* Sólo acepta exactamente:
+ * https://mx.travelpromomaker.com/sharepromotions/12345
+ * Opcionalmente con / final.
+ * No usa URL(), para máxima compatibilidad con Apps Script.
+ */
+function safeProviderPromoLead_(value) {
+  const url = cleanLead_(value, 500);
+
+  if (!url) return '';
+
+  const match = url.match(
+    /^https:\/\/mx\.travelpromomaker\.com\/sharepromotions\/(\d+)\/?$/i
+  );
+
+  if (!match) return '';
+
+  return 'https://mx.travelpromomaker.com/sharepromotions/' + match[1];
 }
 
 function parseAgesLead_(value) {
   return cleanLead_(value, 120)
     .split(/[,;|\s]+/)
-    .map(function(v) { return v.trim(); })
+    .map(function(v) {
+      return v.trim();
+    })
     .filter(Boolean)
     .map(Number);
 }
 
 function validateLead_(lead) {
-  if (!lead.nombre) return 'Escribe tu nombre.';
-  if (!lead.whatsapp) return 'Escribe tu WhatsApp.';
-  const digits = lead.whatsapp.replace(/\D/g, '');
-  if (digits.length < 8 || digits.length > 15) return 'Revisa el número de WhatsApp.';
-  if (!lead.destino) return 'Indica el destino o escribe “Ayúdame a elegir”.';
-  if (!lead.ciudadSalida) return 'Indica tu ciudad de salida.';
-  if (!lead.fechaSalida) return 'Indica una fecha aproximada de salida.';
-  const people = Number(lead.personas);
-  if (!Number.isFinite(people) || people < 1 || people > 99) return 'Revisa el número de viajeros.';
+  if (!lead.nombre) {
+    return 'Escribe tu nombre.';
+  }
 
-  const hasFamilyBreakdown = lead.adultos !== '' || lead.menores !== '' || lead.edadesMenores !== '';
+  if (!lead.whatsapp) {
+    return 'Escribe tu WhatsApp.';
+  }
+
+  const digits = lead.whatsapp.replace(/\D/g, '');
+
+  if (digits.length < 8 || digits.length > 15) {
+    return 'Revisa el número de WhatsApp.';
+  }
+
+  if (!lead.destino) {
+    return 'Indica el destino o escribe “Ayúdame a elegir”.';
+  }
+
+  if (!lead.ciudadSalida) {
+    return 'Indica tu ciudad de salida.';
+  }
+
+  if (!lead.fechaSalida) {
+    return 'Indica una fecha aproximada de salida.';
+  }
+
+  const people = Number(lead.personas);
+
+  if (!Number.isFinite(people) || people < 1 || people > 99) {
+    return 'Revisa el número de viajeros.';
+  }
+
+  const hasFamilyBreakdown =
+    lead.adultos !== '' ||
+    lead.menores !== '' ||
+    lead.edadesMenores !== '';
+
   if (hasFamilyBreakdown) {
     const adults = Number(lead.adultos);
     const children = Number(lead.menores || 0);
-    if (!Number.isInteger(adults) || adults < 1 || adults > 20) return 'Revisa el número de adultos.';
-    if (!Number.isInteger(children) || children < 0 || children > 20) return 'Revisa el número de menores.';
-    if (adults + children !== people) return 'El total de viajeros no coincide con adultos y menores.';
+
+    if (
+      !Number.isInteger(adults) ||
+      adults < 1 ||
+      adults > 20
+    ) {
+      return 'Revisa el número de adultos.';
+    }
+
+    if (
+      !Number.isInteger(children) ||
+      children < 0 ||
+      children > 20
+    ) {
+      return 'Revisa el número de menores.';
+    }
+
+    if (adults + children !== people) {
+      return 'El total de viajeros no coincide con adultos y menores.';
+    }
+
     const ages = parseAgesLead_(lead.edadesMenores);
-    if (children > 0 && ages.length !== children) return 'Indica la edad de cada menor.';
-    if (ages.some(function(age) { return !Number.isInteger(age) || age < 0 || age > 17; })) return 'Revisa las edades de los menores.';
+
+    if (
+      children > 0 &&
+      ages.length !== children
+    ) {
+      return 'Indica la edad de cada menor.';
+    }
+
+    if (
+      ages.some(function(age) {
+        return (
+          !Number.isInteger(age) ||
+          age < 0 ||
+          age > 17
+        );
+      })
+    ) {
+      return 'Revisa las edades de los menores.';
+    }
   }
 
-  if (!['Todo incluido', 'Sin todo incluido', 'Recomiéndame'].includes(lead.hospedaje)) {
+  if (
+    ![
+      'Todo incluido',
+      'Sin todo incluido',
+      'Recomiéndame'
+    ].includes(lead.hospedaje)
+  ) {
     return 'Elige una preferencia de hospedaje.';
   }
-  if (!lead.consentimiento) return 'Necesitamos tu autorización para contactarte.';
+
+  if (!lead.consentimiento) {
+    return 'Necesitamos tu autorización para contactarte.';
+  }
+
   return '';
 }
 
@@ -203,78 +352,209 @@ function cleanLead_(value, maxLength) {
 }
 
 function makeLeadId_() {
-  const stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd-HHmmss');
-  const suffix = Utilities.getUuid().replace(/-/g, '').slice(0, 6).toUpperCase();
+  const stamp = Utilities.formatDate(
+    new Date(),
+    Session.getScriptTimeZone(),
+    'yyyyMMdd-HHmmss'
+  );
+
+  const suffix = Utilities.getUuid()
+    .replace(/-/g, '')
+    .slice(0, 6)
+    .toUpperCase();
+
   return 'TT-' + stamp + '-' + suffix;
 }
 
 function notifyLead_(lead, leadId) {
   try {
     const hotelLabel = cleanLead_(lead.hotel, 140);
+    const promoPublic = safeProviderPromoLead_(lead.promoUrl);
+
     const subjectParts = ['Nueva solicitud web'];
-    if (hotelLabel) subjectParts.push(hotelLabel);
+
+    if (hotelLabel) {
+      subjectParts.push(hotelLabel);
+    }
+
     subjectParts.push(lead.destino);
     subjectParts.push(leadId);
+
     const subject = subjectParts.join(' | ');
 
     const body = [
       'Nueva solicitud recibida en Trhoncal Travel',
       '',
       'Folio: ' + leadId,
-      'Nombre: ' + lead.nombre + (lead.apellido ? ' ' + lead.apellido : ''),
+      'Nombre: ' +
+        lead.nombre +
+        (lead.apellido ? ' ' + lead.apellido : ''),
       'WhatsApp: ' + lead.whatsapp,
       'Destino: ' + lead.destino,
       'Hotel: ' + (hotelLabel || 'Por definir'),
       'Ciudad de salida: ' + lead.ciudadSalida,
       'Salida: ' + lead.fechaSalida,
-      'Regreso: ' + (lead.fechaRegreso || 'No definida'),
+      'Regreso: ' +
+        (lead.fechaRegreso || 'No definida'),
       'Viajeros: ' + lead.personas,
-      'Adultos: ' + (lead.adultos || 'No desglosado'),
-      'Menores: ' + (lead.menores || '0 / no desglosado'),
-      'Edades de menores: ' + (lead.edadesMenores || 'No aplica'),
+      'Adultos: ' +
+        (lead.adultos || 'No desglosado'),
+      'Menores: ' +
+        (lead.menores || '0 / no desglosado'),
+      'Edades de menores: ' +
+        (lead.edadesMenores || 'No aplica'),
       'Hospedaje: ' + lead.hospedaje,
       'Origen: ' + (lead.origen || 'web'),
-      'Ocasión: ' + (lead.ocasionId || 'No aplica'),
-      'Oferta: ' + (lead.ofertaId || 'No aplica'),
-      'Promo: ' + (lead.promoUrl || ''),
+      'Ocasión: ' +
+        (lead.ocasionId || 'No aplica'),
+      'Oferta: ' +
+        (lead.ofertaId || 'No aplica'),
+      promoPublic
+        ? 'Promo proveedor: ' + promoPublic
+        : 'Promo proveedor: No disponible / pendiente de validar',
       'CTA: ' + (lead.ctaOrigen || ''),
-      'URL: ' + (lead.urlOrigen || ''),
+      'URL Trhoncal: ' +
+        (lead.urlOrigen || ''),
       '',
       'La solicitud quedó registrada en 13_Solicitudes_Web.'
     ].join('\n');
 
-    const quotaBefore = MailApp.getRemainingDailyQuota();
-    MailApp.sendEmail('viajestroncal@gmail.com', subject, body);
+    const quotaBefore =
+      MailApp.getRemainingDailyQuota();
+
+    MailApp.sendEmail(
+      'viajestroncal@gmail.com',
+      subject,
+      body
+    );
 
     return {
       ok: true,
       quotaBefore: quotaBefore,
-      quotaAfter: MailApp.getRemainingDailyQuota()
+      quotaAfter:
+        MailApp.getRemainingDailyQuota()
     };
+
   } catch (error) {
-    const message = cleanLead_(error && error.message ? error.message : String(error || 'Error desconocido'), 180);
-    console.warn('No se pudo enviar aviso por correo', message);
-    return { ok: false, error: message };
+    const message = cleanLead_(
+      error && error.message
+        ? error.message
+        : String(error || 'Error desconocido'),
+      180
+    );
+
+    console.warn(
+      'No se pudo enviar aviso por correo',
+      message
+    );
+
+    return {
+      ok: false,
+      error: message
+    };
   }
 }
 
-function recordLeadNotification_(rowNumber, notification) {
+function recordLeadNotification_(
+  rowNumber,
+  notification
+) {
   if (!rowNumber) return;
+
   try {
-    const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
-    const sheet = ss.getSheetByName('13_Solicitudes_Web');
+    const ss =
+      SpreadsheetApp.openById(
+        CONFIG.spreadsheetId
+      );
+
+    const sheet =
+      ss.getSheetByName(
+        '13_Solicitudes_Web'
+      );
+
     if (!sheet) return;
-    const note = notification && notification.ok
-      ? 'Aviso correo: ENVIADO'
-      : 'Aviso correo: FALLÓ | ' + cleanLead_(notification && notification.error ? notification.error : 'Sin detalle', 180);
-    sheet.getRange(rowNumber, 20).setValue(note);
+
+    const note =
+      notification && notification.ok
+        ? 'Aviso correo: ENVIADO'
+        : 'Aviso correo: FALLÓ | ' +
+          cleanLead_(
+            notification &&
+            notification.error
+              ? notification.error
+              : 'Sin detalle',
+            180
+          );
+
+    sheet
+      .getRange(rowNumber, 20)
+      .setValue(note);
+
   } catch (error) {
-    console.warn('No se pudo registrar estado del aviso', error);
+    console.warn(
+      'No se pudo registrar estado del aviso',
+      error
+    );
   }
 }
 
 function jsonLead_(obj) {
   return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+    .createTextOutput(
+      JSON.stringify(obj)
+    )
+    .setMimeType(
+      ContentService.MimeType.JSON
+    );
+}
+
+/* Función manual visible para revisar MailApp.
+ * No crea leads ni modifica 13_Solicitudes_Web.
+ */
+function testLeadEmailAuthorization() {
+  const to =
+    'viajestroncal@gmail.com';
+
+  const stamp =
+    Utilities.formatDate(
+      new Date(),
+      Session.getScriptTimeZone(),
+      'yyyy-MM-dd HH:mm:ss'
+    );
+
+  const quotaBefore =
+    MailApp.getRemainingDailyQuota();
+
+  const subject =
+    'TEST Trhoncal Travel | correo Apps Script | ' +
+    stamp;
+
+  const body = [
+    'Prueba técnica de correo de Trhoncal Travel.',
+    '',
+    'Si recibes este mensaje, MailApp está autorizado.',
+    'Fecha/hora del script: ' + stamp,
+    'Cuota restante antes del envío: ' + quotaBefore,
+    '',
+    'Esta prueba no crea un lead ni modifica 13_Solicitudes_Web.'
+  ].join('\n');
+
+  MailApp.sendEmail(
+    to,
+    subject,
+    body
+  );
+
+  const result = {
+    ok: true,
+    quotaBefore: quotaBefore,
+    quotaAfter:
+      MailApp.getRemainingDailyQuota()
+  };
+
+  console.log(
+    JSON.stringify(result)
+  );
+
+  return result;
 }
