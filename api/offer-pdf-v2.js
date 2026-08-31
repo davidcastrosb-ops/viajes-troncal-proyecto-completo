@@ -9,6 +9,11 @@ const FALLBACK_HOTEL = {
   'OF-PA-PVR-SEP26-002': {id:'HOT-PVR-BARCELO-001',slug:'barcelo-puerto-vallarta'},
   'OF-PA-NAY-REV26-003': {id:'HOT-NAY-DECAMERON-001',slug:'grand-decameron-bucerias'}
 };
+const LOCAL_IMAGE_COUNTS = {
+  'friendly-fun-vallarta': 4,
+  'barcelo-puerto-vallarta': 6,
+  'grand-decameron-bucerias': 5
+};
 
 function clean(v=''){return String(v==null?'':v).replace(/[–—]/g,'-').replace(/[•·]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/→|↗/g,'').replace(/\s+/g,' ').trim();}
 function numberMx(v){const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?new Intl.NumberFormat('es-MX',{maximumFractionDigits:0}).format(n):clean(v);}
@@ -16,6 +21,7 @@ function dateMx(v=''){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return clean(v);
 function safe(v=''){try{const u=new URL(String(v));return /^https?:$/.test(u.protocol)?u.toString():'';}catch(_){return '';}}
 function requestHost(req){const raw=String(req.headers?.['x-forwarded-host']||req.headers?.host||PUBLIC_HOST).split(',')[0].trim();return /^[A-Za-z0-9.-]+(?::\d+)?$/.test(raw)?raw:PUBLIC_HOST;}
 function requestProto(req){return String(req.headers?.['x-forwarded-proto']||'https').split(',')[0].trim()==='http'?'http':'https';}
+function localGallery(req,slug){const count=Number(LOCAL_IMAGE_COUNTS[slug]||0);if(!count)return [];const origin=`${requestProto(req)}://${requestHost(req)}`;return Array.from({length:count},(_,i)=>`${origin}/assets/images/hoteles/${encodeURIComponent(slug)}/${String(i+1).padStart(2,'0')}.jpg`);}
 function priceUnit(o){const raw=clean(o?.priceUnit||'');if(/por\s*persona/i.test(raw))return 'Por persona';if(/total/i.test(raw))return 'Total publicado';if(/desde/i.test(raw))return 'Desde';return raw||'Precio publicado';}
 async function master(){const sep=MASTER_ENDPOINT.includes('?')?'&':'?';const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);try{const r=await fetch(`${MASTER_ENDPOINT}${sep}_ts=${Date.now()}`,{cache:'no-store',redirect:'follow',signal:c.signal,headers:{'User-Agent':'TrhoncalTravel-OfferPDFV2/2.0'}});if(!r.ok)throw new Error(`Master ${r.status}`);return await r.json();}finally{clearTimeout(t);}}
 function wrap(text,font,size,maxWidth){const words=clean(text).split(' ').filter(Boolean),lines=[];let line='';for(const w of words){const test=line?`${line} ${w}`:w;if(font.widthOfTextAtSize(test,size)<=maxWidth)line=test;else{if(line)lines.push(line);line=w;}}if(line)lines.push(line);return lines;}
@@ -34,6 +40,7 @@ export default async function handler(req,res){
   const hotelId=offer.hotelId||fallback.id||'',hotelProfile=hotels.find(h=>h&&h.id===hotelId)||null,hotelSlug=hotelProfile?.slug||fallback.slug||'';
   const approved=hotelImages.filter(img=>img&&img.hotelId===hotelId&&safe(img.url)).sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)).map(x=>x.url);
   const gallery=[];approved.forEach(u=>{const s=safe(u);if(s&&!gallery.includes(s))gallery.push(s);});
+  if(gallery.length<2){localGallery(req,hotelSlug).forEach(u=>{if(!gallery.includes(u))gallery.push(u);});}
 
   const destinationName=clean(destination?.name||offer.leadDestinationVerified||'Viaje especial'),title=clean(offer.title||destinationName),hotel=clean(offer.hotel||hotelProfile?.name||''),price=numberMx(offer.price);
   const dates=[offer.travelStart?dateMx(offer.travelStart):'',offer.travelEnd?dateMx(offer.travelEnd):''].filter(Boolean).join(' - '),duration=[offer.days?`${offer.days} días`:'',offer.nights?`${offer.nights} noches`:''].filter(Boolean).join(' / '),includes=Array.isArray(offer.includes)?offer.includes.map(clean).filter(Boolean):[];
