@@ -1,0 +1,39 @@
+{
+  "source": "Google Drive folder 1uZmgFAe4RTk1MMgvv-ODCyVQx3U-HrtE",
+  "updated": "2026-08-31",
+  "hotels": [
+    {
+      "hotel_id": "HOT-PVR-FRIENDLY-001",
+      "slug": "friendly-fun-vallarta",
+      "files": [
+        {"order": 1, "drive_file_id": "1tu60KUY7uUljp9xmQf-fshVGx-XCM_j2", "source_name": "af25449e-6c0b-445a-b2c6-f9093d4951e3.webp"},
+        {"order": 2, "drive_file_id": "1RrobVEjALPyBnX_zDtkwjusZbnJFn97o", "source_name": "bd14dc05-1165-4dec-a7e0-c42a65fe3ded.webp"},
+        {"order": 3, "drive_file_id": "1TULMMuQgZpgrX7dpVt3p_YWoFsPaNqZ-", "source_name": "a60badf7-2b6e-4ab6-ac28-9678d7f0d072.webp"},
+        {"order": 4, "drive_file_id": "1G6-PxevBecYaCyWljF1w8nIUP_82b2hV", "source_name": "81d2a8e8-026c-43f5-becb-a0a2f224a818.webp"}
+      ]
+    },
+    {
+      "hotel_id": "HOT-PVR-BARCELO-001",
+      "slug": "barcelo-puerto-vallarta",
+      "files": [
+        {"order": 1, "drive_file_id": "1QrK_0ffXdTvbDn1mkFRrBj0SXRjQecVE", "source_name": "7fc534fd-e989-48e0-92ff-0c909dc28f7a.webp"},
+        {"order": 2, "drive_file_id": "1zlvr3XmIsk-21fv6OcQTYH4vNdcQmw3_", "source_name": "e7652093-e376-447b-9e27-9ccc159535ec.webp"},
+        {"order": 3, "drive_file_id": "1HylbMQcZASjuWnEjCYJMRLI3yD82Ceya", "source_name": "6b49776f-c00f-476a-8d08-57be4e63ede9.webp"},
+        {"order": 4, "drive_file_id": "1w5CYBnq7A1ik3HpJYhdCTXCP__dCTgI5", "source_name": "c90ada44-9065-40a3-8860-5743d2b4679c.webp"},
+        {"order": 5, "drive_file_id": "19V-CFwvmV3KE64_tWBfaT3aaHS6GHaNv", "source_name": "882dbb23-b850-42b6-a744-572d07da55b2.webp"},
+        {"order": 6, "drive_file_id": "11e24r87MjfqKTBHhYELKbCFc6PcgJmeE", "source_name": "65b2cf5e-9875-4fa6-96ae-07a93c4ffa90.webp"}
+      ]
+    },
+    {
+      "hotel_id": "HOT-NAY-DECAMERON-001",
+      "slug": "grand-decameron-bucerias",
+      "files": [
+        {"order": 1, "drive_file_id": "1ZJH8uK1LBbz5RXEnDcpsTstiMD5p347a", "source_name": "87d743e8-064d-4056-ac0a-1757b0a0759e.webp"},
+        {"order": 2, "drive_file_id": "1Tlre3M7vt4atV65N41bBZr9A06-1GMhE", "source_name": "40f297e4-b6bd-4177-a39d-40202d27077e.webp"},
+        {"order": 3, "drive_file_id": "1iU-Op8Acb3V1whNcdFZVt8YdmVi8q0Uo", "source_name": "8b08a551-a328-4e82-bcef-2e3297924e68.webp"},
+        {"order": 4, "drive_file_id": "109Ad1LjECSfgzF4dzXSzf3ncSDlxdUTv", "source_name": "e7a6e4d0-46b1-49ad-9002-998bafdedafb.webp"},
+        {"order": 5, "drive_file_id": "1_z0Efavb7UoPCAAMSQDy-fGoo12t694t", "source_name": "939ea38b-ecd0-4c07-adf4-ba8adb00df7b.webp"}
+      ]
+    }
+  ]
+}
