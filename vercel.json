@@ -30,7 +30,7 @@
     },
     {
       "source": "/hotel-v2/:slug",
-      "destination": "/api/hotel-v2?slug=:slug"
+      "destination": "/api/hotel-v2-assets?slug=:slug"
     },
     {
       "source": "/oferta-v2/:id.pdf",
