@@ -30,10 +30,15 @@ function esc(v=''){
 
 function injectFallbackGallery(html, slug){
   const images = FALLBACK_GALLERIES[slug] || [];
-  if (!images.length || typeof html !== 'string') return html;
+  if (typeof html !== 'string') return html;
+
+  // Lanzamiento: el PDF queda fuera del camino crítico hasta completar QA post-publicación.
+  let result = html.replace(/<a class="hotel-v2-mini gold" href="[^"]+">Descargar PDF<\/a>/g, '');
+
+  if (!images.length) return result;
 
   // Si el endpoint ya recibió imágenes aprobadas del Maestro, no intervenimos.
-  if (!html.includes('Galería en preparación')) return html;
+  if (!result.includes('Galería en preparación')) return result;
 
   const heroPlaceholder = '<div class="hotel-v2-gallery-empty"><strong>Galería en preparación</strong><p>Mostramos fotografías únicamente cuando su permiso de uso web está verificado.</p></div>';
   const galleryPlaceholder = '<div class="hotel-v2-gallery-empty"><strong>Galería en preparación</strong><p>Las imágenes aparecerán en cuanto sus derechos estén aprobados para uso web.</p></div>';
@@ -45,7 +50,7 @@ function injectFallbackGallery(html, slug){
 
   const galleryData = JSON.stringify(images.map(x=>({url:x[0],alt:x[1]}))).replace(/</g,'\\u003c');
 
-  return html
+  return result
     .replace(heroPlaceholder, hero)
     .replace(galleryPlaceholder, `<div class="hotel-v2-gallery">${gallery}</div>`)
     .replace('const GALLERY=[]', `const GALLERY=${galleryData}`);
