@@ -42,7 +42,7 @@
     },
     {
       "source": "/oferta/:id",
-      "destination": "/api/offer?id=:id"
+      "destination": "/api/offer-v2-compat?id=:id"
     },
     {
       "source": "/mexico/:slug",
