@@ -29,21 +29,28 @@ jobs:
 
       - name: Validar micrositios e imagenes
         run: |
-          set -euo pipefail
+          set -uo pipefail
+          fail=0
           check_hotel() {
             slug="$1"; offer="$2"; count="$3"
-            curl -Lsf "$BASE_URL/hotel-v2/$slug?oferta=$offer" -o "/tmp/$slug.html"
-            grep -q "Fotos del hotel" "/tmp/$slug.html"
-            grep -q "/assets/images/hoteles/$slug/01.jpg" "/tmp/$slug.html"
+            echo "=== $slug ==="
+            code=$(curl -L -s -o "/tmp/$slug.html" -w '%{http_code}' "$BASE_URL/hotel-v2/$slug?oferta=$offer" || true)
+            echo "micrositio HTTP $code"
+            [ "$code" = "200" ] || fail=1
+            if grep -q "Fotos del hotel" "/tmp/$slug.html"; then echo "OK texto galeria"; else echo "FAIL texto galeria"; fail=1; fi
+            if grep -q "/assets/images/hoteles/$slug/01.jpg" "/tmp/$slug.html"; then echo "OK referencia 01.jpg"; else echo "FAIL referencia 01.jpg"; fail=1; fi
             for i in $(seq 1 "$count"); do
               n=$(printf '%02d' "$i")
-              curl -Lsf "$BASE_URL/assets/images/hoteles/$slug/$n.jpg" -o "/tmp/$slug-$n.jpg"
-              test -s "/tmp/$slug-$n.jpg"
+              code=$(curl -L -s -o "/tmp/$slug-$n.jpg" -w '%{http_code}' "$BASE_URL/assets/images/hoteles/$slug/$n.jpg" || true)
+              size=$(wc -c < "/tmp/$slug-$n.jpg" 2>/dev/null || echo 0)
+              echo "$n.jpg => HTTP $code, $size bytes"
+              [ "$code" = "200" ] && [ "$size" -gt 1000 ] || fail=1
             done
           }
           check_hotel friendly-fun-vallarta OF-PA-PVR-REV26-001 4
           check_hotel barcelo-puerto-vallarta OF-PA-PVR-SEP26-002 6
           check_hotel grand-decameron-bucerias OF-PA-NAY-REV26-003 5
+          exit "$fail"
 
       - name: Validar compatibilidad de enlaces antiguos
         run: |
