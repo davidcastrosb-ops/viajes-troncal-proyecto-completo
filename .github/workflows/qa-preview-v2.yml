@@ -35,7 +35,8 @@ jobs:
             curl -Lsf "$BASE_URL/hotel-v2/$slug?oferta=$offer" -o "/tmp/$slug.html"
             grep -q "Fotos del hotel" "/tmp/$slug.html"
             grep -q "/assets/images/hoteles/$slug/01.jpg" "/tmp/$slug.html"
-            for n in $(seq -w 1 "$count"); do
+            for i in $(seq 1 "$count"); do
+              n=$(printf '%02d' "$i")
               curl -Lsf "$BASE_URL/assets/images/hoteles/$slug/$n.jpg" -o "/tmp/$slug-$n.jpg"
               test -s "/tmp/$slug-$n.jpg"
             done
