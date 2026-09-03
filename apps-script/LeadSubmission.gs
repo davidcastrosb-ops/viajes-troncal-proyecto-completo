@@ -1,5 +1,5 @@
 /* Trhoncal Travel — recepción de solicitudes web.
- * v10: hotel + promo estable por Oferta_ID; correo principal + copia de respaldo.
+ * v11: correo con micrositio Trhoncal real + promo proveedor + origen de solicitud.
  * Este archivo complementa Code.gs y usa el mismo CONFIG.spreadsheetId.
  */
 
@@ -376,10 +376,75 @@ function makeLeadId_() {
   return 'TT-' + stamp + '-' + suffix;
 }
 
+function trhoncalPromoUrlForLead_(offerId) {
+  const id = cleanLead_(offerId, 120);
+  if (!id) return '';
+
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.spreadsheetId);
+    const offersSheetName =
+      CONFIG && CONFIG.sheets && CONFIG.sheets.offers
+        ? CONFIG.sheets.offers
+        : '07_Ofertas_Vigentes';
+    const hotelsSheetName =
+      CONFIG && CONFIG.sheets && CONFIG.sheets.hotels
+        ? CONFIG.sheets.hotels
+        : '21_Hoteles_Maestro';
+
+    const offersSheet = ss.getSheetByName(offersSheetName);
+    const hotelsSheet = ss.getSheetByName(hotelsSheetName);
+    if (!offersSheet || !hotelsSheet) return '';
+
+    const offerValues = offersSheet.getDataRange().getDisplayValues();
+    if (offerValues.length < 2) return '';
+
+    const offerHeaders = offerValues[0].map(function(value) {
+      return String(value || '').trim();
+    });
+    const offerIdIndex = offerHeaders.indexOf('Oferta_ID');
+    const hotelIdIndex = offerHeaders.indexOf('Hotel_ID');
+    if (offerIdIndex < 0 || hotelIdIndex < 0) return '';
+
+    let hotelId = '';
+    for (let i = 1; i < offerValues.length; i++) {
+      if (cleanLead_(offerValues[i][offerIdIndex], 120) !== id) continue;
+      hotelId = cleanLead_(offerValues[i][hotelIdIndex], 120);
+      break;
+    }
+    if (!hotelId) return '';
+
+    const hotelValues = hotelsSheet.getDataRange().getDisplayValues();
+    if (hotelValues.length < 2) return '';
+
+    const hotelHeaders = hotelValues[0].map(function(value) {
+      return String(value || '').trim();
+    });
+    const hotelKeyIndex = hotelHeaders.indexOf('Hotel_ID');
+    const slugIndex = hotelHeaders.indexOf('Slug_Hotel');
+    if (hotelKeyIndex < 0 || slugIndex < 0) return '';
+
+    let slug = '';
+    for (let i = 1; i < hotelValues.length; i++) {
+      if (cleanLead_(hotelValues[i][hotelKeyIndex], 120) !== hotelId) continue;
+      slug = cleanLead_(hotelValues[i][slugIndex], 160);
+      break;
+    }
+    if (!slug) return '';
+
+    return 'https://viajes.trhoncalhomes.com.mx/hotel-v2/' +
+      encodeURIComponent(slug) +
+      '?oferta=' + encodeURIComponent(id);
+  } catch (error) {
+    console.warn('No se pudo construir URL Trhoncal para la oferta', error);
+    return '';
+  }
+}
+
 function notifyLead_(lead, leadId) {
   try {
     const hotelLabel = cleanLead_(lead.hotel, 140);
     const promoPublic = safeProviderPromoLead_(lead.promoUrl);
+    const trhoncalPromo = trhoncalPromoUrlForLead_(lead.ofertaId);
 
     const subjectParts = ['Nueva solicitud web'];
 
@@ -419,11 +484,14 @@ function notifyLead_(lead, leadId) {
         (lead.ocasionId || 'No aplica'),
       'Oferta: ' +
         (lead.ofertaId || 'No aplica'),
+      trhoncalPromo
+        ? 'Ver promoción en Trhoncal Travel: ' + trhoncalPromo
+        : 'Ver promoción en Trhoncal Travel: No disponible',
       promoPublic
-        ? 'Promo proveedor: ' + promoPublic
-        : 'Promo proveedor: No disponible / pendiente de validar',
+        ? 'Referencia promoción proveedor: ' + promoPublic
+        : 'Referencia promoción proveedor: No disponible / pendiente de validar',
       'CTA: ' + (lead.ctaOrigen || ''),
-      'URL Trhoncal: ' +
+      'Origen de la solicitud: ' +
         (lead.urlOrigen || ''),
       '',
       'La solicitud quedó registrada en 13_Solicitudes_Web.'
