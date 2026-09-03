@@ -89,3 +89,12 @@ test('hotel-v2 convierte assets conocidos del Preview a rutas del mismo origen',
   assert.equal(res.body.includes('viajes-troncal-proye-git-2116d4-david-castros-projects-75de0086.vercel.app/assets/images/hoteles'), false,
     'El HTML no debe depender del host protegido del Preview para assets propios');
 });
+
+test('lead reserva tiempo suficiente para la latencia observada de Apps Script', async () => {
+  const leadSource = await fs.readFile(new URL('../api/lead.js', import.meta.url), 'utf8');
+  const vercel = JSON.parse(await fs.readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const timeoutMatch = leadSource.match(/const\s+UPSTREAM_TIMEOUT_MS\s*=\s*(\d+)/);
+  assert.ok(timeoutMatch, 'api/lead.js debe declarar un timeout explícito');
+  assert.ok(Number(timeoutMatch[1]) >= 30000, 'El timeout upstream debe ser >= 30 s');
+  assert.ok(Number(vercel?.functions?.['api/lead.js']?.maxDuration) >= 60, 'Vercel debe reservar al menos 60 s para api/lead.js');
+});
