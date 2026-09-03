@@ -1,0 +1,40 @@
+name: QA social preview production
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'api/hotel-v2-assets.js'
+      - '.github/workflows/qa-social-preview-production.yml'
+
+jobs:
+  social-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for production deployment
+        run: sleep 75
+
+      - name: Verify Open Graph cards and public images
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://viajes.trhoncalhomes.com.mx'
+
+          check_page() {
+            local path="$1"
+            local expected_title="$2"
+            local image_path="$3"
+            local html
+            html="$(curl -fsSL --retry 4 --retry-delay 5 --connect-timeout 15 --max-time 45 "${BASE}${path}")"
+            echo "$html" | grep -Fq 'property="og:type" content="website"'
+            echo "$html" | grep -Fq "property=\"og:title\" content=\"${expected_title}"
+            echo "$html" | grep -Fq "property=\"og:image\" content=\"${BASE}${image_path}\""
+            echo "$html" | grep -Fq 'name="twitter:card" content="summary_large_image"'
+            curl -fsSI --retry 4 --retry-delay 5 --connect-timeout 15 --max-time 45 "${BASE}${image_path}" | grep -Eiq '^content-type: image/jpeg'
+            echo "OK ${path}"
+          }
+
+          check_page '/hotel-v2/friendly-fun-vallarta?oferta=OF-PA-PVR-REV26-001' 'Puente de la Revolución · Friendly Fun Vallarta · Todo incluido' '/assets/images/hoteles/friendly-fun-vallarta/01.jpg'
+          check_page '/hotel-v2/barcelo-puerto-vallarta?oferta=OF-PA-PVR-SEP26-002' 'Puerto Vallarta · Barceló Puerto Vallarta · Todo incluido' '/assets/images/hoteles/barcelo-puerto-vallarta/01.jpg'
+          check_page '/hotel-v2/grand-decameron-bucerias?oferta=OF-PA-NAY-REV26-003' 'Puente de la Revolución · Grand Decameron Bucerías · Todo incluido' '/assets/images/hoteles/grand-decameron-bucerias/01.jpg'
