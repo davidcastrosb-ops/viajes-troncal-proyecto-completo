@@ -118,8 +118,6 @@ export default async function handler(req, res) {
   const destination = destinations.find(d => d && d.id === offer.destinationId) || null;
   const destinationName = clean(destination?.name || offer.leadDestinationVerified || 'Viaje especial');
   const canonical = `https://${PUBLIC_HOST}/oferta/${encodeURIComponent(offer.id)}`;
-  // Igual que la ficha web: una oferta de hotel sólo usa la foto propia de esa promoción.
-  // Si falta, el PDF sale sin imagen antes que mostrar otro hotel o una foto genérica del destino.
   const imageUrl = safeHttpUrl(offer.image || (!offer.hotel ? destination?.mainImage : '') || '');
   const title = clean(offer.title || destinationName);
   const hotel = clean(offer.hotel || '');

@@ -3,6 +3,7 @@ const LEAD_ENDPOINT = process.env.TRHONCAL_LEAD_ENDPOINT ||
   'https://script.google.com/macros/s/AKfycbxq6OxUnMWH004OKyspo7eAbI0GvJvwwDgSnfffSzn9amtKzOWqaDmtWUnrk52rz7U8/exec';
 
 const PUBLIC_ORIGIN = 'https://viajes.trhoncalhomes.com.mx';
+const UPSTREAM_TIMEOUT_MS = 40000;
 
 function clean(value = '', max = 200) {
   return String(value == null ? '' : value)
@@ -29,6 +30,9 @@ function normalize(body = {}) {
     fechaSalida: clean(body.fechaSalida, 20),
     fechaRegreso: clean(body.fechaRegreso, 20),
     personas: clean(body.personas, 8),
+    adultos: clean(body.adultos, 4),
+    menores: clean(body.menores, 4),
+    edadesMenores: safeText(body.edadesMenores, 120),
     hospedaje: safeText(body.hospedaje, 40),
     origen: safeText(body.origen, 50),
     urlOrigen: safeText(body.urlOrigen, 500),
@@ -58,6 +62,15 @@ function todayISO() {
   return `${y}-${m}-${d}`;
 }
 
+function parseAges(value = '') {
+  return String(value || '')
+    .replace(/^'/, '')
+    .split(/[,;|\s]+/)
+    .map(v => v.trim())
+    .filter(Boolean)
+    .map(Number);
+}
+
 function validate(lead) {
   if (!lead.nombre) return 'Escribe tu nombre.';
   const digits = lead.whatsapp.replace(/\D/g, '');
@@ -72,6 +85,20 @@ function validate(lead) {
   }
   const people = Number(lead.personas);
   if (!Number.isFinite(people) || people < 1 || people > 99) return 'Revisa el número de viajeros.';
+
+  const hasFamilyBreakdown = lead.adultos !== '' || lead.menores !== '' || lead.edadesMenores !== '';
+  if (hasFamilyBreakdown) {
+    const adults = Number(lead.adultos);
+    const children = Number(lead.menores || 0);
+    if (!Number.isInteger(adults) || adults < 1 || adults > 20) return 'Revisa el número de adultos.';
+    if (!Number.isInteger(children) || children < 0 || children > 20) return 'Revisa el número de menores.';
+    if (adults + children !== people) return 'El total de viajeros no coincide con adultos y menores.';
+    const ages = parseAges(lead.edadesMenores);
+    if (children > 0 && ages.length !== children) return 'Indica la edad de cada menor.';
+    if (ages.some(age => !Number.isInteger(age) || age < 0 || age > 17)) return 'Revisa las edades de los menores.';
+    if (children === 0 && ages.length) return 'Indicaste edades de menores, pero el número de menores es 0.';
+  }
+
   if (!['Todo incluido', 'Sin todo incluido', 'Recomiéndame'].includes(lead.hospedaje.replace(/^'/, ''))) return 'Elige una preferencia de hospedaje.';
   if (!lead.consentimiento) return 'Necesitamos tu autorización para contactarte.';
   return '';
@@ -106,14 +133,14 @@ export default async function handler(req, res) {
   if (validationError) return res.status(400).json({ ok: false, error: validationError });
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+  const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
   try {
     const upstream = await fetch(LEAD_ENDPOINT, {
       method: 'POST',
       redirect: 'follow',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'TrhoncalTravel-Lead/2.2'
+        'User-Agent': 'TrhoncalTravel-Lead/2.4'
       },
       body: JSON.stringify(lead),
       signal: controller.signal
@@ -130,7 +157,11 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({ ok: true, leadId: payload.leadId || '' });
+    return res.status(200).json({
+      ok: true,
+      leadId: payload.leadId || '',
+      emailSent: payload.emailSent === true
+    });
   } catch (error) {
     const timeoutError = error && error.name === 'AbortError';
     return res.status(502).json({

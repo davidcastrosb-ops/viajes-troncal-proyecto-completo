@@ -28,9 +28,7 @@
     if(status)status.textContent=count?`${currentIndex()+1} de ${count}`:'0 de 0';
   }
 
-  function markInteraction(ms=12000){
-    lastInteraction=Date.now()+ms;
-  }
+  function markInteraction(ms=12000){lastInteraction=Date.now()+ms;}
 
   function scrollToIndex(index,{manual=false}={}){
     const t=track();const list=cards();if(!t||!list.length)return;
@@ -45,13 +43,10 @@
 
   function canAutoplay(){
     const s=section();
-    return !reducedMotion && !userPaused && !hoverPaused && !focusPaused && Date.now()>lastInteraction && !s?.classList.contains('is-expanded') && cards().length>1;
+    return !reducedMotion&&!userPaused&&!hoverPaused&&!focusPaused&&Date.now()>lastInteraction&&!s?.classList.contains('is-expanded')&&cards().length>1;
   }
 
-  function startAutoplay(){
-    clearInterval(autoplayTimer);
-    autoplayTimer=setInterval(()=>{if(canAutoplay())next(false);},5500);
-  }
+  function startAutoplay(){clearInterval(autoplayTimer);autoplayTimer=setInterval(()=>{if(canAutoplay())next(false);},5500);}
 
   function syncPauseButton(){
     const btn=qs('destinationCarouselPause');if(!btn)return;
@@ -67,6 +62,16 @@
     if(!expanded)setTimeout(()=>scrollToIndex(0),30);
   }
 
+  function rewritePreviewDestinationLinks(root=document){
+    if(!location.hostname.endsWith('.vercel.app'))return;
+    root.querySelectorAll?.('a.detail-link[href^="/mexico/"]').forEach(a=>{
+      const current=a.getAttribute('href')||'';
+      a.setAttribute('href',current.replace(/^\/mexico\//,'/destino-v2/'));
+      a.textContent='Ver viajes y destino →';
+      a.setAttribute('aria-label',(a.getAttribute('aria-label')||'').replace('Ver ficha completa','Ver viajes y destino'));
+    });
+  }
+
   function bind(){
     const t=track();const s=section();if(!t||!s)return;
     if(t.dataset.carouselReady==='1')return;
@@ -75,9 +80,7 @@
     qs('destinationCarouselNext')?.addEventListener('click',()=>next(true));
     qs('destinationCarouselPrev')?.addEventListener('click',()=>prev(true));
     qs('destinationCarouselViewAll')?.addEventListener('click',toggleExpanded);
-    qs('destinationCarouselPause')?.addEventListener('click',()=>{
-      userPaused=!userPaused;syncPauseButton();
-    });
+    qs('destinationCarouselPause')?.addEventListener('click',()=>{userPaused=!userPaused;syncPauseButton();});
 
     t.addEventListener('scroll',()=>window.requestAnimationFrame(updateStatus),{passive:true});
     t.addEventListener('pointerdown',()=>markInteraction(15000),{passive:true});
@@ -88,19 +91,21 @@
     t.addEventListener('focusout',()=>{focusPaused=false;});
 
     const observer=new MutationObserver(()=>{
-      updateStatus();
+      updateStatus();rewritePreviewDestinationLinks(document);
       const count=cards().length;
-      ['destinationCarouselPrev','destinationCarouselNext','destinationCarouselPause','destinationCarouselViewAll'].forEach(id=>{
-        const el=qs(id);if(el)el.hidden=count<2;
-      });
+      ['destinationCarouselPrev','destinationCarouselNext','destinationCarouselPause','destinationCarouselViewAll'].forEach(id=>{const el=qs(id);if(el)el.hidden=count<2;});
     });
     observer.observe(t,{childList:true,subtree:false});
 
-    updateStatus();syncPauseButton();startAutoplay();
+    updateStatus();syncPauseButton();startAutoplay();rewritePreviewDestinationLinks(document);
   }
 
-  document.addEventListener('visibilitychange',()=>{
-    if(document.hidden)hoverPaused=true;else hoverPaused=false;
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)hoverPaused=true;else hoverPaused=false;});
+  document.addEventListener('DOMContentLoaded',()=>{
+    bind();rewritePreviewDestinationLinks(document);
+    if(location.hostname.endsWith('.vercel.app')){
+      const routeObserver=new MutationObserver(()=>rewritePreviewDestinationLinks(document));
+      routeObserver.observe(document.body,{childList:true,subtree:true});
+    }
   });
-  document.addEventListener('DOMContentLoaded',bind);
 })();

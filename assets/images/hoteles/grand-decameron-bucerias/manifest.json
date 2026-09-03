@@ -3,16 +3,13 @@
   "hotel": "Grand Decameron Complex, A Trademark All Inclusive",
   "slug": "grand-decameron-bucerias",
   "status": "preview",
-  "naming": "NN-tipo-descripcion.ext",
+  "naming": "NN-tipo-descripcion.webp",
   "planned": [
-    "01-portada.jpg",
-    "02-alberca.jpg",
-    "03-playa.jpg",
-    "04-habitacion-estandar.jpg",
-    "05-restaurante.jpg",
-    "06-bar.jpg",
-    "07-exterior.jpg",
-    "08-amenidades.jpg"
+    "01-portada.webp",
+    "02-alberca.webp",
+    "03-habitacion-estandar.webp",
+    "04-entretenimiento.webp",
+    "05-exterior-nocturno.webp"
   ],
   "sourcePolicy": "Usar solo fotografías reales del hotel con fuente y permiso de uso registrados en 22_Hotel_Imagenes. No usar IA para representar instalaciones reales.",
   "officialSource": "https://www.decameron.com/es/hoteles/bucerias/decameron-complex/"

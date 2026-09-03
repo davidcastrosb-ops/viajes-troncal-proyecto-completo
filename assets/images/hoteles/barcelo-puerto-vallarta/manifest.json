@@ -3,16 +3,14 @@
   "hotel": "Barceló Puerto Vallarta",
   "slug": "barcelo-puerto-vallarta",
   "status": "preview",
-  "naming": "NN-tipo-descripcion.ext",
+  "naming": "NN-tipo-descripcion.webp",
   "planned": [
-    "01-portada.jpg",
-    "02-alberca.jpg",
-    "03-playa-mismaloya.jpg",
-    "04-habitacion.jpg",
-    "05-restaurante.jpg",
-    "06-amenidades.jpg",
-    "07-exterior.jpg",
-    "08-lobby.jpg"
+    "01-portada.webp",
+    "02-playa-exterior.webp",
+    "03-albercas.webp",
+    "04-habitacion.webp",
+    "05-vista-bahia.webp",
+    "06-exterior-playa.webp"
   ],
   "sourcePolicy": "Usar solo fotografías reales del hotel con fuente y permiso de uso registrados en 22_Hotel_Imagenes. No usar IA para representar instalaciones reales.",
   "officialSource": "https://www.barcelo.com/es-mx/barcelo-puerto-vallarta/"

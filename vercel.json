@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/lead.js": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     {
       "source": "/sitemap.xml",
@@ -9,8 +14,32 @@
       "destination": "/api/robots"
     },
     {
+      "source": "/destino-v2/:slug",
+      "destination": "/api/destination-hub-v4?slug=:slug"
+    },
+    {
+      "source": "/cotizar-v2",
+      "destination": "/api/quote-v2"
+    },
+    {
+      "source": "/cotizar-v2/",
+      "destination": "/api/quote-v2"
+    },
+    {
+      "source": "/cotizar-v2/:slug",
+      "destination": "/api/quote-v2?slug=:slug"
+    },
+    {
+      "source": "/cotizar-v2/:slug/",
+      "destination": "/api/quote-v2?slug=:slug"
+    },
+    {
       "source": "/hotel-v2/:slug",
-      "destination": "/api/hotel-v2?slug=:slug"
+      "destination": "/api/hotel-v2-assets?slug=:slug"
+    },
+    {
+      "source": "/oferta-v2/:id.pdf",
+      "destination": "/api/offer-pdf-v2?id=:id"
     },
     {
       "source": "/oferta/:id.pdf",

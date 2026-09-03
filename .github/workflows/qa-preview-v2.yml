@@ -1,0 +1,14 @@
+name: QA Preview V2 (requiere bypass Vercel)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  notice:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aviso de ejecucion
+        run: |
+          echo "Este QA remoto queda manual mientras el Preview de Vercel tenga Deployment Protection."
+          echo "El gate automatico de la rama es QA local V2 bloqueadores."
+          echo "No interpretar respuestas 200 del Preview protegido como validacion del HTML o de los JPG."

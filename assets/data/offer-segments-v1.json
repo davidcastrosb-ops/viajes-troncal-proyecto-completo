@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "status": "preview",
+  "segments": [
+    {
+      "offerId": "OF-PA-PVR-REV26-001",
+      "segment": "pareja",
+      "adults": 2,
+      "children": 0,
+      "childAges": [],
+      "childFareType": "no_aplica",
+      "childBenefit": "",
+      "publicText": "Opción calculada para 2 adultos.",
+      "priority": 1
+    },
+    {
+      "offerId": "OF-PA-PVR-SEP26-002",
+      "segment": "pareja",
+      "adults": 2,
+      "children": 0,
+      "childAges": [],
+      "childFareType": "no_aplica",
+      "childBenefit": "",
+      "publicText": "Opción calculada para 2 adultos.",
+      "priority": 2
+    },
+    {
+      "offerId": "OF-PA-NAY-REV26-003",
+      "segment": "pareja",
+      "adults": 2,
+      "children": 0,
+      "childAges": [],
+      "childFareType": "no_aplica",
+      "childBenefit": "",
+      "publicText": "Precio publicado por persona para una ocupación de 2 adultos.",
+      "priority": 1
+    }
+  ]
+}
