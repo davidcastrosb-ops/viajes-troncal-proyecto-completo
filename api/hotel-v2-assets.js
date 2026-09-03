@@ -1,5 +1,7 @@
 import hotelV2 from './hotel-v2.js';
 
+const PUBLIC_ORIGIN = 'https://viajes.trhoncalhomes.com.mx';
+
 const FALLBACK_GALLERIES = {
   'friendly-fun-vallarta': [
     ['/assets/images/hoteles/friendly-fun-vallarta/01.jpg','Vista general de Friendly Fun Vallarta'],
@@ -22,6 +24,30 @@ const FALLBACK_GALLERIES = {
     ['/assets/images/hoteles/grand-decameron-bucerias/04.jpg','Entretenimiento del Grand Decameron Complex'],
     ['/assets/images/hoteles/grand-decameron-bucerias/05.jpg','Exterior nocturno del Grand Decameron Complex']
   ]
+};
+
+const SOCIAL_CARDS = {
+  'friendly-fun-vallarta': {
+    title: 'Puente de la Revolución · Friendly Fun Vallarta · Todo incluido | Trhoncal Travel',
+    description: 'Puerto Vallarta · 14–16 nov 2026 · 3 días / 2 noches · 2 adultos · Total $11,714 MXN.',
+    image: '/assets/images/hoteles/friendly-fun-vallarta/01.jpg',
+    imageAlt: 'Friendly Fun Vallarta · Trhoncal Travel',
+    offerId: 'OF-PA-PVR-REV26-001'
+  },
+  'barcelo-puerto-vallarta': {
+    title: 'Puerto Vallarta · Barceló Puerto Vallarta · Todo incluido | Trhoncal Travel',
+    description: '25–27 sep 2026 · 3 días / 2 noches · 2 adultos · Total $9,948 MXN.',
+    image: '/assets/images/hoteles/barcelo-puerto-vallarta/01.jpg',
+    imageAlt: 'Barceló Puerto Vallarta · Trhoncal Travel',
+    offerId: 'OF-PA-PVR-SEP26-002'
+  },
+  'grand-decameron-bucerias': {
+    title: 'Puente de la Revolución · Grand Decameron Bucerías · Todo incluido | Trhoncal Travel',
+    description: 'Bucerías · 14–16 nov 2026 · 3 días / 2 noches · desde $4,511 MXN por persona.',
+    image: '/assets/images/hoteles/grand-decameron-bucerias/01.jpg',
+    imageAlt: 'Grand Decameron Complex Bucerías · Trhoncal Travel',
+    offerId: 'OF-PA-NAY-REV26-003'
+  }
 };
 
 function esc(v=''){
@@ -56,11 +82,42 @@ function injectFallbackGallery(html, slug){
     .replace('const GALLERY=[]', `const GALLERY=${galleryData}`);
 }
 
+function injectSocialMeta(html, slug, req){
+  if (typeof html !== 'string' || !html.includes('</head>')) return html;
+  const card = SOCIAL_CARDS[slug];
+  if (!card) return html;
+
+  const requestedOffer = String(req.query?.oferta || '').trim();
+  const offerId = requestedOffer || card.offerId;
+  const canonical = `${PUBLIC_ORIGIN}/hotel-v2/${encodeURIComponent(slug)}${offerId?`?oferta=${encodeURIComponent(offerId)}`:''}`;
+  const image = `${PUBLIC_ORIGIN}${card.image}`;
+
+  const meta = [
+    `<link rel="canonical" href="${esc(canonical)}">`,
+    '<meta property="og:type" content="website">',
+    '<meta property="og:site_name" content="Trhoncal Travel">',
+    '<meta property="og:locale" content="es_MX">',
+    `<meta property="og:title" content="${esc(card.title)}">`,
+    `<meta property="og:description" content="${esc(card.description)}">`,
+    `<meta property="og:url" content="${esc(canonical)}">`,
+    `<meta property="og:image" content="${esc(image)}">`,
+    `<meta property="og:image:secure_url" content="${esc(image)}">`,
+    `<meta property="og:image:alt" content="${esc(card.imageAlt)}">`,
+    '<meta name="twitter:card" content="summary_large_image">',
+    `<meta name="twitter:title" content="${esc(card.title)}">`,
+    `<meta name="twitter:description" content="${esc(card.description)}">`,
+    `<meta name="twitter:image" content="${esc(image)}">`
+  ].join('');
+
+  return html.replace('</head>', `${meta}</head>`);
+}
+
 export default async function handler(req,res){
   const originalSend = res.send.bind(res);
   res.send = body => {
     const slug = String(req.query?.slug || '').trim().toLowerCase();
-    return originalSend(injectFallbackGallery(body, slug));
+    const withGallery = injectFallbackGallery(body, slug);
+    return originalSend(injectSocialMeta(withGallery, slug, req));
   };
   return hotelV2(req,res);
 }
