@@ -30,21 +30,21 @@ const SOCIAL_CARDS = {
   'friendly-fun-vallarta': {
     title: 'Puente de la Revolución · Friendly Fun Vallarta · Todo incluido | Trhoncal Travel',
     description: 'Puerto Vallarta · 14–16 nov 2026 · 3 días / 2 noches · 2 adultos · Total $11,714 MXN.',
-    image: '/assets/images/hoteles/friendly-fun-vallarta/01.jpg',
+    image: '/assets/images/hoteles/friendly-fun-vallarta/social.jpg',
     imageAlt: 'Friendly Fun Vallarta · Trhoncal Travel',
     offerId: 'OF-PA-PVR-REV26-001'
   },
   'barcelo-puerto-vallarta': {
     title: 'Puerto Vallarta · Barceló Puerto Vallarta · Todo incluido | Trhoncal Travel',
     description: '25–27 sep 2026 · 3 días / 2 noches · 2 adultos · Total $9,948 MXN.',
-    image: '/assets/images/hoteles/barcelo-puerto-vallarta/01.jpg',
+    image: '/assets/images/hoteles/barcelo-puerto-vallarta/social.jpg',
     imageAlt: 'Barceló Puerto Vallarta · Trhoncal Travel',
     offerId: 'OF-PA-PVR-SEP26-002'
   },
   'grand-decameron-bucerias': {
     title: 'Puente de la Revolución · Grand Decameron Bucerías · Todo incluido | Trhoncal Travel',
     description: 'Bucerías · 14–16 nov 2026 · 3 días / 2 noches · desde $4,511 MXN por persona.',
-    image: '/assets/images/hoteles/grand-decameron-bucerias/01.jpg',
+    image: '/assets/images/hoteles/grand-decameron-bucerias/social.jpg',
     imageAlt: 'Grand Decameron Complex Bucerías · Trhoncal Travel',
     offerId: 'OF-PA-NAY-REV26-003'
   }
@@ -82,6 +82,11 @@ function injectFallbackGallery(html, slug){
     .replace('const GALLERY=[]', `const GALLERY=${galleryData}`);
 }
 
+function safeShareToken(v=''){
+  const token=String(v||'').trim();
+  return /^[A-Za-z0-9_-]{1,40}$/.test(token)?token:'';
+}
+
 function injectSocialMeta(html, slug, req){
   if (typeof html !== 'string' || !html.includes('</head>')) return html;
   const card = SOCIAL_CARDS[slug];
@@ -90,6 +95,8 @@ function injectSocialMeta(html, slug, req){
   const requestedOffer = String(req.query?.oferta || '').trim();
   const offerId = requestedOffer || card.offerId;
   const canonical = `${PUBLIC_ORIGIN}/hotel-v2/${encodeURIComponent(slug)}${offerId?`?oferta=${encodeURIComponent(offerId)}`:''}`;
+  const shareToken = safeShareToken(req.query?.share);
+  const socialUrl = shareToken ? `${canonical}${canonical.includes('?')?'&':'?'}share=${encodeURIComponent(shareToken)}` : canonical;
   const image = `${PUBLIC_ORIGIN}${card.image}`;
 
   const meta = [
@@ -99,14 +106,18 @@ function injectSocialMeta(html, slug, req){
     '<meta property="og:locale" content="es_MX">',
     `<meta property="og:title" content="${esc(card.title)}">`,
     `<meta property="og:description" content="${esc(card.description)}">`,
-    `<meta property="og:url" content="${esc(canonical)}">`,
+    `<meta property="og:url" content="${esc(socialUrl)}">`,
     `<meta property="og:image" content="${esc(image)}">`,
     `<meta property="og:image:secure_url" content="${esc(image)}">`,
+    '<meta property="og:image:type" content="image/jpeg">',
+    '<meta property="og:image:width" content="1200">',
+    '<meta property="og:image:height" content="630">',
     `<meta property="og:image:alt" content="${esc(card.imageAlt)}">`,
     '<meta name="twitter:card" content="summary_large_image">',
     `<meta name="twitter:title" content="${esc(card.title)}">`,
     `<meta name="twitter:description" content="${esc(card.description)}">`,
-    `<meta name="twitter:image" content="${esc(image)}">`
+    `<meta name="twitter:image" content="${esc(image)}">`,
+    `<meta name="twitter:image:alt" content="${esc(card.imageAlt)}">`
   ].join('');
 
   return html.replace('</head>', `${meta}</head>`);
