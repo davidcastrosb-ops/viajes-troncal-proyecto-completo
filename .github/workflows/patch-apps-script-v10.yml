@@ -1,0 +1,93 @@
+name: Patch Apps Script v10
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-apps-script-v10.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Patch lead notification and canonical promo URLs
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('apps-script/LeadSubmission.gs')
+          s = p.read_text(encoding='utf-8')
+
+          s = s.replace(
+              ' * v9: hotel + promo reconstruidos por Oferta_ID; promo pública sólo sharepromotions.',
+              ' * v10: hotel + promo estable por Oferta_ID; correo principal + copia de respaldo.'
+          )
+
+          old_safe = r'''function safeProviderPromoLead_\(value\) \{.*?\n\}'''
+          new_safe = '''function safeProviderPromoLead_(value) {
+  const url = cleanLead_(value, 500);
+
+  if (!url) return '';
+
+  const canonicalMatch = url.match(
+    /^https:\\/\\/mx\\.travelpromomaker\\.com\\/promotion\\/(\\d+)\\/?$/i
+  );
+
+  if (canonicalMatch) {
+    return 'https://mx.travelpromomaker.com/promotion/' + canonicalMatch[1];
+  }
+
+  const legacyMatch = url.match(
+    /^https:\\/\\/mx\\.travelpromomaker\\.com\\/sharepromotions\\/(\\d+)\\/?$/i
+  );
+
+  if (legacyMatch) {
+    return 'https://mx.travelpromomaker.com/sharepromotions/' + legacyMatch[1];
+  }
+
+  return '';
+}'''
+          s, n = re.subn(old_safe, new_safe, s, count=1, flags=re.S)
+          if n != 1:
+              raise SystemExit('safeProviderPromoLead_ patch not applied exactly once')
+
+          old_mail = '''    MailApp.sendEmail(
+      'viajestroncal@gmail.com',
+      subject,
+      body
+    );'''
+          new_mail = '''    MailApp.sendEmail({
+      to: 'viajestroncal@gmail.com',
+      cc: 'davidcastrosb@gmail.com',
+      subject: subject,
+      body: body,
+      name: 'Trhoncal Travel'
+    });'''
+          if old_mail not in s:
+              raise SystemExit('lead MailApp block not found')
+          s = s.replace(old_mail, new_mail, 1)
+
+          p.write_text(s, encoding='utf-8')
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- apps-script/LeadSubmission.gs; then
+            echo 'No changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps-script/LeadSubmission.gs
+          git commit -m 'Apps Script v10: canonical promo and lead email CC'
+          git push origin HEAD:main
