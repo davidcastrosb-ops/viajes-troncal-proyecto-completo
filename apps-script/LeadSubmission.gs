@@ -1,5 +1,5 @@
 /* Trhoncal Travel — recepción de solicitudes web.
- * v9: hotel + promo reconstruidos por Oferta_ID; promo pública sólo sharepromotions.
+ * v10: hotel + promo estable por Oferta_ID; correo principal + copia de respaldo.
  * Este archivo complementa Code.gs y usa el mismo CONFIG.spreadsheetId.
  */
 
@@ -223,13 +223,23 @@ function safeProviderPromoLead_(value) {
 
   if (!url) return '';
 
-  const match = url.match(
+  const canonicalMatch = url.match(
+    /^https:\/\/mx\.travelpromomaker\.com\/promotion\/(\d+)\/?$/i
+  );
+
+  if (canonicalMatch) {
+    return 'https://mx.travelpromomaker.com/promotion/' + canonicalMatch[1];
+  }
+
+  const legacyMatch = url.match(
     /^https:\/\/mx\.travelpromomaker\.com\/sharepromotions\/(\d+)\/?$/i
   );
 
-  if (!match) return '';
+  if (legacyMatch) {
+    return 'https://mx.travelpromomaker.com/sharepromotions/' + legacyMatch[1];
+  }
 
-  return 'https://mx.travelpromomaker.com/sharepromotions/' + match[1];
+  return '';
 }
 
 function parseAgesLead_(value) {
@@ -422,11 +432,13 @@ function notifyLead_(lead, leadId) {
     const quotaBefore =
       MailApp.getRemainingDailyQuota();
 
-    MailApp.sendEmail(
-      'viajestroncal@gmail.com',
-      subject,
-      body
-    );
+    MailApp.sendEmail({
+    to: 'viajestroncal@gmail.com',
+    cc: 'davidcastrosb@gmail.com',
+    subject: subject,
+    body: body,
+    name: 'Trhoncal Travel'
+  });
 
     return {
       ok: true,
