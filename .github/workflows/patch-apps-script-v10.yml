@@ -34,8 +34,8 @@ jobs:
               ' * v10: hotel + promo estable por Oferta_ID; correo principal + copia de respaldo.'
           )
 
-          old_safe = r"function safeProviderPromoLead_\(value\) \{.*?\n\}"
-          new_safe = """function safeProviderPromoLead_(value) {
+          safe_pattern = r"function safeProviderPromoLead_\(value\) \{.*?\n\}"
+          safe_replacement = """function safeProviderPromoLead_(value) {
             const url = cleanLead_(value, 500);
 
             if (!url) return '';
@@ -58,25 +58,21 @@ jobs:
 
             return '';
           }"""
-          s, n = re.subn(old_safe, new_safe, s, count=1, flags=re.S)
+          s, n = re.subn(safe_pattern, lambda _: safe_replacement, s, count=1, flags=re.S)
           if n != 1:
               raise SystemExit('safeProviderPromoLead_ patch not applied exactly once')
 
-          old_mail = """    MailApp.sendEmail(
-              'viajestroncal@gmail.com',
-              subject,
-              body
-            );"""
-          new_mail = """    MailApp.sendEmail({
+          mail_pattern = r"\s{4}MailApp\.sendEmail\(\s*'viajestroncal@gmail\.com',\s*subject,\s*body\s*\);"
+          mail_replacement = """    MailApp.sendEmail({
               to: 'viajestroncal@gmail.com',
               cc: 'davidcastrosb@gmail.com',
               subject: subject,
               body: body,
               name: 'Trhoncal Travel'
             });"""
-          if old_mail not in s:
-              raise SystemExit('lead MailApp block not found')
-          s = s.replace(old_mail, new_mail, 1)
+          s, n = re.subn(mail_pattern, lambda _: mail_replacement, s, count=1, flags=re.S)
+          if n != 1:
+              raise SystemExit('lead MailApp patch not applied exactly once')
 
           p.write_text(s, encoding='utf-8')
           PY
