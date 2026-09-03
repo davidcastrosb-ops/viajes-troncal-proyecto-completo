@@ -4,6 +4,9 @@
   "engines": {
     "node": "20.x"
   },
+  "scripts": {
+    "test:blockers": "node --experimental-vm-modules --test tests/v2-blockers.test.mjs"
+  },
   "dependencies": {
     "pdf-lib": "^1.17.1",
     "qrcode": "^1.5.4"
