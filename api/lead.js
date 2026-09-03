@@ -3,6 +3,7 @@ const LEAD_ENDPOINT = process.env.TRHONCAL_LEAD_ENDPOINT ||
   'https://script.google.com/macros/s/AKfycbxq6OxUnMWH004OKyspo7eAbI0GvJvwwDgSnfffSzn9amtKzOWqaDmtWUnrk52rz7U8/exec';
 
 const PUBLIC_ORIGIN = 'https://viajes.trhoncalhomes.com.mx';
+const UPSTREAM_TIMEOUT_MS = 40000;
 
 function clean(value = '', max = 200) {
   return String(value == null ? '' : value)
@@ -132,7 +133,7 @@ export default async function handler(req, res) {
   if (validationError) return res.status(400).json({ ok: false, error: validationError });
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+  const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
   try {
     const upstream = await fetch(LEAD_ENDPOINT, {
       method: 'POST',
