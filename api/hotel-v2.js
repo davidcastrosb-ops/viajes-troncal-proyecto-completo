@@ -1,4 +1,5 @@
 const PUBLIC_HOST = 'viajes.trhoncalhomes.com.mx';
+const SHARE_VERSION = 'wa-20260902b';
 const MASTER_ENDPOINT = process.env.TRHONCAL_MASTER_ENDPOINT ||
   'https://script.google.com/macros/s/AKfycbxq6OxUnMWH004OKyspo7eAbI0GvJvwwDgSnfffSzn9amtKzOWqaDmtWUnrk52rz7U8/exec';
 
@@ -90,7 +91,8 @@ export default async function handler(req,res){
   const backUrl=destinationSlug?`/destino-v2/${encodeURIComponent(destinationSlug)}#opciones`:'/destinos-v2/';
   const price=offer?.price?numberMx(offer.price):'';
   const dates=[offer?.travelStart?dateMx(offer.travelStart):'',offer?.travelEnd?dateMx(offer.travelEnd):''].filter(Boolean).join(' – ');
-  const previewUrl=`${requestProto(req)}://${requestHost(req)}/hotel-v2/${encodeURIComponent(slug)}${offer?`?oferta=${encodeURIComponent(offer.id)}`:''}`;
+  const canonicalShareUrl=`${requestProto(req)}://${requestHost(req)}/hotel-v2/${encodeURIComponent(slug)}${offer?`?oferta=${encodeURIComponent(offer.id)}`:''}`;
+  const previewUrl=`${canonicalShareUrl}${canonicalShareUrl.includes('?')?'&':'?'}share=${encodeURIComponent(SHARE_VERSION)}`;
   const shareText=`${offer?.title||hotel.name}. Conoce el hotel y consulta la promoción con Trhoncal Travel.`;
   const waShare=`https://wa.me/?text=${encodeURIComponent(`${shareText}\n${previewUrl}`)}`;
   const mail=`mailto:?subject=${encodeURIComponent(`Mira esta opción: ${hotel.name}`)}&body=${encodeURIComponent(`${shareText}\n\n${previewUrl}`)}`;
