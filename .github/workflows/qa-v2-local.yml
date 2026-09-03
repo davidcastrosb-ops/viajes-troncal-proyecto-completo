@@ -14,7 +14,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-      - run: npm ci
       - name: Regresiones P1 XSS y galerias
-        run: npm run test:blockers
+        run: node --experimental-vm-modules --test tests/v2-blockers.test.mjs
