@@ -1,97 +1,14 @@
-name: QA Preview V2
+name: QA Preview V2 (requiere bypass Vercel)
 
 on:
-  push:
-    branches:
-      - feature/destination-hubs-v2-2026-08-29
   workflow_dispatch:
 
 jobs:
-  smoke:
+  notice:
     runs-on: ubuntu-latest
-    env:
-      BASE_URL: https://viajes-troncal-proye-git-2116d4-david-castros-projects-75de0086.vercel.app
     steps:
-      - name: Instalar herramientas PDF
+      - name: Aviso de ejecucion
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq poppler-utils
-
-      - name: Esperar a Vercel
-        run: |
-          for i in {1..30}; do
-            code=$(curl -L -s -o /tmp/home.html -w '%{http_code}' "$BASE_URL/hotel-v2/barcelo-puerto-vallarta?oferta=OF-PA-PVR-SEP26-002" || true)
-            if [ "$code" = "200" ]; then exit 0; fi
-            echo "Vercel aun no responde 200 ($code). Intento $i/30"
-            sleep 10
-          done
-          exit 1
-
-      - name: Validar micrositios e imagenes
-        run: |
-          set -uo pipefail
-          fail=0
-          check_hotel() {
-            slug="$1"; offer="$2"; count="$3"
-            echo "=== $slug ==="
-            code=$(curl -L -s -o "/tmp/$slug.html" -w '%{http_code}' "$BASE_URL/hotel-v2/$slug?oferta=$offer" || true)
-            echo "micrositio HTTP $code"
-            [ "$code" = "200" ] || fail=1
-            if grep -q "Fotos del hotel" "/tmp/$slug.html"; then echo "OK texto galeria"; else echo "FAIL texto galeria"; fail=1; fi
-            if grep -q "/assets/images/hoteles/$slug/01.jpg" "/tmp/$slug.html"; then echo "OK referencia 01.jpg"; else echo "FAIL referencia 01.jpg"; fail=1; fi
-            for i in $(seq 1 "$count"); do
-              n=$(printf '%02d' "$i")
-              code=$(curl -L -s -o "/tmp/$slug-$n.jpg" -w '%{http_code}' "$BASE_URL/assets/images/hoteles/$slug/$n.jpg" || true)
-              size=$(wc -c < "/tmp/$slug-$n.jpg" 2>/dev/null || echo 0)
-              echo "$n.jpg => HTTP $code, $size bytes"
-              [ "$code" = "200" ] && [ "$size" -gt 1000 ] || fail=1
-            done
-          }
-          check_hotel friendly-fun-vallarta OF-PA-PVR-REV26-001 4
-          check_hotel barcelo-puerto-vallarta OF-PA-PVR-SEP26-002 6
-          check_hotel grand-decameron-bucerias OF-PA-NAY-REV26-003 5
-          exit "$fail"
-
-      - name: Validar compatibilidad de enlaces antiguos
-        run: |
-          set -euo pipefail
-          check_redirect() {
-            offer="$1"; expected="$2"
-            headers=$(curl -sS -D - -o /dev/null "$BASE_URL/oferta/$offer")
-            echo "$headers"
-            echo "$headers" | grep -Eq '^HTTP/.* 302'
-            echo "$headers" | grep -Fq "location: $expected" || echo "$headers" | grep -Fq "Location: $expected"
-          }
-          check_redirect OF-PA-PVR-REV26-001 "/hotel-v2/friendly-fun-vallarta?oferta=OF-PA-PVR-REV26-001"
-          check_redirect OF-PA-PVR-SEP26-002 "/hotel-v2/barcelo-puerto-vallarta?oferta=OF-PA-PVR-SEP26-002"
-          check_redirect OF-PA-NAY-REV26-003 "/hotel-v2/grand-decameron-bucerias?oferta=OF-PA-NAY-REV26-003"
-
-      - name: Validar PDFs V2 y rutas historicas
-        run: |
-          set -euo pipefail
-          check_pdf() {
-            offer="$1"
-            for route in "oferta-v2/$offer.pdf" "oferta/$offer.pdf"; do
-              file="/tmp/${offer}-$(echo "$route" | tr '/' '-').pdf"
-              curl -Lsf "$BASE_URL/$route" -o "$file"
-              test -s "$file"
-              pages=$(pdfinfo "$file" | awk '/^Pages:/ {print $2}')
-              echo "$route => $pages paginas"
-              test "${pages:-0}" -ge 3
-              pdftotext "$file" "${file%.pdf}.txt"
-              ! grep -Eqi 'se retiro URL|se retiró URL|pendiente de recaptura|QA interno|URL_proveedor_interna' "${file%.pdf}.txt"
-              grep -Eqi 'Trhoncal Travel' "${file%.pdf}.txt"
-            done
-          }
-          check_pdf OF-PA-PVR-REV26-001
-          check_pdf OF-PA-PVR-SEP26-002
-          check_pdf OF-PA-NAY-REV26-003
-
-      - name: Validar formulario contextual
-        run: |
-          set -euo pipefail
-          curl -Lsf "$BASE_URL/cotizar-v2/puerto-vallarta?oferta=OF-PA-PVR-SEP26-002&destino=Puerto%20Vallarta&salida=2026-09-25&regreso=2026-09-27&plan=Todo%20incluido" -o /tmp/quote.html
-          grep -q "¿Quiénes viajan?" /tmp/quote.html
-          grep -q "Puerto Vallarta" /tmp/quote.html
-          grep -q "2026-09-25" /tmp/quote.html
-          grep -q "2026-09-27" /tmp/quote.html
+          echo "Este QA remoto queda manual mientras el Preview de Vercel tenga Deployment Protection."
+          echo "El gate automatico de la rama es QA local V2 bloqueadores."
+          echo "No interpretar respuestas 200 del Preview protegido como validacion del HTML o de los JPG."
