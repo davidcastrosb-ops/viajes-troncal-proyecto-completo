@@ -1,0 +1,53 @@
+name: QA lead real Apps Script
+
+on:
+  push:
+    branches:
+      - feature/destination-hubs-v2-2026-08-29
+
+jobs:
+  submit-real-qa-lead:
+    if: contains(github.event.head_commit.message, '[qa-lead-real]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enviar lead QA controlado
+        env:
+          ENDPOINT: https://script.google.com/macros/s/AKfycbxq6OxUnMWH004OKyspo7eAbI0GvJvwwDgSnfffSzn9amtKzOWqaDmtWUnrk52rz7U8/exec
+        run: |
+          set -euo pipefail
+          cat > /tmp/lead.json <<'JSON'
+          {
+            "action": "submitLead",
+            "website": "",
+            "nombre": "QA CODEX PANCHITO",
+            "apellido": "NO CONTACTAR",
+            "whatsapp": "00000000",
+            "destino": "Puerto Vallarta",
+            "ciudadSalida": "Guadalajara QA",
+            "fechaSalida": "2026-09-25",
+            "fechaRegreso": "2026-09-27",
+            "personas": "4",
+            "adultos": "2",
+            "menores": "2",
+            "edadesMenores": "7,12",
+            "hospedaje": "Todo incluido",
+            "origen": "qa_go_live_v2",
+            "urlOrigen": "https://qa.trhoncal/hotel-v2/barcelo-puerto-vallarta?oferta=OF-PA-PVR-SEP26-002",
+            "slugDestino": "puerto-vallarta",
+            "utmSource": "qa_codex",
+            "utmMedium": "internal_test",
+            "utmCampaign": "go_live_v2",
+            "ocasionId": "",
+            "ofertaId": "OF-PA-PVR-SEP26-002",
+            "promoUrl": "https://mx.travelpromomaker.com/promotion/161469",
+            "ctaOrigen": "qa_controlado_post_codex",
+            "consentimiento": true
+          }
+          JSON
+          response=$(curl -sS -L --fail-with-body --max-time 30 \
+            -H 'Content-Type: application/json' \
+            -H 'User-Agent: TrhoncalTravel-QA/1.0' \
+            --data-binary @/tmp/lead.json "$ENDPOINT")
+          echo "$response"
+          echo "$response" | grep -q '"ok":true'
+          echo "$response" | grep -Eq '"leadId":"[^"]+"'
