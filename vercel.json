@@ -38,11 +38,11 @@
     },
     {
       "source": "/oferta/:id.pdf",
-      "destination": "/api/offer-pdf-v2?id=:id"
+      "destination": "/api/offer-pdf?id=:id"
     },
     {
       "source": "/oferta/:id",
-      "destination": "/api/offer-v2-compat?id=:id"
+      "destination": "/api/offer?id=:id"
     },
     {
       "source": "/mexico/:slug",
