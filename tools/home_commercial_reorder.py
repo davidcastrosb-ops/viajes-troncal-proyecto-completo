@@ -1,0 +1,89 @@
+from pathlib import Path
+import re
+
+index_path = Path('index.html')
+index = index_path.read_text(encoding='utf-8')
+
+old_nav = '<nav class="nav" aria-label="Navegación principal"><a href="#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="#inspiracion">Inspírate</a><a href="#promociones">Ofertas</a><a href="#faq">Preguntas</a><a href="#fuentes">Fuentes</a><a href="#cotizar">Cotizar</a></nav>'
+new_nav = '<nav class="nav" aria-label="Navegación principal"><a href="#promociones">Ofertas</a><a href="#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="#inspiracion">Inspírate</a><a href="#faq">Preguntas</a><a href="#fuentes">Fuentes</a><a href="#cotizar">Cotizar</a></nav>'
+assert old_nav in index, 'No encontré nav esperado'
+index = index.replace(old_nav, new_nav, 1)
+
+old_wa = '<a id="headerWhatsapp" class="btn btn-outline" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>'
+new_wa = '<a id="headerWhatsapp" class="btn btn-outline whatsapp-cta" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>'
+assert old_wa in index, 'No encontré WhatsApp header esperado'
+index = index.replace(old_wa, new_wa, 1)
+
+old_actions = '<div class="hero-actions"><a class="btn btn-primary" href="#destinos">Explorar destinos</a><a class="btn btn-soft" href="#cotizar" data-quote-launch>Solicita tu viaje</a><a class="hero-when-link" href="/cuando-viajar/">Cuándo viajar →</a></div>'
+new_actions = '<div class="hero-actions"><a class="btn btn-primary" href="#promociones">Ver ofertas vigentes</a><a class="btn btn-soft" href="#destinos">Explorar destinos</a><a class="btn btn-soft" href="#cotizar" data-quote-launch>Solicita tu viaje</a><a class="hero-when-link" href="/cuando-viajar/">Cuándo viajar →</a></div>'
+assert old_actions in index, 'No encontré hero actions esperado'
+index = index.replace(old_actions, new_actions, 1)
+
+promo_line = '    <section class="section" id="promociones"><div class="container"><div class="section-head"><div><span class="eyebrow">Oportunidades para tu viaje</span><h2>Ofertas destacadas</h2></div><p>Cuando hay promociones vigentes, aquí encontrarás opciones con precio, disponibilidad y condiciones reconfirmadas.</p></div><div id="promosCards" class="promo-grid"></div></div></section>'
+assert promo_line in index, 'No encontré sección promociones original'
+index = index.replace('\n' + promo_line + '\n', '\n', 1)
+promo_line = promo_line.replace('class="section" id="promociones"', 'class="section offers-priority-section" id="promociones"')
+
+destination_marker = '\n    <section class="section" id="destinos">'
+assert destination_marker in index, 'No encontré inicio destinos'
+index = index.replace(destination_marker, '\n' + promo_line + '\n' + destination_marker, 1)
+
+required_ids = ['promociones','destinos','viaja-a-tu-manera','inspiracion','faq','fuentes','cotizar']
+for section_id in required_ids:
+    count = len(re.findall(r'id=["\']' + re.escape(section_id) + r'["\']', index))
+    assert count == 1, f'{section_id}: esperaba 1, encontré {count}'
+assert index.index('id="promociones"') < index.index('id="destinos"'), 'Ofertas no quedaron antes de destinos'
+index_path.write_text(index, encoding='utf-8')
+
+when_path = Path('assets/js/when-to-travel-v1.js')
+when = when_path.read_text(encoding='utf-8')
+old_insert = "    hero.insertAdjacentElement('afterend',section);"
+new_insert = "    const offers=document.getElementById('promociones');\n    if(offers)offers.insertAdjacentElement('afterend',section);\n    else hero.insertAdjacentElement('afterend',section);"
+assert old_insert in when, 'No encontré inserción de calendario esperada'
+when = when.replace(old_insert, new_insert, 1)
+when_path.write_text(when, encoding='utf-8')
+
+promo_path = Path('assets/js/promo-maker-v1.js')
+js = promo_path.read_text(encoding='utf-8')
+anchor = "  function destinationFor(entry){\n    return (typeof DESTINATIONS!=='undefined'?DESTINATIONS:[]).find(d=>d.id===entry.destinationId)||null;\n  }\n"
+assert anchor in js, 'No encontré anchor destinationFor'
+helper = anchor + "  const LOCAL_OFFER_IMAGES={\n    'OF-PA-PVR-REV26-001':'/assets/images/hoteles/friendly-fun-vallarta/01.jpg',\n    'OF-PA-PVR-SEP26-002':'/assets/images/hoteles/barcelo-puerto-vallarta/01.jpg',\n    'OF-PA-NAY-REV26-003':'/assets/images/hoteles/grand-decameron-bucerias/01.jpg'\n  };\n"
+js = js.replace(anchor, helper, 1)
+old_image = "    const image=validHttp(entry.image||(!entry.hotel?destination?.mainImage:'')||'');"
+new_image = "    const image=validHttp(entry.image||'')||LOCAL_OFFER_IMAGES[entry.id]||(!entry.hotel?validHttp(destination?.mainImage||''):'');"
+assert old_image in js, 'No encontré lógica de imagen esperada'
+js = js.replace(old_image, new_image, 1)
+old_pref = '<a class="promo-maker-secondary" href="${escapeHTML(wa)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a>'
+new_pref = '<a class="promo-maker-secondary whatsapp-offer-link" href="${escapeHTML(wa)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a>'
+assert old_pref in js, 'No encontré link WhatsApp de promo'
+js = js.replace(old_pref, new_pref, 1)
+promo_path.write_text(js, encoding='utf-8')
+
+css_path = Path('assets/css/styles.css')
+css = css_path.read_text(encoding='utf-8')
+addon = '''
+
+/* Home commercial hierarchy: offers are easier to find without removing editorial content. */
+.offers-priority-section{background:linear-gradient(180deg,#fffaf0 0%,#ffffff 100%);border-top:1px solid rgba(216,175,88,.28);border-bottom:1px solid rgba(216,175,88,.2)}
+.offers-priority-section .section-head h2{font-size:clamp(38px,4.4vw,60px)}
+.nav a[href="#promociones"]{color:#8b641f;background:#f4ead5;border:1px solid rgba(216,175,88,.48);padding:9px 13px;border-radius:999px}
+.whatsapp-cta{background:#25D366!important;border-color:#25D366!important;color:#fff!important;box-shadow:0 10px 26px rgba(37,211,102,.24)}
+.whatsapp-cta:hover{background:#1fbd5a!important;border-color:#1fbd5a!important;color:#fff!important}
+.whatsapp-offer-link{background:#25D366!important;border-color:#25D366!important;color:#fff!important}
+.whatsapp-offer-link:hover{background:#1fbd5a!important;color:#fff!important}
+@media(max-width:760px){.offers-priority-section{padding-top:46px;padding-bottom:50px}}
+'''
+if 'Home commercial hierarchy:' not in css:
+    css += addon
+css_path.write_text(css, encoding='utf-8')
+
+# Final invariants: no content was removed.
+h = index_path.read_text(encoding='utf-8')
+for text in [
+    'Destinos destacados', 'Más destinos de México', 'Viaja según lo que buscas',
+    'Elegimos pensando en tu experiencia', 'Preguntas que conviene resolver desde el principio',
+    'Conoce el destino con mejores referencias', '¿Listo para convertir la idea en viaje?'
+]:
+    assert text in h, text
+
+print('HOME REORDER SCRIPT OK')
