@@ -1,0 +1,63 @@
+name: Patch Apps Script v12 recipient
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-apps-script-v12.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set Trhoncal Travel primary recipient
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('apps-script/LeadSubmission.gs')
+          s = p.read_text(encoding='utf-8')
+
+          s = s.replace(
+              '* v11: correo con micrositio Trhoncal real + promo proveedor + origen de solicitud.',
+              '* v12: correo a trhoncal.viajes@gmail.com + copia a David; mantiene micrositio, proveedor y origen.'
+          )
+
+          old = "to: 'viajestroncal@gmail.com',"
+          new = "to: 'trhoncal.viajes@gmail.com',"
+          if old not in s:
+              raise SystemExit('No se encontró destinatario v11 esperado')
+          s = s.replace(old, new, 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp apps-script/LeadSubmission.gs /tmp/LeadSubmission.js
+          node --check /tmp/LeadSubmission.js
+
+      - name: Commit v12
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- apps-script/LeadSubmission.gs; then
+            echo 'No changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps-script/LeadSubmission.gs
+          git commit -m 'Apps Script v12: send leads to Trhoncal Travel inbox'
+          git push origin HEAD:main
