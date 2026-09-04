@@ -24,9 +24,9 @@
   function promoCard(entry){
     const destination=destinationFor(entry);
     const destinationName=destination?.name||entry.leadDestinationVerified||entry.destinationName||'Viaje seleccionado';
-    // Una oferta de hotel necesita su propia imagen de promoción. No mostramos otra
-    // propiedad ni una foto genérica de destino si Imagen_Promo_URL está vacía.
-    const image=validHttp(entry.image||'')||LOCAL_OFFER_IMAGES[entry.id]||(!entry.hotel?validHttp(destination?.mainImage||''):'');
+    // Para las ofertas piloto usamos primero el asset local estable; así una URL remota
+    // válida pero inaccesible no deja la tarjeta sin imagen en producción.
+    const image=LOCAL_OFFER_IMAGES[entry.id]||validHttp(entry.image||'')||(!entry.hotel?validHttp(destination?.mainImage||''):'');
     const brandedUrl=brandedOfferUrl(entry);
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero asesoría sobre la promoción ${entry.title||destinationName} con Trhoncal Travel.`):'#cotizar';
     const price=money(entry.price);
