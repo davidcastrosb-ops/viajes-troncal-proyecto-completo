@@ -1,5 +1,5 @@
 /* Trhoncal Travel — recepción de solicitudes web.
- * v11: correo con micrositio Trhoncal real + promo proveedor + origen de solicitud.
+ * v12: correo a trhoncal.viajes@gmail.com + copia a David; mantiene micrositio, proveedor y origen.
  * Este archivo complementa Code.gs y usa el mismo CONFIG.spreadsheetId.
  */
 
@@ -501,7 +501,7 @@ function notifyLead_(lead, leadId) {
       MailApp.getRemainingDailyQuota();
 
     MailApp.sendEmail({
-    to: 'viajestroncal@gmail.com',
+    to: 'trhoncal.viajes@gmail.com',
     cc: 'davidcastrosb@gmail.com',
     subject: subject,
     body: body,
