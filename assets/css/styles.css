@@ -39,3 +39,14 @@ h1{font-family:Georgia,"Times New Roman",serif;color:var(--primary);font-size:cl
 .empty-state{padding:30px;border:1px dashed var(--line);border-radius:20px;color:var(--muted);text-align:center}
 @media(max-width:1050px){.hero-editorial,.split-editorial,.sources-layout,.quote-grid{grid-template-columns:1fr}.hero-visual{min-height:470px}.destination-grid{grid-template-columns:repeat(2,1fr)}.promo-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){.container{width:min(100% - 24px,1220px)}.header-inner{min-height:68px}.nav{display:none}.brand-text strong{font-size:16px}.hero-section{padding:26px 0 42px}.hero-visual{min-height:360px;border-radius:24px}h1{font-size:54px}.hero-copy>p{font-size:17px}.section{padding:58px 0}.section-head{align-items:flex-start;flex-direction:column}.destination-grid,.promo-grid,.editorial-points,.source-summary,.footer-grid{grid-template-columns:1fr}.jotform-shell iframe{height:1150px}.whatsapp-float{right:12px;bottom:12px;padding:13px 15px}}
+
+
+/* Home commercial hierarchy: offers are easier to find without removing editorial content. */
+.offers-priority-section{background:linear-gradient(180deg,#fffaf0 0%,#ffffff 100%);border-top:1px solid rgba(216,175,88,.28);border-bottom:1px solid rgba(216,175,88,.2)}
+.offers-priority-section .section-head h2{font-size:clamp(38px,4.4vw,60px)}
+.nav a[href="#promociones"]{color:#8b641f;background:#f4ead5;border:1px solid rgba(216,175,88,.48);padding:9px 13px;border-radius:999px}
+.whatsapp-cta{background:#25D366!important;border-color:#25D366!important;color:#fff!important;box-shadow:0 10px 26px rgba(37,211,102,.24)}
+.whatsapp-cta:hover{background:#1fbd5a!important;border-color:#1fbd5a!important;color:#fff!important}
+.whatsapp-offer-link{background:#25D366!important;border-color:#25D366!important;color:#fff!important}
+.whatsapp-offer-link:hover{background:#1fbd5a!important;color:#fff!important}
+@media(max-width:760px){.offers-priority-section{padding-top:46px;padding-bottom:50px}}

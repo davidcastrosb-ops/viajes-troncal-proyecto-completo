@@ -190,7 +190,9 @@
     section.id='cuando-viajar-preview';
     section.className='section when-travel-section when-travel-home';
     section.innerHTML=`<div class="container"><div class="when-travel-home-head"><div><span class="eyebrow">Tu próximo viaje puede empezar con un día libre</span><h2>¿Cuándo te puedes escapar?</h2></div><p>Aprovecha puentes, vacaciones y escapadas con opciones reales para distintos presupuestos.</p><a class="when-travel-home-link" href="/cuando-viajar/">Ver calendario completo →</a></div><div class="when-travel-carousel"><button class="when-travel-arrow" type="button" data-when-prev aria-label="Ver oportunidad anterior">←</button><div id="whenTravelHomeGrid" class="travel-home-track" aria-live="polite"></div><button class="when-travel-arrow" type="button" data-when-next aria-label="Ver oportunidad siguiente">→</button></div><div id="whenTravelHomeStatus" class="travel-home-status"></div></div>`;
-    hero.insertAdjacentElement('afterend',section);
+    const offers=document.getElementById('promociones');
+    if(offers)offers.insertAdjacentElement('afterend',section);
+    else hero.insertAdjacentElement('afterend',section);
   }
 
   function setupHomeCarousel(count){
