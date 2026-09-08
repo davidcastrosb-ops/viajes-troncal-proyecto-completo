@@ -185,10 +185,11 @@ export default async function handler(req, res) {
 
     <section class="offer-actions-section"><div class="container">
       <div class="offer-actions-card" data-share-title="${esc(offer.title || destinationName)}" data-share-text="${esc(shareText)}" data-share-url="${esc(canonical)}">
-        <div><span class="eyebrow">¿Te gusta esta opción?</span><h2>Guárdala, compártela o cotízala</h2><p>Puedes enviársela a quien viaje contigo para decidir juntos sin perder la promoción.</p></div>
+        <div><span class="eyebrow">¿Te gusta esta opción?</span><h2>Guárdala, compártela o arma tu viaje</h2><p>Puedes enviársela a quien viaje contigo para decidir juntos sin perder la promoción.</p></div>
         <div class="offer-action-buttons">
           <button class="btn btn-primary" type="button" data-native-share>Compartir promoción</button>
           <a class="btn btn-soft" href="${esc(pdfUrl)}" download>Descargar PDF</a>
+          <a class="btn btn-soft" href="${esc(customQuoteUrl)}">Arma tu viaje</a>
           <a class="offer-mini-action" href="${esc(waShare)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
           <a class="offer-mini-action" href="${esc(mailShare)}">Correo</a>
           <button class="offer-mini-action" type="button" data-copy-link>Copiar enlace</button>
