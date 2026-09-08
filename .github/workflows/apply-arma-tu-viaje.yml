@@ -1,0 +1,118 @@
+name: Apply Arma tu viaje CTA convention
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-arma-tu-viaje.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-ctas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply approved CTA language
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          changed = set()
+
+          def rep(path, old, new, required=True, count=None):
+              p = Path(path)
+              if not p.exists():
+                  if required:
+                      raise SystemExit(f'Missing file: {path}')
+                  return
+              text = p.read_text(encoding='utf-8')
+              n = text.count(old)
+              if required and n == 0:
+                  raise SystemExit(f'Pattern not found in {path}: {old[:100]}')
+              if count is not None and n != count:
+                  raise SystemExit(f'Unexpected count in {path}: expected {count}, got {n} for {old[:100]}')
+              if n:
+                  text = text.replace(old, new)
+                  p.write_text(text, encoding='utf-8')
+                  changed.add(path)
+
+          # Home: one commercial language for the personalized path.
+          rep('index.html', '<a href="#cotizar">Cotizar</a>', '<a href="#cotizar">Arma tu viaje</a>', count=1)
+          rep('index.html', 'data-quote-launch>Solicita tu viaje</a>', 'data-quote-launch>Arma tu viaje</a>', count=1)
+          rep('index.html', 'data-quote-launch>Solicita tu viaje a tu medida →</a>', 'data-quote-launch>Arma tu viaje →</a>', count=1)
+
+          # Existing modal/form: title and action become Arma tu viaje.
+          rep('assets/js/quote-modal-v1.js', '<h2 id="quoteModalTitle">Solicita tu viaje a tu medida</h2>', '<h2 id="quoteModalTitle">Arma tu viaje</h2>', count=1)
+          rep('assets/js/quote-modal-v1.js', '<button id="quoteSubmitButton" class="btn btn-primary" type="submit">Solicitar mi viaje →</button>', '<button id="quoteSubmitButton" class="btn btn-primary" type="submit">Armar mi viaje →</button>', count=1)
+          rep('assets/js/quote-modal-v1.js', "if(title) title.textContent = clean ? `Tu viaje a ${clean}` : 'Solicita tu viaje a tu medida';", "if(title) title.textContent = clean ? `Arma tu viaje a ${clean}` : 'Arma tu viaje';", count=1)
+          rep('assets/js/quote-modal-v1.js', "link.textContent = destination ? 'Solicita este viaje' : 'Solicita tu viaje';", "link.textContent = 'Arma tu viaje';", count=1)
+          rep('assets/js/quote-modal-v1.js', "qsa('.hero-actions [data-quote-launch]').forEach(link=>link.textContent='Solicita tu viaje');", "qsa('.hero-actions [data-quote-launch]').forEach(link=>link.textContent='Arma tu viaje');", count=1)
+
+          # Legacy shareable offer: keep Quiero este viaje as primary and add personalized alternative.
+          rep('api/offer.js', "  const quoteUrl = `https://${PUBLIC_HOST}/?${quoteParams.toString()}`;", "  const quoteUrl = `https://${PUBLIC_HOST}/?${quoteParams.toString()}`;\n  const customQuoteParams = new URLSearchParams({ travelQuote: '1', cta: 'arma_tu_viaje_oferta' });\n  if (destinationName) customQuoteParams.set('destino', destinationName);\n  const customQuoteUrl = `https://${PUBLIC_HOST}/?${customQuoteParams.toString()}`;", count=1)
+          rep('api/offer.js', '<a href="/#cotizar">Solicita tu viaje</a>', '<a href="/#cotizar">Arma tu viaje</a>', count=1)
+          rep('api/offer.js', '<div class="offer-final-actions"><a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a></div>', '<div class="offer-final-actions"><a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a><a class="btn btn-soft" href="${esc(customQuoteUrl)}">Arma tu viaje →</a></div>', count=1)
+
+          # Hotel microsite: exact offer stays primary; personalized path is clearly separate.
+          rep('api/hotel-v2.js', "  const quoteUrl=`/cotizar-v2${destinationSlug?`/${encodeURIComponent(destinationSlug)}`:''}?${quote.toString()}`;", "  const quoteUrl=`/cotizar-v2${destinationSlug?`/${encodeURIComponent(destinationSlug)}`:''}?${quote.toString()}`;\n  const customQuote=new URLSearchParams({cta:'arma_tu_viaje_hotel',destino:destinationName});\n  const customQuoteUrl=`/cotizar-v2${destinationSlug?`/${encodeURIComponent(destinationSlug)}`:''}?${customQuote.toString()}`;", count=1)
+          rep('api/hotel-v2.js', '<a href="/cotizar-v2">Solicita tu viaje</a>', '<a href="/cotizar-v2">Arma tu viaje</a>', count=1)
+          rep('api/hotel-v2.js', '<a class="btn btn-primary" href="${esc(quoteUrl)}">Solicitar esta opción →</a>', '<a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a><a class="btn btn-outline" href="${esc(customQuoteUrl)}">Arma tu viaje →</a>', count=1)
+          rep('api/hotel-v2.js', '<div class="hotel-v2-price-row"><a class="btn btn-primary" href="${esc(quoteUrl)}">Cotizar este hotel →</a></div>', '<div class="hotel-v2-price-row"><a class="btn btn-primary" href="${esc(customQuoteUrl)}">Arma tu viaje →</a></div>', count=1)
+          rep('api/hotel-v2.js', '<section class="hotel-v2-final"><div class="container hotel-v2-final-card"><div><span class="eyebrow">Siguiente paso</span><h2>${offer?\'¿Te gustaría viajar con esta opción?\':\'¿Quieres cotizar este hotel?\'}</h2><p>${offer?\'Destino, fechas, hotel y promoción pasan precargados al formulario.\':\'Cuéntanos fechas y viajeros para buscar una opción vigente.\'}</p></div><a class="btn btn-primary" href="${esc(quoteUrl)}">${offer?\'Solicitar esta opción →\':\'Cotizar este hotel →\'}</a></div></section>', '<section class="hotel-v2-final"><div class="container hotel-v2-final-card"><div><span class="eyebrow">Siguiente paso</span><h2>${offer?\'¿Te gustaría viajar con esta opción?\':\'¿Quieres que armemos tu viaje?\'}</h2><p>${offer?\'Destino, fechas, hotel y promoción pasan precargados al formulario. Si necesitas algo diferente, también podemos armarlo a tu medida.\':\'Cuéntanos fechas y viajeros para buscar una opción vigente.\'}</p></div><div class="hotel-v2-final-actions">${offer?`<a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a><a class="btn btn-outline" href="${esc(customQuoteUrl)}">Arma tu viaje →</a>`:`<a class="btn btn-primary" href="${esc(customQuoteUrl)}">Arma tu viaje →</a>`}</div></div></section>', count=1)
+          rep('api/hotel-v2.js', '<a class="btn" href="${esc(quoteUrl)}">Solicitar</a>', '<a class="btn" href="${esc(quoteUrl)}">Quiero este viaje</a>', count=1)
+
+          # V2 quote page: action reflects whether the user chose a ready-made trip or wants one built.
+          rep('api/quote-v2.js', "  const title=offer?`Tu viaje a ${destinationName}`:`Arma tu viaje a ${destinationName}`,offerLabel=offer?.hotel||offer?.title||'',promoUrl=offer?.publicPromoUrl||offer?.sharePromoUrl||'';", "  const title=offer?`Tu viaje a ${destinationName}`:`Arma tu viaje a ${destinationName}`,offerLabel=offer?.hotel||offer?.title||'',promoUrl=offer?.publicPromoUrl||offer?.sharePromoUrl||'';\n  const submitLabel=offer?'Quiero este viaje →':'Armar mi viaje →';", count=1)
+          rep('api/quote-v2.js', '<button id="send" type="submit">Solicitar cotización →</button>', '<button id="send" type="submit">${esc(submitLabel)}</button>', count=1)
+
+          # Destination hub: personalized path wording.
+          rep('api/destination-hub-v4.js', "return {href:`/cotizar-v2?${params.toString()}`,label:'Cotizar esta opción →'};", "return {href:`/cotizar-v2?${params.toString()}`,label:'Quiero este viaje →'};", count=1)
+          rep('api/destination-hub-v4.js', 'Cotizar este destino →', 'Arma tu viaje →', count=1)
+
+          # Safe global cleanup for navigation anchors using the exact old CTA text.
+          for p in list(Path('.').rglob('*.html')) + list(Path('api').glob('*.js')):
+              text = p.read_text(encoding='utf-8')
+              new = text.replace('>Solicita tu viaje</a>', '>Arma tu viaje</a>').replace('>Cotizar</a>', '>Arma tu viaje</a>')
+              if new != text:
+                  p.write_text(new, encoding='utf-8')
+                  changed.add(str(p))
+
+          # Persist the commercial convention in the continuity file.
+          doc = Path('docs/ESTADO_ACTUAL_TRHONCAL_TRAVEL.md')
+          if doc.exists():
+              text = doc.read_text(encoding='utf-8')
+              marker = '## Convención comercial de CTA'
+              block = '''\n\n## Convención comercial de CTA\n- **Quiero este viaje** = el cliente quiere una promoción ya armada; conserva oferta, fechas y condiciones para confirmar disponibilidad.\n- **Arma tu viaje** = servicio personalizado; abre el formulario para construir una opción distinta o a la medida.\n- El acceso persistente a **Arma tu viaje** se resuelve mediante navegación/header, no con un segundo botón flotante que compita con WhatsApp.\n'''
+              if marker not in text:
+                  doc.write_text(text.rstrip() + block + '\n', encoding='utf-8')
+                  changed.add(str(doc))
+
+          if not changed:
+              raise SystemExit('No files changed')
+          print('Changed files:')
+          for path in sorted(changed):
+              print(' -', path)
+          PY
+
+      - name: Sanity checks
+        run: |
+          node --check api/offer.js
+          node --check api/hotel-v2.js
+          node --check api/quote-v2.js
+          node --check api/destination-hub-v4.js
+          node --check assets/js/quote-modal-v1.js
+          grep -q 'Arma tu viaje' index.html
+          grep -q 'Quiero este viaje' api/offer.js
+
+      - name: Commit approved CTA changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/js/quote-modal-v1.js api/offer.js api/hotel-v2.js api/quote-v2.js api/destination-hub-v4.js docs/ESTADO_ACTUAL_TRHONCAL_TRAVEL.md
+          git add -u
+          git commit -m 'Standardize Arma tu viaje CTA' || exit 0
+          git push origin HEAD:main
