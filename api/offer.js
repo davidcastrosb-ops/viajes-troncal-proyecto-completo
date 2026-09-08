@@ -97,6 +97,9 @@ export default async function handler(req, res) {
   if (offer.id) quoteParams.set('oferta', offer.id);
   if (plan) quoteParams.set('plan', plan);
   const quoteUrl = `https://${PUBLIC_HOST}/?${quoteParams.toString()}`;
+  const customQuoteParams = new URLSearchParams({ travelQuote: '1', cta: 'arma_tu_viaje_oferta' });
+  if (destinationName) customQuoteParams.set('destino', destinationName);
+  const customQuoteUrl = `https://${PUBLIC_HOST}/?${customQuoteParams.toString()}`;
   const pdfUrl = `https://${PUBLIC_HOST}/oferta/${encodeURIComponent(offer.id)}.pdf`;
   const waShare = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${canonical}`)}`;
   const mailShare = `mailto:?subject=${encodeURIComponent(`Mira esta opción de ${destinationName}`)}&body=${encodeURIComponent(`${shareText}\n\n${canonical}`)}`;
@@ -157,7 +160,7 @@ export default async function handler(req, res) {
   <script type="application/ld+json">${structured}</script>
 </head>
 <body class="offer-page">
-  <header class="site-header"><div class="container header-inner"><a class="brand" href="/" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#promociones">Ofertas</a><a href="/#cotizar">Solicita tu viaje</a></nav><a class="btn btn-outline" href="https://wa.me/523329335952" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
+  <header class="site-header"><div class="container header-inner"><a class="brand" href="/" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#promociones">Ofertas</a><a href="/#cotizar">Arma tu viaje</a></nav><a class="btn btn-outline" href="https://wa.me/523329335952" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
 
   <main class="offer-main">
     <section class="offer-hero">
@@ -206,7 +209,7 @@ export default async function handler(req, res) {
       <article class="offer-detail-card"><span class="eyebrow">Qué incluye</span><h2>Lo esencial de esta promoción</h2>${includes.length ? `<ul>${includes.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p>Consulta el detalle de servicios en la promoción vigente.</p>'}${excludes.length ? `<h3>No incluye</h3><ul>${excludes.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</article>
     </div></section>
 
-    <section class="offer-final"><div class="container offer-final-card"><div><span class="eyebrow">Siguiente paso</span><h2>¿Quieres avanzar con este viaje?</h2><p>Revisamos disponibilidad y condiciones actuales antes de cualquier pago.</p></div><div class="offer-final-actions"><a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a></div></div></section>
+    <section class="offer-final"><div class="container offer-final-card"><div><span class="eyebrow">Siguiente paso</span><h2>¿Quieres avanzar con este viaje?</h2><p>Revisamos disponibilidad y condiciones actuales antes de cualquier pago.</p></div><div class="offer-final-actions"><a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a><a class="btn btn-soft" href="${esc(customQuoteUrl)}">Arma tu viaje →</a></div></div></section>
   </main>
 
   <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"><p>Tu viaje comienza desde que lo imaginas.</p></div><div><h3>Contacto</h3><p><a href="https://wa.me/523329335952" target="_blank" rel="noopener noreferrer">WhatsApp 33 2933 5952</a></p><p><a href="mailto:viajestroncal@gmail.com">viajestroncal@gmail.com</a></p></div></div></footer>

@@ -161,7 +161,7 @@ export default async function handler(req, res) {
   <script type="application/ld+json">${structured}</script>
 </head>
 <body class="destination-route">
-  <header class="site-header"><div class="container header-inner"><a class="brand" href="/#inicio" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#inspiracion">Inspírate</a><a href="/#fuentes">Fuentes</a><a href="/#cotizar">Cotizar</a></nav><a class="btn btn-outline" href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
+  <header class="site-header"><div class="container header-inner"><a class="brand" href="/#inicio" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#inspiracion">Inspírate</a><a href="/#fuentes">Fuentes</a><a href="/#cotizar">Arma tu viaje</a></nav><a class="btn btn-outline" href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
   <main>
     <div class="destination-detail-overlay open route-page" aria-hidden="false"><article class="destination-detail" aria-labelledby="detailTitle">
       <div class="detail-route-bar"><a class="detail-route-brand" href="/#destinos"><img src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><div class="detail-route-context"><span>México · ${esc(d.state || '')}</span><a class="detail-route-back" href="/#destinos">← Volver a destinos</a></div></div>

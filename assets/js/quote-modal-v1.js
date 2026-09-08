@@ -64,7 +64,7 @@
       <button class="quote-modal-close" type="button" data-quote-close aria-label="Cerrar solicitud">×</button>
       <header class="quote-modal-head">
         <span class="eyebrow">Trhoncal Travel</span>
-        <h2 id="quoteModalTitle">Solicita tu viaje a tu medida</h2>
+        <h2 id="quoteModalTitle">Arma tu viaje</h2>
         <p id="quoteModalCopy">Cuéntanos lo esencial. Nosotros te ayudamos a convertirlo en un viaje real.</p>
         <div id="quoteSelectedDestination" class="quote-modal-destination" hidden></div>
       </header>
@@ -143,7 +143,7 @@
         <div id="quoteFormStatus" class="native-form-status" role="status" aria-live="polite"></div>
 
         <div class="native-form-actions">
-          <button id="quoteSubmitButton" class="btn btn-primary" type="submit">Solicitar mi viaje →</button>
+          <button id="quoteSubmitButton" class="btn btn-primary" type="submit">Armar mi viaje →</button>
           <span>Sin compromiso. Confirmamos precio y disponibilidad antes de cualquier pago.</span>
         </div>
       </form>
@@ -179,7 +179,7 @@
       selected.hidden = !clean;
       selected.textContent = clean ? `Destino seleccionado: ${clean}` : '';
     }
-    if(title) title.textContent = clean ? `Tu viaje a ${clean}` : 'Solicita tu viaje a tu medida';
+    if(title) title.textContent = clean ? `Arma tu viaje a ${clean}` : 'Arma tu viaje';
     if(copy) copy.textContent = clean
       ? 'Ya sabemos a dónde quieres ir. Cuéntanos fechas, viajeros y lo esencial para empezar.'
       : 'Cuéntanos lo esencial. Nosotros te ayudamos a convertirlo en un viaje real.';
@@ -500,14 +500,14 @@
     qsa('.nav a').forEach(link=>{
       const href = link.getAttribute('href') || '';
       if(href.endsWith('#cotizar')){
-        link.textContent = destination ? 'Solicita este viaje' : 'Solicita tu viaje';
+        link.textContent = 'Arma tu viaje';
         link.setAttribute('href','#cotizar');
         link.setAttribute('data-quote-launch','');
         if(destination) link.dataset.destination = destination;
         link.classList.add('nav-quote');
       }
     });
-    qsa('.hero-actions [data-quote-launch]').forEach(link=>link.textContent='Solicita tu viaje');
+    qsa('.hero-actions [data-quote-launch]').forEach(link=>link.textContent='Arma tu viaje');
   }
 
   document.addEventListener('DOMContentLoaded',()=>{

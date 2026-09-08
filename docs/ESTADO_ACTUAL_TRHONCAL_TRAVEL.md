@@ -204,3 +204,9 @@ David puede escribir simplemente:
 **“Continuamos Trhoncal Travel desde el estado maestro.”**
 
 El asistente debe leer este archivo y el Archivo Maestro antes de pedir a David que repita información del proyecto.
+
+## Convención comercial de CTA
+- **Quiero este viaje** = el cliente quiere una promoción ya armada; conserva oferta, fechas y condiciones para confirmar disponibilidad.
+- **Arma tu viaje** = servicio personalizado; abre el formulario para construir una opción distinta o a la medida.
+- El acceso persistente a **Arma tu viaje** se resuelve mediante navegación/header, no con un segundo botón flotante que compita con WhatsApp.
+
