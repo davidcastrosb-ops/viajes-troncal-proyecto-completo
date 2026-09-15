@@ -1,6 +1,6 @@
 # Trhoncal Travel — Estado actual y continuidad
 
-Última actualización: 2026-09-05
+Última actualización: 2026-09-15
 
 Este archivo existe para retomar el proyecto en cualquier chat, con Codex u otro asistente, sin reconstruir semanas de conversación. El chat es la mesa de trabajo; este documento resume la lógica operativa vigente.
 
@@ -182,20 +182,21 @@ Antes de implementar:
 3. definir si el feed será compartido o habrá salidas separadas para Meta y WhatsApp;
 4. preferir inicialmente un feed automático estable antes que una integración API compleja.
 
-No iniciar Fase 2 hasta validar Fase 1 con una nueva promoción real.
+No iniciar conexión real con Meta hasta validar el feed y evitar catálogos duplicados.
 
 ## 11. Siguiente acción concreta
 
-**David envía la próxima promoción real.**
+El cierre funcional se organiza ahora con el documento:
 
-El asistente debe:
-1. revisar y verificar la promoción;
-2. identificar si el hotel ya existe;
-3. si existe, publicarla mediante `24_Publicador_Ofertas`;
-4. si es nuevo, dar de alta hotel + imágenes primero;
-5. confirmar que aparece en web;
-6. revisar tarjeta, micrositio, precio, fechas, WhatsApp y formulario;
-7. documentar cualquier cambio importante en este archivo.
+`docs/CIERRE_FUNCIONAL_MVP_2026-09-15.md`
+
+Rama de trabajo:
+
+`codex/cierre-funcional-mvp-2026-09`
+
+Issue de coordinación:
+
+`#14 — Cierre funcional MVP — caducidad, dashboard y feed Meta sin tocar UI`
 
 ## 12. Instrucción para un chat nuevo
 
@@ -203,10 +204,32 @@ David puede escribir simplemente:
 
 **“Continuamos Trhoncal Travel desde el estado maestro.”**
 
-El asistente debe leer este archivo y el Archivo Maestro antes de pedir a David que repita información del proyecto.
+El asistente debe leer este archivo, el documento de cierre funcional y el Archivo Maestro antes de pedir a David que repita información del proyecto.
 
-## Convención comercial de CTA
+## 13. Convención comercial de CTA
+
 - **Quiero este viaje** = el cliente quiere una promoción ya armada; conserva oferta, fechas y condiciones para confirmar disponibilidad.
 - **Arma tu viaje** = servicio personalizado; abre el formulario para construir una opción distinta o a la medida.
 - El acceso persistente a **Arma tu viaje** se resuelve mediante navegación/header, no con un segundo botón flotante que compita con WhatsApp.
 
+## 14. Congelamiento visual/estructural — septiembre 2026
+
+Por instrucción expresa de David, durante el cierre funcional actual NO se modifica sin consulta previa:
+
+- diseño o estructura de home;
+- diseño o estructura de micrositios;
+- diseño o estructura de páginas de oferta;
+- colores, tipografías, imágenes, galerías, hero, footer o layout;
+- navegación/copy visible o estructura de formularios visibles.
+
+Si una corrección funcional requiere cualquiera de esos cambios, presentar a David un único bloque numerado con todas las decisiones necesarias. No preguntar una por una.
+
+## 15. Arquitectura funcional acordada para cierre
+
+- `Hotel_ID` = hotel permanente.
+- `Oferta_ID` = promoción temporal.
+- Una misma promoción debe alimentar web y posteriormente Meta/WhatsApp.
+- La vigencia se controla desde el Maestro.
+- Promociones vencidas se ocultan automáticamente de canales públicos, pero se conservan como historial.
+- Se prepara dashboard interno simple con conteo de ofertas activas por destino.
+- Se prepara seguimiento de interés en Kommo sólo después de catálogo/WhatsApp operativos y respetando plantillas/consentimiento.
