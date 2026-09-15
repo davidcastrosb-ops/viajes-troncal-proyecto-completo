@@ -132,20 +132,16 @@ El enlace del artículo debe llevar a Trhoncal Travel, no al proveedor.
 
 No crear catálogo, no tocar Commerce Manager y no conectar WhatsApp en este bloque.
 
-### A5. Dashboard: sólo especificación técnica para el Maestro
+### A5. Dashboard interno: reutilizar lo que ya existe
 
-Preparar especificación para una pestaña nueva del Sheet:
+Ya existe `19_Dashboard_Cierre` y funciona con fórmulas del Maestro. NO crear otra pestaña salvo que exista una razón técnica real.
 
-`25_Dashboard_Promociones`
-
-Debe ser extremadamente simple:
+Añadir después, de forma simple y sin gráficas complejas:
 
 - total de promociones activas;
 - total que vencen pronto;
 - conteo por destino: Puerto Vallarta 3, Cancún 2, etc.;
 - opcionalmente fecha más próxima de vencimiento por destino.
-
-No hacer gráficas ni dashboard visual complejo.
 
 El dashboard debe usar la misma definición de ACTIVA del punto 3.
 
@@ -156,7 +152,7 @@ Una vez que Codex deje verde el Bloque A:
 1. revisar diff y pruebas;
 2. confirmar que no hubo cambios visuales/estructurales;
 3. validar feed de Meta con muestras reales;
-4. crear/ajustar `25_Dashboard_Promociones` directamente en el Archivo Maestro;
+4. actualizar `19_Dashboard_Cierre` directamente en el Archivo Maestro con el bloque mínimo de promociones;
 5. probar una promoción nueva real desde `24_Publicador_Ofertas`;
 6. comprobar home, oferta, micrositio, formulario, correo y lead;
 7. comprobar una promoción artificialmente vencida en entorno de prueba o fixture, sin alterar una venta real;
