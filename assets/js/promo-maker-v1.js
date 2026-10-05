@@ -44,8 +44,10 @@
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero información sobre esta promoción de Trhoncal Travel: ${entry.title||destinationName}. ${publicUrl}`):'#cotizar';
     const price=money(entry.price);
     const totalValue=tripTotal(entry),total=totalValue?money(totalValue):'';
+    const personsCount=Number(entry.persons),perPersonValue=totalValue&&personsCount>0?totalValue/personsCount:null,perPerson=perPersonValue?money(perPersonValue):'';
     const unitIsTotal=/total\s+por\s+estancia|por\s+paquete/i.test(String(entry.priceUnit||''));
     const showTripTotal=!!total&&!unitIsTotal;
+    const showPerPerson=!!perPerson&&personsCount>0;
     const duration=[entry.days?`${entry.days} días`:'',entry.nights?`${entry.nights} noches`:''].filter(Boolean).join(' · ');
     const expiry=entry.expiresAt||'';
     const verified=entry.verifiedAt||'';
@@ -58,7 +60,8 @@
         <h3${entry.hotel?' translate="no" class="notranslate"':''}>${escapeHTML(title)}</h3>
         ${entry.hotel?`<p class="promo-maker-hotel notranslate" translate="no">${escapeHTML(entry.hotel)}</p>`:''}
         ${price?`<div class="promo-maker-price">${pricePrefix(entry)?`<small>${pricePrefix(entry)}</small>`:'' }<strong>${escapeHTML(price)}</strong>${entry.priceUnit?`<span>${escapeHTML(entry.priceUnit)}</span>`:''}</div>`:''}
-        ${showTripTotal?`<div class="promo-maker-total"><span>Total de esta opción</span><strong>${escapeHTML(total)}</strong><small>MXN</small></div>`:''}
+        ${showTripTotal?`<div class="promo-maker-total"><span>Total del viaje</span><strong>${escapeHTML(total)}</strong><small>MXN</small></div>`:''}
+        ${showPerPerson?`<div class="promo-maker-person"><span>Por persona</span><strong>${escapeHTML(perPerson)}</strong><small>MXN</small></div>`:''}
         <div class="promo-maker-payment"><span>Hasta 18 meses con tarjetas participantes</span>${entry.allowsDeposits?`<span>${escapeHTML(entry.depositText||'Pregunta por opción de apartar y abonar')}</span>`:''}</div>
         <div class="promo-maker-meta">${duration?`<span>${escapeHTML(duration)}</span>`:''}${expiry?`<span>Vigente hasta ${escapeHTML(expiry)}</span>`:''}${verified?`<span>Precio confirmado ${escapeHTML(verified)}</span>`:''}</div>
         ${entry.note?`<p class="promo-maker-note">${escapeHTML(entry.note)}</p>`:''}
