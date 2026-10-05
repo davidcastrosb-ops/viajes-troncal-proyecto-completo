@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/destination-hubs-v2-2026-08-29
+      - codex/cierre-funcional-mvp-2026-09
   workflow_dispatch:
 
 jobs:
@@ -14,5 +15,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Regresiones P1 XSS y galerias
+      - name: Sintaxis JS modificada
+        run: |
+          node --check api/hotel-v2.js
+          node --check api/offer.js
+          node --check api/offer-pdf-v2.js
+          node --check api/offer-pdf.js
+          node --check assets/js/site.js
+          node --check assets/js/v2-directories.js
+          node --check apps-script/Code.gs
+      - name: Regresiones P1 XSS, galerias y precios
         run: node --experimental-vm-modules --test tests/v2-blockers.test.mjs
