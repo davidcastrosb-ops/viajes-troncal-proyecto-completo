@@ -12,6 +12,23 @@ function setText(id,text){const el=document.getElementById(id);if(el)el.textCont
 function setHref(id,href){const el=document.getElementById(id);if(el)el.href=href||'#'}
 function escapeHTML(value=''){return String(value).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]))}
 function destinationSlug(d={}){return String(d.slug||d.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
+function offerPriceText(o={}){
+  if(!o.price)return '';
+  const type=String(o.commercialType||'').toUpperCase();
+  const rawUnit=String(o.priceUnit||'').trim();
+  const unitLower=rawUnit.toLowerCase();
+  let suffix='';
+  if(/por\s*persona/.test(unitLower))suffix=' por persona';
+  else if(/noche/.test(unitLower)||/promedio/.test(unitLower))suffix=' por habitación por noche';
+  else if(/total/.test(unitLower))suffix=' total';
+  const prefix=type==='PAQUETE_FIJO'?'': 'Desde ';
+  return `${prefix}${o.price} MXN${suffix}`;
+}
+function ensurePriceDisclaimer(text=''){
+  const value=String(text||'').trim();
+  if(/sujeto a disponibilidad|sujeta a disponibilidad/i.test(value))return value;
+  return `${value}${value?' ':''}Sujeto a disponibilidad y cambios sin previo aviso.`;
+}
 
 function whatsappLink(message='Hola, quiero cotizar un viaje con Trhoncal Travel.'){
   return `https://wa.me/${SITE.contact.whatsapp}?text=${encodeURIComponent(message)}`;
@@ -233,9 +250,10 @@ function renderOffers(){
   if(footerLink)footerLink.closest('p')?.removeAttribute('hidden');
   publishable.forEach(entry=>{
     const title=escapeHTML(entry.title||'Promoción especial');
-    const desc=escapeHTML(entry.description||entry.note||'Cotiza disponibilidad y condiciones vigentes.');
+    const desc=escapeHTML(ensurePriceDisclaimer(entry.description||entry.note||'Cotiza disponibilidad y condiciones vigentes.'));
     const image=escapeHTML(entry.image||'');
-    const price=entry.price?`<div class="promo-price">${escapeHTML(entry.price)}</div>`:'';
+    const priceText=offerPriceText(entry);
+    const price=priceText?`<div class="promo-price">${escapeHTML(priceText)}</div>`:'';
     const destination=DESTINATIONS.find(d=>d.id===entry.destinationId)?.name||entry.leadDestinationVerified||'';
     grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}" loading="lazy">`:''}<h3>${title}</h3>${price}<p>${desc}</p><div class="promo-actions"><a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destination)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}" data-promo-url="${escapeHTML(entry.publicPromoUrl||entry.sharePromoUrl||'')}" data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a></div></article>`);
   });
