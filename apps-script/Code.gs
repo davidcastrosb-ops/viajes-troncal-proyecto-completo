@@ -70,7 +70,7 @@ function buildPublicPayload_() {
   });
 
   const visibleSources = sourceRows
-    .filter(row => sourceIds[text_(row.Fuente_ID)])
+    .filter(row => sourceIds[text_(row.Fuente_ID)] && !isInternalSource_(row))
     .map(publicSource_);
 
   const visibleOffers = offerRows
@@ -188,6 +188,20 @@ function publicDestination_(row, ficha) {
   };
 }
 
+function isInternalSource_(row) {
+  const level = text_(row.Nivel).toLowerCase();
+  const type = text_(row.Tipo).toLowerCase();
+  return level.indexOf('interna') !== -1 || type.indexOf('interna') !== -1;
+}
+
+function publicNote_(value) {
+  const raw = text_(value);
+  const fallback = 'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.';
+  if (!raw) return fallback;
+  const internal = /(priceagencies|travel\s*promo\s*maker|proveedor|captura\s+directa|evidencia\s+interna|nota\s+interna|uso\s+interno|\/promotion\/|url\s+del\s+proveedor)/i;
+  return internal.test(raw) ? fallback : raw;
+}
+
 function publicSource_(row) {
   return {
     id: text_(row.Fuente_ID),
@@ -222,7 +236,6 @@ function publicOffer_(row) {
 
   return {
     id: text_(row.Oferta_ID),
-    providerId: text_(row.Proveedor_ID),
     destinationId: text_(row.Destino_ID),
     hotelId: text_(row.Hotel_ID),
     occasionId: text_(row.Ocasion_ID),
@@ -247,7 +260,7 @@ function publicOffer_(row) {
     expiresAt: dateText_(row.Fecha_Expiracion_Web),
     includes: split_(row.Incluye),
     excludes: split_(row.No_Incluye),
-    note: text_(row.Notas_Publicacion),
+    note: publicNote_(row.Notas_Publicacion),
     publicPromoUrl,
     sharePromoUrl,
     leadFormUrl,
