@@ -196,7 +196,7 @@ export default async function handler(req, res) {
             ${dates.length ? `<span>${esc(dates.join(' - '))}</span>` : ''}
             ${duration ? `<span>${esc(duration)}</span>` : ''}
             ${plan ? `<span>${esc(plan)}</span>` : ''}
-            ${offer.rooms ? `<span>${esc(offer.rooms)} habitación${Number(offer.rooms)===1?'':'es'}</span>` : ''}
+            ${offer.rooms ? `<span>${esc(Number(offer.rooms)===1?'1 habitación':offer.rooms+' habitaciones')}</span>` : ''}
             ${offer.persons ? `<span>${esc(offer.persons)} persona${Number(offer.persons)===1?'':'s'}</span>` : ''}
             ${offer.occupancy ? `<span>${esc(offer.occupancy)}</span>` : ''}
           </div>
