@@ -155,6 +155,9 @@ export default async function handler(req, res) {
   const price = money(offer.price);
   const totalValue = tripTotal(offer);
   const total = totalValue ? money(totalValue) : '';
+  const personsCount = Number(offer.persons);
+  const perPersonValue = totalValue && personsCount > 0 ? totalValue / personsCount : null;
+  const perPerson = perPersonValue ? money(perPersonValue) : '';
   const unitIsTotal = /total\s+por\s+estancia|por\s+paquete/i.test(String(offer.priceUnit || ''));
   const dates = [offer.travelStart ? dateMx(offer.travelStart) : '', offer.travelEnd ? dateMx(offer.travelEnd) : ''].filter(Boolean).join(' - ');
   const duration = [offer.days ? `${offer.days} días` : '', offer.nights ? `${offer.nights} noches` : ''].filter(Boolean).join(' / ');
@@ -220,8 +223,13 @@ export default async function handler(req, res) {
     page.drawText('MXN', { x: 170, y: y - 25, font: bold, size: 10, color: navy });
     y -= 52;
     if (total && !unitIsTotal) {
-      page.drawText('TOTAL DE ESTA OPCIÓN', { x: 42, y, font: bold, size: 8.8, color: gold });
+      page.drawText('TOTAL DEL VIAJE', { x: 42, y, font: bold, size: 8.8, color: gold });
       page.drawText(`${total} MXN`, { x: 42, y: y - 22, font: bold, size: 18, color: navy });
+      y -= 39;
+    }
+    if (perPerson) {
+      page.drawText('POR PERSONA', { x: 42, y, font: bold, size: 8.8, color: gold });
+      page.drawText(`${perPerson} MXN`, { x: 42, y: y - 22, font: bold, size: 18, color: navy });
       y -= 39;
     }
     page.drawText('Hasta 18 meses con tarjetas participantes', { x: 42, y, font: bold, size: 9, color: navy });
