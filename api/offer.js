@@ -139,6 +139,9 @@ export default async function handler(req, res) {
   const includes = Array.isArray(offer.includes) ? offer.includes : [];
   const excludes = Array.isArray(offer.excludes) ? offer.excludes : [];
   const description = publicNote(offer.note || `Opción de viaje a ${destinationName}. Precio, disponibilidad y condiciones se reconfirman antes de reservar.`);
+  const normalizedTitle = String(offer.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const normalizedHotel = String(offer.hotel || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const showHotelSubtitle = !!offer.hotel && !normalizedTitle.includes(normalizedHotel);
 
   const structured = JSON.stringify({
     '@context': 'https://schema.org',
@@ -198,7 +201,7 @@ export default async function handler(req, res) {
         <div class="offer-copy">
           <span class="eyebrow">Una opción para compartir</span>
           <h1${offer.hotel ? ' translate="no" class="notranslate"' : ''}>${esc(offer.title || destinationName)}</h1>
-          ${offer.hotel ? `<p class="offer-hotel" translate="no"><strong>Hotel: ${esc(offer.hotel)}</strong></p>` : ''}
+          ${showHotelSubtitle ? `<p class="offer-hotel" translate="no"><strong>Hotel: ${esc(offer.hotel)}</strong></p>` : ''}
           <p>${esc(description)}</p>
           <div class="offer-tags">
             ${dates.length ? `<span>${esc(dates.join(' - '))}</span>` : ''}
