@@ -27,9 +27,15 @@ function offerPriceText(o={}){
   const basis=[o.rooms?(Number(o.rooms)===1?'1 habitación':o.rooms+' habitaciones'):'',o.persons?o.persons+' persona'+(Number(o.persons)===1?'':'s'):''].filter(Boolean).join(' · ');
   return `${prefix}${o.price} MXN ${unit}${basis?' · '+basis:''}`;
 }
-function ensurePriceDisclaimer(text=''){
+function publicSafeText(text=''){
   const value=String(text||'').trim();
-  if(/sujeto a disponibilidad|sujeta a disponibilidad/i.test(value))return value;
+  if(!value)return '';
+  const internal=/(priceagencies|travel\s*promo\s*maker|proveedor|captura\s+directa|evidencia\s+interna|nota\s+interna|uso\s+interno|\/promotion\/)/i;
+  return internal.test(value)?'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.':value;
+}
+function ensurePriceDisclaimer(text=''){
+  const value=publicSafeText(text);
+  if(/sujeto a disponibilidad|sujeta a disponibilidad|sujetos a reconfirmación/i.test(value))return value;
   return `${value}${value?' ':''}Sujeto a disponibilidad y cambios sin previo aviso.`;
 }
 
@@ -213,7 +219,7 @@ function renderSourceSummary(){
     ['Turismo oficial','Secretarías estatales, FONATUR y organismos oficiales de promoción.'],
     ['Patrimonio','INAH y UNESCO para historia, arqueología y reconocimientos.'],
     ['Naturaleza','CONANP y autoridades de áreas naturales protegidas.'],
-    ['Producto','PriceAgencies y otros proveedores solamente para precio, cupo, condiciones y materiales de difusión.']
+    ['Producto','Fuentes comerciales verificadas para precio, cupo, condiciones y materiales de difusión.']
   ];
   holder.innerHTML=groups.map(g=>`<div class="source-item"><b>${g[0]}</b><span>${g[1]}</span></div>`).join('');
 }
