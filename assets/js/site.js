@@ -15,14 +15,17 @@ function destinationSlug(d={}){return String(d.slug||d.name||'').toLowerCase().n
 function offerPriceText(o={}){
   if(!o.price)return '';
   const type=String(o.commercialType||'').toUpperCase();
-  const rawUnit=String(o.priceUnit||'').trim();
-  const unitLower=rawUnit.toLowerCase();
-  let suffix='';
-  if(/por\s*persona/.test(unitLower))suffix=' por persona';
-  else if(/noche/.test(unitLower)||/promedio/.test(unitLower))suffix=' por habitación por noche';
-  else if(/total/.test(unitLower))suffix=' total';
-  const prefix=type==='PAQUETE_FIJO'?'': 'Desde ';
-  return `${prefix}${o.price} MXN${suffix}`;
+  const raw=String(o.priceUnit||'').trim();
+  const low=raw.toLowerCase();
+  let unit=raw||'precio publicado';
+  if(/total\s+por\s+estancia/.test(low))unit='total por estancia';
+  else if(/por\s*persona.*estancia/.test(low))unit='por persona · estancia completa';
+  else if(/por\s*habitaci[oó]n.*noche/.test(low)||/promedio.*noche/.test(low))unit='por habitación · por noche';
+  else if(/por\s*persona.*noche/.test(low))unit='por persona · por noche';
+  else if(/por\s+paquete/.test(low))unit='por paquete';
+  const prefix=type==='PAQUETE_FIJO'?'':'Desde ';
+  const basis=[o.rooms?o.rooms+' habitación'+(Number(o.rooms)===1?'':'es'):'',o.persons?o.persons+' persona'+(Number(o.persons)===1?'':'s'):''].filter(Boolean).join(' · ');
+  return `${prefix}${o.price} MXN ${unit}${basis?' · '+basis:''}`;
 }
 function ensurePriceDisclaimer(text=''){
   const value=String(text||'').trim();
