@@ -29,10 +29,10 @@ function offerPriceText(o={}){
 }
 function tripTotal(o={}){
   const price=Number(String(o.price??'').replace(/[^0-9.-]/g,''));if(!Number.isFinite(price)||price<=0)return null;
-  const unit=String(o.priceUnit||'').toLowerCase(),nights=Math.max(1,Number(o.nights)||1),rooms=Math.max(1,Number(o.rooms)||1),persons=Math.max(1,Number(o.persons)||1);
-  if(/por\s*habitaci[oó]n.*noche/.test(unit))return price*rooms*nights;
-  if(/por\s*persona.*noche/.test(unit))return price*persons*nights;
-  if(/por\s*persona.*estancia/.test(unit))return price*persons;
+  const unit=String(o.priceUnit||'').toLowerCase(),nights=Number(o.nights),rooms=Number(o.rooms),persons=Number(o.persons);
+  if(/por\s*habitaci[oó]n.*noche/.test(unit))return nights>0&&rooms>0?price*rooms*nights:null;
+  if(/por\s*persona.*noche/.test(unit))return nights>0&&persons>0?price*persons*nights:null;
+  if(/por\s*persona.*estancia/.test(unit))return persons>0?price*persons:null;
   if(/total\s+por\s+estancia|por\s+paquete/.test(unit))return price;
   return null;
 }
