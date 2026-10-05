@@ -10,6 +10,18 @@
     if(Number.isFinite(numeric))return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(numeric);
     return String(value);
   }
+  function tripTotal(entry={}){
+    const price=Number(String(entry.price??'').replace(/[^0-9.-]/g,''));
+    if(!Number.isFinite(price)||price<=0)return null;
+    const unit=String(entry.priceUnit||'').toLowerCase();
+    const nights=Number(entry.nights),rooms=Number(entry.rooms),persons=Number(entry.persons);
+    if(/por\s*habitaci[oó]n.*noche/.test(unit))return nights>0&&rooms>0?price*rooms*nights:null;
+    if(/por\s*persona.*noche/.test(unit))return nights>0&&persons>0?price*persons*nights:null;
+    if(/por\s*persona.*estancia/.test(unit))return persons>0?price*persons:null;
+    if(/total\s+por\s+estancia|por\s+paquete/.test(unit))return price;
+    return null;
+  }
+  function pricePrefix(entry={}){return String(entry.commercialType||'').toUpperCase()==='CAMPANA_DESDE'?'Desde':'';}
   function destinationFor(entry){
     return (typeof DESTINATIONS!=='undefined'?DESTINATIONS:[]).find(d=>d.id===entry.destinationId)||null;
   }
@@ -31,6 +43,11 @@
     const publicUrl=brandedUrl?new URL(brandedUrl,window.location.origin).toString():window.location.href;
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero información sobre esta promoción de Trhoncal Travel: ${entry.title||destinationName}. ${publicUrl}`):'#cotizar';
     const price=money(entry.price);
+    const totalValue=tripTotal(entry),total=totalValue?money(totalValue):'';
+    const personsCount=Number(entry.persons),perPersonValue=totalValue&&personsCount>0?totalValue/personsCount:null,perPerson=perPersonValue?money(perPersonValue):'';
+    const unitIsTotal=/total\s+por\s+estancia|por\s+paquete/i.test(String(entry.priceUnit||''));
+    const showTripTotal=!!total&&!unitIsTotal;
+    const showPerPerson=!!perPerson&&personsCount>0;
     const duration=[entry.days?`${entry.days} días`:'',entry.nights?`${entry.nights} noches`:''].filter(Boolean).join(' · ');
     const expiry=entry.expiresAt||'';
     const verified=entry.verifiedAt||'';
@@ -42,7 +59,10 @@
         <span class="promo-maker-destination">${escapeHTML(destinationName)}</span>
         <h3${entry.hotel?' translate="no" class="notranslate"':''}>${escapeHTML(title)}</h3>
         ${entry.hotel?`<p class="promo-maker-hotel notranslate" translate="no">${escapeHTML(entry.hotel)}</p>`:''}
-        ${price?`<div class="promo-maker-price"><small>Desde</small><strong>${escapeHTML(price)}</strong>${entry.priceUnit?`<span>${escapeHTML(entry.priceUnit)}</span>`:''}</div>`:''}
+        ${price?`<div class="promo-maker-price">${pricePrefix(entry)?`<small>${pricePrefix(entry)}</small>`:'' }<strong>${escapeHTML(price)}</strong>${entry.priceUnit?`<span>${escapeHTML(entry.priceUnit)}</span>`:''}</div>`:''}
+        ${showTripTotal?`<div class="promo-maker-total"><span>Total del viaje</span><strong>${escapeHTML(total)}</strong><small>MXN</small></div>`:''}
+        ${showPerPerson?`<div class="promo-maker-person"><span>Por persona</span><strong>${escapeHTML(perPerson)}</strong><small>MXN</small></div>`:''}
+        <div class="promo-maker-payment"><span>Hasta 18 meses con tarjetas participantes</span>${entry.allowsDeposits?`<span>${escapeHTML(entry.depositText||'Pregunta por opción de apartar y abonar')}</span>`:''}</div>
         <div class="promo-maker-meta">${duration?`<span>${escapeHTML(duration)}</span>`:''}${expiry?`<span>Vigente hasta ${escapeHTML(expiry)}</span>`:''}${verified?`<span>Precio confirmado ${escapeHTML(verified)}</span>`:''}</div>
         ${entry.note?`<p class="promo-maker-note">${escapeHTML(entry.note)}</p>`:''}
         <div class="promo-maker-actions">

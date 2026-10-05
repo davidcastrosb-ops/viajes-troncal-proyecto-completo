@@ -35,7 +35,7 @@ function priceUnitLabel(offer = {}) {
   const raw = String(offer.priceUnit || '').trim();
   const type = String(offer.commercialType || '').toUpperCase();
   const low = raw.toLowerCase();
-  const prefix = type === 'PAQUETE_FIJO' ? '' : 'Desde';
+  const prefix = type === 'CAMPANA_DESDE' ? 'Desde' : '';
   if (/por\s*persona/i.test(low)) return prefix ? `${prefix} - por persona` : 'Por persona';
   if (/noche|promedio/i.test(low)) return prefix ? `${prefix} - por habitación por noche` : 'Por habitación por noche';
   if (/total/i.test(low)) return prefix ? `${prefix} - total` : 'Total publicado';
@@ -43,6 +43,17 @@ function priceUnitLabel(offer = {}) {
   return prefix || raw || 'Precio publicado';
 }
 
+function tripTotal(offer = {}) {
+  const price = Number(String(offer.price ?? '').replace(/[^0-9.-]/g, ''));
+  if (!Number.isFinite(price) || price <= 0) return null;
+  const unit = String(offer.priceUnit || '').toLowerCase();
+  const nights = Number(offer.nights), rooms = Number(offer.rooms), persons = Number(offer.persons);
+  if (/por\s*habitaci[oó]n.*noche/.test(unit)) return nights > 0 && rooms > 0 ? price * rooms * nights : null;
+  if (/por\s*persona.*noche/.test(unit)) return nights > 0 && persons > 0 ? price * persons * nights : null;
+  if (/por\s*persona.*estancia/.test(unit)) return persons > 0 ? price * persons : null;
+  if (/total\s+por\s+estancia|por\s+paquete/.test(unit)) return price;
+  return null;
+}
 function dateMx(value = '') {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return clean(value);
   const d = new Date(`${value}T12:00:00`);
@@ -142,6 +153,12 @@ export default async function handler(req, res) {
   const title = clean(offer.title || destinationName);
   const hotel = clean(offer.hotel || '');
   const price = money(offer.price);
+  const totalValue = tripTotal(offer);
+  const total = totalValue ? money(totalValue) : '';
+  const personsCount = Number(offer.persons);
+  const perPersonValue = totalValue && personsCount > 0 ? totalValue / personsCount : null;
+  const perPerson = perPersonValue ? money(perPersonValue) : '';
+  const unitIsTotal = /total\s+por\s+estancia|por\s+paquete/i.test(String(offer.priceUnit || ''));
   const dates = [offer.travelStart ? dateMx(offer.travelStart) : '', offer.travelEnd ? dateMx(offer.travelEnd) : ''].filter(Boolean).join(' - ');
   const duration = [offer.days ? `${offer.days} días` : '', offer.nights ? `${offer.nights} noches` : ''].filter(Boolean).join(' / ');
   const includes = Array.isArray(offer.includes) ? offer.includes.map(clean).filter(Boolean) : [];
@@ -205,6 +222,18 @@ export default async function handler(req, res) {
     page.drawText(price, { x: 42, y: y - 30, font: bold, size: 28, color: navy });
     page.drawText('MXN', { x: 170, y: y - 25, font: bold, size: 10, color: navy });
     y -= 52;
+    if (total && !unitIsTotal) {
+      page.drawText('TOTAL DEL VIAJE', { x: 42, y, font: bold, size: 8.8, color: gold });
+      page.drawText(`${total} MXN`, { x: 42, y: y - 22, font: bold, size: 18, color: navy });
+      y -= 39;
+    }
+    if (perPerson) {
+      page.drawText('POR PERSONA', { x: 42, y, font: bold, size: 8.8, color: gold });
+      page.drawText(`${perPerson} MXN`, { x: 42, y: y - 22, font: bold, size: 18, color: navy });
+      y -= 39;
+    }
+    page.drawText('Hasta 18 meses con tarjetas participantes', { x: 42, y, font: bold, size: 9, color: navy });
+    y -= 18;
   }
 
   if (includes.length) {

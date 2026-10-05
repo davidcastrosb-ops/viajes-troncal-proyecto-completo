@@ -23,9 +23,18 @@ function offerPriceText(o={}){
   else if(/por\s*habitaci[oó]n.*noche/.test(low)||/promedio.*noche/.test(low))unit='por habitación · por noche';
   else if(/por\s*persona.*noche/.test(low))unit='por persona · por noche';
   else if(/por\s+paquete/.test(low))unit='por paquete';
-  const prefix=type==='PAQUETE_FIJO'?'':'Desde ';
+  const prefix=type==='CAMPANA_DESDE'?'Desde ':'';
   const basis=[o.rooms?(Number(o.rooms)===1?'1 habitación':o.rooms+' habitaciones'):'',o.persons?o.persons+' persona'+(Number(o.persons)===1?'':'s'):''].filter(Boolean).join(' · ');
   return `${prefix}${o.price} MXN ${unit}${basis?' · '+basis:''}`;
+}
+function tripTotal(o={}){
+  const price=Number(String(o.price??'').replace(/[^0-9.-]/g,''));if(!Number.isFinite(price)||price<=0)return null;
+  const unit=String(o.priceUnit||'').toLowerCase(),nights=Number(o.nights),rooms=Number(o.rooms),persons=Number(o.persons);
+  if(/por\s*habitaci[oó]n.*noche/.test(unit))return nights>0&&rooms>0?price*rooms*nights:null;
+  if(/por\s*persona.*noche/.test(unit))return nights>0&&persons>0?price*persons*nights:null;
+  if(/por\s*persona.*estancia/.test(unit))return persons>0?price*persons:null;
+  if(/total\s+por\s+estancia|por\s+paquete/.test(unit))return price;
+  return null;
 }
 function publicSafeText(text=''){
   const value=String(text||'').trim();
@@ -263,13 +272,18 @@ function renderOffers(){
     const image=escapeHTML(entry.image||'');
     const priceText=offerPriceText(entry);
     const price=priceText?`<div class="promo-price">${escapeHTML(priceText)}</div>`:'';
+    const totalValue=tripTotal(entry),total=totalValue?new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(totalValue):'';
+    const personsCount=Number(entry.persons),perPersonValue=totalValue&&personsCount>0?totalValue/personsCount:null,perPerson=perPersonValue?new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(perPersonValue):'';
+    const showTripTotal=!!total&&!/total\s+por\s+estancia|por\s+paquete/i.test(String(entry.priceUnit||''));
+    const showPerPerson=!!perPerson&&personsCount>0;
+    const payment=`<div class="promo-payment"><span>Hasta 18 meses con tarjetas participantes</span>${entry.allowsDeposits?`<span>${escapeHTML(entry.depositText||'Pregunta por opción de apartar y abonar')}</span>`:''}</div>`;
     const destination=DESTINATIONS.find(d=>d.id===entry.destinationId)?.name||entry.leadDestinationVerified||'';
     const offerId=escapeHTML(entry.id||'');
     const offerPath=entry.id?`/oferta/${encodeURIComponent(entry.id)}`:'#cotizar';
     const offerUrl=entry.id?`${location.origin}/oferta/${encodeURIComponent(entry.id)}`:location.href;
     const waText=`Hola, quiero información sobre esta promoción de Trhoncal Travel: ${entry.title||destination||'viaje'}. ${offerUrl}`;
     const waHref=whatsappLink(waText);
-    grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}" loading="lazy">`:''}<h3>${title}</h3>${price}<p>${desc}</p><div class="promo-actions promo-actions-grid"><a class="btn promo-cta promo-cta-view" href="${offerPath}">Ver promoción</a><a class="btn btn-primary promo-cta" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destination)}" data-offer="${offerId}" data-occasion="${escapeHTML(entry.occasionId||'')}" data-promo-url="${escapeHTML(entry.publicPromoUrl||entry.sharePromoUrl||'')}" data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje</a><button class="btn promo-cta promo-cta-share" type="button" data-share-offer data-share-title="${title}" data-share-url="${escapeHTML(offerUrl)}">Compartir promoción</button><a class="btn promo-cta promo-cta-whatsapp" href="${escapeHTML(waHref)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a></div></article>`);
+    grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}" loading="lazy">`:''}<h3>${title}</h3>${price}${showTripTotal?`<div class="promo-total"><span>Total del viaje</span><strong>${escapeHTML(total)}</strong></div>`:''}${showPerPerson?`<div class="promo-person"><span>Por persona</span><strong>${escapeHTML(perPerson)}</strong></div>`:''}${payment}<p>${desc}</p><div class="promo-actions promo-actions-grid"><a class="btn promo-cta promo-cta-view" href="${offerPath}">Ver promoción</a><a class="btn btn-primary promo-cta" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destination)}" data-offer="${offerId}" data-occasion="${escapeHTML(entry.occasionId||'')}" data-promo-url="${escapeHTML(entry.publicPromoUrl||entry.sharePromoUrl||'')}" data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje</a><button class="btn promo-cta promo-cta-share" type="button" data-share-offer data-share-title="${title}" data-share-url="${escapeHTML(offerUrl)}">Compartir promoción</button><a class="btn promo-cta promo-cta-whatsapp" href="${escapeHTML(waHref)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a></div></article>`);
   });
   grid.querySelectorAll('[data-share-offer]').forEach(btn=>btn.addEventListener('click',async()=>{
     const shareData={title:btn.dataset.shareTitle||'Trhoncal Travel',text:'Mira esta promoción de Trhoncal Travel.',url:btn.dataset.shareUrl||location.href};
