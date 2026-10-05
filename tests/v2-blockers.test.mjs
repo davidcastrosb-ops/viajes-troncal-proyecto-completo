@@ -173,3 +173,19 @@ test('oferta compartida oculta referencias internas del proveedor', async () => 
   assert.doesNotMatch(res.body, /mostrado por el proveedor/i);
   assert.match(res.body, /reconfirmaci[oó]n|reconfirmamos|reconfirmar/i);
 });
+
+
+test('Trhoncal Travel no publica el número de Homes', async () => {
+  const files = [
+    '../api/offer.js',
+    '../api/offer-pdf.js',
+    '../api/offer-pdf-v2.js',
+    '../api/hotel-v2.js',
+    '../assets/data/site.json',
+    '../index.html'
+  ];
+  for (const path of files) {
+    const source = await fs.readFile(new URL(path, import.meta.url), 'utf8');
+    assert.doesNotMatch(source, /33\s*2933\s*5952|523329335952/, path + ' no debe contener el WhatsApp de Trhoncal Homes');
+  }
+});
