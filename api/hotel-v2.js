@@ -102,7 +102,7 @@ export default async function handler(req,res){
   const gallery=images.slice(0,5).map((img,i)=>`<button type="button" data-gallery-index="${i}" aria-label="Abrir fotografía ${i+1}"><img src="${esc(img[0])}" alt="${esc(img[1])}" loading="${i?'lazy':'eager'}">${i===4&&images.length>5?`<span class="hotel-v2-gallery-more">Ver ${images.length} fotos</span>`:''}</button>`).join('');
   const features=(hotel.features||[]).map(x=>`<div class="hotel-v2-feature">${esc(x)}</div>`).join('');
   const roomDetails=(hotel.room?.details||[]).map(x=>`<li>${esc(x)}</li>`).join('');
-  const essentials=[offer?.hotel?`Hotel: ${offer.hotel}`:`Hotel: ${hotel.name}`,offer?.days&&offer?.nights?`${offer.days} días / ${offer.nights} noches`:'',offer?.rooms?${Number(offer.rooms)===1?'1 habitación':offer.rooms+' habitaciones'}:'',offer?.persons?`${offer.persons} persona${Number(offer.persons)===1?'':'s'}`:'',offer?.plan||'',offer?.occupancy||''].filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join('');
+  const essentials=[offer?.hotel?`Hotel: ${offer.hotel}`:`Hotel: ${hotel.name}`,offer?.days&&offer?.nights?`${offer.days} días / ${offer.nights} noches`:'',offer?.rooms?(Number(offer.rooms)===1?'1 habitación':offer.rooms+' habitaciones'):'',offer?.persons?`${offer.persons} persona${Number(offer.persons)===1?'':'s'}`:'',offer?.plan||'',offer?.occupancy||''].filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join('');
   const galleryData=scriptJson(images.map(x=>({url:x[0],alt:x[1]})));
 
   res.setHeader('Content-Type','text/html; charset=utf-8');res.setHeader('X-Robots-Tag','noindex,nofollow');res.setHeader('Cache-Control','public, s-maxage=60, stale-while-revalidate=180');
