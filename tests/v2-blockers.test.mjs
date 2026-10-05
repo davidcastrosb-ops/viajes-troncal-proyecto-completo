@@ -277,3 +277,33 @@ test('api master oculta datos internos de proveedor', async () => {
   assert.equal(res.body.sources.length,1);
   assert.equal(res.body.sources[0].id,'SRC-2');
 });
+
+
+test('pagos y total del viaje quedan claros sin prometer MSI', async () => {
+  const offer = await fs.readFile(new URL('../api/offer.js', import.meta.url), 'utf8');
+  const promo = await fs.readFile(new URL('../assets/js/promo-maker-v1.js', import.meta.url), 'utf8');
+  const pdf = await fs.readFile(new URL('../api/offer-pdf-v2.js', import.meta.url), 'utf8');
+
+  for (const source of [offer, promo, pdf]) {
+    assert.match(source, /Hasta 18 meses con tarjetas participantes/);
+    assert.doesNotMatch(source, /meses sin intereses/i);
+    assert.match(source, /Total de esta opción|TOTAL DE ESTA OPCIÓN/);
+  }
+
+  assert.match(offer, /CAMPANA_DESDE/);
+  assert.doesNotMatch(offer, /type === 'PAQUETE_FIJO' \? '' : 'Desde'/);
+  assert.match(promo, /pricePrefix/);
+});
+
+test('Decameron calcula total de 18,044 para 2 habitaciones y 2 noches', async () => {
+  const source = await fs.readFile(new URL('../api/offer.js', import.meta.url), 'utf8');
+  assert.match(source, /price \* rooms \* nights/);
+  const price = 4511, rooms = 2, nights = 2;
+  assert.equal(price * rooms * nights, 18044);
+});
+
+test('abonos quedan opt-in por oferta', async () => {
+  const apps = await fs.readFile(new URL('../apps-script/Code.gs', import.meta.url), 'utf8');
+  assert.match(apps, /allowsDeposits: yes_\(row\.Permite_Abonos\)/);
+  assert.match(apps, /depositText:/);
+});
