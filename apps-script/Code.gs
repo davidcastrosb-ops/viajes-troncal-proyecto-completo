@@ -234,6 +234,10 @@ function publicOffer_(row) {
     price: text_(row.Precio_MXN),
     currency: 'MXN',
     priceUnit: text_(row.Unidad_precio),
+    commercialType: commercialType_(row.Tipo_comercial, row.Unidad_precio),
+    priceAgeDays: priceAgeDays_(row),
+    priceFresh: priceFresh_(row),
+    requiresReconfirmation: true,
     occupancy: text_(row.Ocupación),
     featuredHome: yes_(row.Destacada_Home),
     ordenWeb: number_(row.Orden_Web),
@@ -341,6 +345,29 @@ function publicOccasion_(row) {
     note: text_(row.Nota_publica),
     imageDestinationId: text_(row.Imagen_Destino_ID)
   };
+}
+
+function commercialType_(value, unit) {
+  const explicit = text_(value).toUpperCase();
+  if (['PAQUETE_FIJO', 'TARIFA_DINAMICA', 'CAMPANA_DESDE'].indexOf(explicit) !== -1) return explicit;
+  const rawUnit = text_(unit).toLowerCase();
+  if (rawUnit.indexOf('desde') !== -1 || rawUnit.indexOf('promedio') !== -1 || rawUnit.indexOf('noche') !== -1) return 'CAMPANA_DESDE';
+  return 'TARIFA_DINAMICA';
+}
+
+function priceAgeDays_(row) {
+  const confirmed = parseDate_(row.Ultima_Confirmacion_Precio || row.Última_verificación);
+  if (!confirmed) return null;
+  const today = startToday_().getTime();
+  const confirmedDay = new Date(confirmed.getFullYear(), confirmed.getMonth(), confirmed.getDate()).getTime();
+  return Math.max(0, Math.floor((today - confirmedDay) / 86400000));
+}
+
+function priceFresh_(row) {
+  const type = commercialType_(row.Tipo_comercial, row.Unidad_precio);
+  if (type === 'PAQUETE_FIJO') return true;
+  const age = priceAgeDays_(row);
+  return age !== null && age <= 1;
 }
 
 function yes_(value) {
