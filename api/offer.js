@@ -35,11 +35,16 @@ function priceUnitLabel(offer = {}) {
   const type = String(offer.commercialType || '').toUpperCase();
   const low = raw.toLowerCase();
   const prefix = type === 'PAQUETE_FIJO' ? '' : 'Desde';
-  if (/por\s*persona/i.test(low)) return prefix ? `${prefix} · por persona` : 'Por persona';
-  if (/noche|promedio/i.test(low)) return prefix ? `${prefix} · por habitación por noche` : 'Por habitación por noche';
-  if (/total/i.test(low)) return prefix ? `${prefix} · total` : 'Total publicado';
-  if (/desde/i.test(low)) return 'Desde';
-  return prefix || raw || 'Precio publicado';
+  let unit = raw || 'Precio publicado';
+  if (/total\s+por\s+estancia/.test(low)) unit = 'Total por estancia';
+  else if (/por\s*persona.*estancia/.test(low)) unit = 'Por persona · estancia completa';
+  else if (/por\s*habitaci[oó]n.*noche/.test(low) || /promedio.*noche/.test(low)) unit = 'Por habitación · por noche';
+  else if (/por\s*persona.*noche/.test(low)) unit = 'Por persona · por noche';
+  else if (/por\s+paquete/.test(low)) unit = 'Por paquete';
+  else if (/por\s*persona/.test(low)) unit = 'Por persona';
+  else if (/total/.test(low)) unit = 'Total publicado';
+  else if (/desde/.test(low)) unit = '';
+  return prefix ? (unit ? `${prefix} · ${unit}` : prefix) : (unit || 'Precio publicado');
 }
 
 function sharePriceText(offer = {}) {
