@@ -24,7 +24,7 @@ function offerPriceText(o={}){
   else if(/por\s*persona.*noche/.test(low))unit='por persona · por noche';
   else if(/por\s+paquete/.test(low))unit='por paquete';
   const prefix=type==='PAQUETE_FIJO'?'':'Desde ';
-  const basis=[o.rooms?o.rooms+' habitación'+(Number(o.rooms)===1?'':'es'):'',o.persons?o.persons+' persona'+(Number(o.persons)===1?'':'s'):''].filter(Boolean).join(' · ');
+  const basis=[o.rooms?(Number(o.rooms)===1?'1 habitación':o.rooms+' habitaciones'):'',o.persons?o.persons+' persona'+(Number(o.persons)===1?'':'s'):''].filter(Boolean).join(' · ');
   return `${prefix}${o.price} MXN ${unit}${basis?' · '+basis:''}`;
 }
 function ensurePriceDisclaimer(text=''){
