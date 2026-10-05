@@ -51,12 +51,12 @@ function tripTotal(offer = {}) {
   const price = Number(String(offer.price ?? '').replace(/[^0-9.-]/g, ''));
   if (!Number.isFinite(price) || price <= 0) return null;
   const unit = String(offer.priceUnit || '').toLowerCase();
-  const nights = Math.max(1, Number(offer.nights) || 1);
-  const rooms = Math.max(1, Number(offer.rooms) || 1);
-  const persons = Math.max(1, Number(offer.persons) || 1);
-  if (/por\s*habitaci[oó]n.*noche/.test(unit)) return price * rooms * nights;
-  if (/por\s*persona.*noche/.test(unit)) return price * persons * nights;
-  if (/por\s*persona.*estancia/.test(unit)) return price * persons;
+  const nights = Number(offer.nights);
+  const rooms = Number(offer.rooms);
+  const persons = Number(offer.persons);
+  if (/por\s*habitaci[oó]n.*noche/.test(unit)) return nights > 0 && rooms > 0 ? price * rooms * nights : null;
+  if (/por\s*persona.*noche/.test(unit)) return nights > 0 && persons > 0 ? price * persons * nights : null;
+  if (/por\s*persona.*estancia/.test(unit)) return persons > 0 ? price * persons : null;
   if (/total\s+por\s+estancia|por\s+paquete/.test(unit)) return price;
   return null;
 }
