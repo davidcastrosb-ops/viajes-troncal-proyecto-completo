@@ -236,3 +236,44 @@ test('offer-share no inyecta hotel duplicado', async () => {
   assert.doesNotMatch(source, /dataset\.hotelBrand/);
   assert.match(source, /no debe crear subtítulos ni filas nuevas/i);
 });
+
+
+test('api master oculta datos internos de proveedor', async () => {
+  const payload = {
+    offers: [{
+      id: 'OF-1',
+      providerId: 'PROV-PA-001',
+      Proveedor_ID: 'PROV-PA-001',
+      URL_proveedor_interna: 'https://example.test/internal',
+      publicPromoUrl: 'https://example.test/promotion/1',
+      sharePromoUrl: 'https://example.test/promotion/1',
+      note: 'Captura directa de PriceAgencies mostrada por el proveedor.'
+    }],
+    sources: [
+      { id: 'SRC-1', level: 'Interna', organization: 'PriceAgencies' },
+      { id: 'SRC-2', level: 'Pública', organization: 'Secretaría de Turismo' }
+    ]
+  };
+  const handler = await loadHandler('api/master.js', async () => ({
+    ok: true,
+    status: 200,
+    async text() { return JSON.stringify(payload); }
+  }));
+  const req = { method: 'GET', query: {}, headers: {} };
+  const res = {
+    statusCode: 200, headers: {}, body: null,
+    setHeader(k,v){this.headers[k]=v;},
+    status(code){this.statusCode=code;return this;},
+    json(value){this.body=value;return this;}
+  };
+  await handler(req,res);
+  assert.equal(res.statusCode,200);
+  assert.equal(res.body.offers[0].providerId,undefined);
+  assert.equal(res.body.offers[0].Proveedor_ID,undefined);
+  assert.equal(res.body.offers[0].URL_proveedor_interna,undefined);
+  assert.equal(res.body.offers[0].publicPromoUrl,undefined);
+  assert.equal(res.body.offers[0].sharePromoUrl,undefined);
+  assert.doesNotMatch(res.body.offers[0].note,/PriceAgencies|proveedor/i);
+  assert.equal(res.body.sources.length,1);
+  assert.equal(res.body.sources[0].id,'SRC-2');
+});
