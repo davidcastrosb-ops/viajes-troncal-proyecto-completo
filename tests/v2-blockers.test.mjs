@@ -154,7 +154,7 @@ test('oferta compartida oculta referencias internas del proveedor', async () => 
       id: 'OF-PA-NAY-REV26-003',
       destinationId: 'MX-NAY-NN-001',
       title: 'Grand Decameron Complex · Todo incluido',
-      hotel: 'Grand Decameron Complex',
+      hotel: 'Grand Decameron Complex, A Trademark All Inclusive',
       showWeb: true,
       price: 4511,
       priceUnit: 'por habitación por noche',
@@ -227,4 +227,12 @@ test('promo maker usa cuatro CTA simétricos y sin flechas ambiguas', async () =
   assert.doesNotMatch(source, /Ver promoción →/);
   assert.doesNotMatch(source, /Quiero este viaje →/);
   assert.match(source, /promo-maker-whatsapp/);
+});
+
+
+test('offer-share no inyecta hotel duplicado', async () => {
+  const source = await fs.readFile(new URL('../assets/js/offer-share-v1.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /createElement\(['"]p['"]\)[\s\S]{0,600}Hotel:/);
+  assert.doesNotMatch(source, /dataset\.hotelBrand/);
+  assert.match(source, /no debe crear subtítulos ni filas nuevas/i);
 });
