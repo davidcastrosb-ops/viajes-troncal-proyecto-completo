@@ -59,12 +59,12 @@
 
         if (node.tagName === 'A' && /ver promoción/i.test(node.textContent || '')) {
           node.href = shareHref(id);
-          node.textContent = 'Ver promoción →';
+          node.textContent = 'Ver promoción';
           node.removeAttribute('target');
           node.removeAttribute('rel');
         }
 
-        const container = node.closest('.promo-maker-actions,.calendar-offer-mini-actions,.travel-offer-actions');
+        const container = node.closest('.calendar-offer-mini-actions,.travel-offer-actions');
         if (container) addShare(container, id);
 
         const hotel = String(offerMap.get(id)?.hotel || '').trim();
