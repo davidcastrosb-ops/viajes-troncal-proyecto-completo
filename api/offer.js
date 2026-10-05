@@ -151,8 +151,12 @@ export default async function handler(req, res) {
   const price = money(offer.price);
   const totalValue = tripTotal(offer);
   const total = totalValue ? money(totalValue) : '';
+  const personsCount = Number(offer.persons);
+  const perPersonValue = totalValue && personsCount > 0 ? totalValue / personsCount : null;
+  const perPerson = perPersonValue ? money(perPersonValue) : '';
   const unitIsTotal = /total\s+por\s+estancia|por\s+paquete/i.test(String(offer.priceUnit || ''));
   const showTripTotal = !!total && !unitIsTotal;
+  const showPerPerson = !!perPerson && personsCount > 0;
   const includes = Array.isArray(offer.includes) ? offer.includes : [];
   const excludes = Array.isArray(offer.excludes) ? offer.excludes : [];
   const description = publicNote(offer.note || `Opción de viaje a ${destinationName}. Precio, disponibilidad y condiciones se reconfirman antes de reservar.`);
@@ -232,7 +236,8 @@ export default async function handler(req, res) {
             ${offer.occupancy ? `<span>${esc(offer.occupancy)}</span>` : ''}
           </div>
           ${price ? `<div class="offer-price"><small>${esc(priceUnitLabel(offer))}</small><strong>${esc(price)}</strong><span>MXN</span></div>` : ''}
-          ${showTripTotal ? `<div class="offer-total"><span>Total de esta opción</span><strong>${esc(total)}</strong><small>MXN</small></div>` : ''}
+          ${showTripTotal ? `<div class="offer-total"><span>Total del viaje</span><strong>${esc(total)}</strong><small>MXN</small></div>` : ''}
+          ${showPerPerson ? `<div class="offer-person-total"><span>Por persona</span><strong>${esc(perPerson)}</strong><small>MXN</small></div>` : ''}
           <div class="offer-payment-benefits"><span>Hasta 18 meses con tarjetas participantes</span>${offer.allowsDeposits ? `<span>${esc(offer.depositText || 'Pregunta por opción de apartar y abonar')}</span>` : ''}</div>
           <p class="offer-disclaimer">Precio, disponibilidad y condiciones se reconfirman antes de reservar.</p>
         </div>
