@@ -28,7 +28,8 @@
     // válida pero inaccesible no deja la tarjeta sin imagen en producción.
     const image=LOCAL_OFFER_IMAGES[entry.id]||validHttp(entry.image||'')||(!entry.hotel?validHttp(destination?.mainImage||''):'');
     const brandedUrl=brandedOfferUrl(entry);
-    const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero asesoría sobre la promoción ${entry.title||destinationName} con Trhoncal Travel.`):'#cotizar';
+    const publicUrl=brandedUrl?new URL(brandedUrl,window.location.origin).toString():window.location.href;
+    const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero información sobre esta promoción de Trhoncal Travel: ${entry.title||destinationName}. ${publicUrl}`):'#cotizar';
     const price=money(entry.price);
     const duration=[entry.days?`${entry.days} días`:'',entry.nights?`${entry.nights} noches`:''].filter(Boolean).join(' · ');
     const expiry=entry.expiresAt||'';
@@ -45,10 +46,10 @@
         <div class="promo-maker-meta">${duration?`<span>${escapeHTML(duration)}</span>`:''}${expiry?`<span>Vigente hasta ${escapeHTML(expiry)}</span>`:''}${verified?`<span>Precio confirmado ${escapeHTML(verified)}</span>`:''}</div>
         ${entry.note?`<p class="promo-maker-note">${escapeHTML(entry.note)}</p>`:''}
         <div class="promo-maker-actions">
-          ${brandedUrl?`<a class="promo-maker-secondary" href="${escapeHTML(brandedUrl)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}">Ver promoción →</a>`:''}
-          <a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destinationName)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}"${planAttr} data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a>
-          ${brandedUrl?`<a class="promo-maker-secondary offer-share-pill" href="${escapeHTML(brandedUrl)}" data-offer-share="${escapeHTML(entry.id||'')}">Compartir promoción</a>`:''}
-          <a class="promo-maker-secondary whatsapp-offer-link" href="${escapeHTML(wa)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a>
+          ${brandedUrl?`<a class="promo-maker-cta promo-maker-view" href="${escapeHTML(brandedUrl)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}">Ver promoción</a>`:''}
+          <a class="promo-maker-cta promo-maker-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destinationName)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}"${planAttr} data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje</a>
+          ${brandedUrl?`<button class="promo-maker-cta promo-maker-share" type="button" data-offer-share="${escapeHTML(entry.id||'')}" data-share-title="${escapeHTML(title)}" data-share-url="${escapeHTML(publicUrl)}">Compartir promoción</button>`:''}
+          <a class="promo-maker-cta promo-maker-whatsapp" href="${escapeHTML(wa)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a>
         </div>
         <p class="promo-maker-disclaimer">Precio, disponibilidad y condiciones se reconfirman antes de reservar.</p>
       </div>
@@ -115,6 +116,18 @@
     if(footerLink)footerLink.closest('p')?.removeAttribute('hidden');
     grid.classList.add('promo-maker-track');
     grid.innerHTML=publishable.map(promoCard).join('');
+    grid.querySelectorAll('[data-offer-share]').forEach(btn=>btn.addEventListener('click',async()=>{
+      const data={title:btn.dataset.shareTitle||'Trhoncal Travel',text:'Mira esta promoción de Trhoncal Travel.',url:btn.dataset.shareUrl||window.location.href};
+      try{
+        if(navigator.share) await navigator.share(data);
+        else{
+          await navigator.clipboard.writeText(data.url);
+          const old=btn.textContent;
+          btn.textContent='Enlace copiado';
+          setTimeout(()=>{btn.textContent=old;},1400);
+        }
+      }catch(_){}
+    }));
     let toolbar=section.querySelector('.promo-maker-toolbar');
     if(!toolbar){
       toolbar=document.createElement('div');
