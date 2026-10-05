@@ -150,7 +150,7 @@ export default async function handler(req, res) {
         url: `https://${PUBLIC_HOST}/`,
         logo: `https://${PUBLIC_HOST}/assets/images/trhoncal-travel-logo.svg`,
         email: 'viajestroncal@gmail.com',
-        telephone: '+52 33 2933 5952'
+        telephone: '+52 33 2927 9412'
       },
       {
         '@type': 'WebPage',
@@ -190,7 +190,7 @@ export default async function handler(req, res) {
   <script type="application/ld+json">${structured}</script>
 </head>
 <body class="offer-page">
-  <header class="site-header"><div class="container header-inner"><a class="brand" href="/" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#promociones">Ofertas</a><a href="/#cotizar">Arma tu viaje</a></nav><a class="btn btn-outline" href="https://wa.me/523329335952" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
+  <header class="site-header"><div class="container header-inner"><a class="brand" href="/" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#promociones">Ofertas</a><a href="/#cotizar">Arma tu viaje</a></nav><a class="btn btn-outline" href="https://wa.me/523329279412" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
 
   <main class="offer-main">
     <section class="offer-hero">
@@ -247,7 +247,7 @@ export default async function handler(req, res) {
     <section class="offer-final"><div class="container offer-final-card"><div><span class="eyebrow">Siguiente paso</span><h2>¿Quieres avanzar con este viaje?</h2><p>Revisamos disponibilidad y condiciones actuales antes de cualquier pago.</p></div><div class="offer-final-actions"><a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a><a class="btn btn-soft" href="${esc(customQuoteUrl)}">Arma tu viaje →</a></div></div></section>
   </main>
 
-  <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"><p>Tu viaje comienza desde que lo imaginas.</p></div><div><h3>Contacto</h3><p><a href="https://wa.me/523329335952" target="_blank" rel="noopener noreferrer">WhatsApp 33 2933 5952</a></p><p><a href="mailto:viajestroncal@gmail.com">viajestroncal@gmail.com</a></p></div></div></footer>
+  <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"><p>Tu viaje comienza desde que lo imaginas.</p></div><div><h3>Contacto</h3><p><a href="https://wa.me/523329279412" target="_blank" rel="noopener noreferrer">WhatsApp 33 2927 9412</a></p><p><a href="mailto:viajestroncal@gmail.com">viajestroncal@gmail.com</a></p></div></div></footer>
   <script src="/assets/js/tracking-v1.js"></script>
   <script src="/assets/js/offer-share-v1.js"></script>
 </body>
