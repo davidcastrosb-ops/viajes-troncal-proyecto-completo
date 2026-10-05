@@ -264,8 +264,25 @@ function renderOffers(){
     const priceText=offerPriceText(entry);
     const price=priceText?`<div class="promo-price">${escapeHTML(priceText)}</div>`:'';
     const destination=DESTINATIONS.find(d=>d.id===entry.destinationId)?.name||entry.leadDestinationVerified||'';
-    grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}" loading="lazy">`:''}<h3>${title}</h3>${price}<p>${desc}</p><div class="promo-actions"><a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destination)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}" data-promo-url="${escapeHTML(entry.publicPromoUrl||entry.sharePromoUrl||'')}" data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a></div></article>`);
+    const offerId=escapeHTML(entry.id||'');
+    const offerPath=entry.id?`/oferta/${encodeURIComponent(entry.id)}`:'#cotizar';
+    const offerUrl=entry.id?`${location.origin}/oferta/${encodeURIComponent(entry.id)}`:location.href;
+    const waText=`Hola, quiero información sobre esta promoción de Trhoncal Travel: ${entry.title||destination||'viaje'}. ${offerUrl}`;
+    const waHref=whatsappLink(waText);
+    grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}" loading="lazy">`:''}<h3>${title}</h3>${price}<p>${desc}</p><div class="promo-actions promo-actions-grid"><a class="btn promo-cta promo-cta-view" href="${offerPath}">Ver promoción</a><a class="btn btn-primary promo-cta" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destination)}" data-offer="${offerId}" data-occasion="${escapeHTML(entry.occasionId||'')}" data-promo-url="${escapeHTML(entry.publicPromoUrl||entry.sharePromoUrl||'')}" data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje</a><button class="btn promo-cta promo-cta-share" type="button" data-share-offer data-share-title="${title}" data-share-url="${escapeHTML(offerUrl)}">Compartir promoción</button><a class="btn promo-cta promo-cta-whatsapp" href="${escapeHTML(waHref)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a></div></article>`);
   });
+  grid.querySelectorAll('[data-share-offer]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const shareData={title:btn.dataset.shareTitle||'Trhoncal Travel',text:'Mira esta promoción de Trhoncal Travel.',url:btn.dataset.shareUrl||location.href};
+    try{
+      if(navigator.share)await navigator.share(shareData);
+      else{
+        await navigator.clipboard.writeText(shareData.url);
+        const original=btn.textContent;
+        btn.textContent='Enlace copiado';
+        setTimeout(()=>{btn.textContent=original;},1400);
+      }
+    }catch(_){}
+  }));
 }
 
 async function init(){
