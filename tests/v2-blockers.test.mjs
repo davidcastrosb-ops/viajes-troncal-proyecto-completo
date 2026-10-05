@@ -145,3 +145,31 @@ test('Decameron conserva base por habitación por noche con habitaciones y perso
   assert.match(res.body, />2 personas</);
   assert.doesNotMatch(res.body, /Por persona · estancia completa/);
 });
+
+
+test('oferta compartida oculta referencias internas del proveedor', async () => {
+  const payload = {
+    destinations: [{ id: 'MX-NAY-NN-001', name: 'Bucerías' }],
+    offers: [{
+      id: 'OF-PA-NAY-REV26-003',
+      destinationId: 'MX-NAY-NN-001',
+      title: 'Grand Decameron Complex · Todo incluido',
+      hotel: 'Grand Decameron Complex',
+      showWeb: true,
+      price: 4511,
+      priceUnit: 'por habitación por noche',
+      commercialType: 'TARIFA_DINAMICA',
+      rooms: 2,
+      persons: 2,
+      note: 'En la captura directa de PriceAgencies el total mostrado por el proveedor fue distinto.'
+    }]
+  };
+  const handler = await loadHandler('api/offer.js', async () => jsonResponse(payload));
+  const req = { method: 'GET', query: { id: 'OF-PA-NAY-REV26-003' }, headers: { host: 'preview.example.test' } };
+  const res = mockRes();
+  await handler(req, res);
+  assert.equal(res.statusCode, 200);
+  assert.doesNotMatch(res.body, /PriceAgencies/i);
+  assert.doesNotMatch(res.body, /mostrado por el proveedor/i);
+  assert.match(res.body, /reconfirmaci[oó]n|reconfirmamos|reconfirmar/i);
+});
