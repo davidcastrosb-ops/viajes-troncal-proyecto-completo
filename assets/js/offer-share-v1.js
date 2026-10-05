@@ -42,40 +42,18 @@
       const hotel = String(offer?.hotel || '').trim();
       if (!hotel) return;
 
+      // Sólo protegemos la marca ya renderizada por api/offer.js.
+      // Este script no debe crear subtítulos ni filas nuevas, para evitar duplicados.
       const heading = document.querySelector('.offer-copy h1');
-      if (heading && heading.textContent.includes(hotel)) protectBrand(heading);
+      const hotelCore = hotel.split(',')[0].trim();
+      if (heading && (heading.textContent.includes(hotel) || (hotelCore && heading.textContent.includes(hotelCore)))) protectBrand(heading);
 
-      if (!document.querySelector('.offer-hotel-brand')) {
-        const line = document.createElement('p');
-        line.className = 'offer-hotel-brand';
-        line.style.margin = '-6px 0 14px';
-        line.style.fontSize = '18px';
-        line.style.fontWeight = '800';
-        line.style.color = '#8a611b';
-        const label = document.createElement('span');
-        label.textContent = 'Hotel: ';
-        const strong = document.createElement('strong');
-        strong.textContent = hotel;
-        protectBrand(strong);
-        line.append(label, strong);
-        heading?.insertAdjacentElement('afterend', line);
-      }
-
-      const dl = document.querySelector('.offer-detail-card dl');
-      if (dl && !dl.querySelector('[data-hotel-brand]')) {
-        const row = document.createElement('div');
-        row.dataset.hotelBrand = '1';
-        const dt = document.createElement('dt');
-        dt.textContent = 'Hotel';
-        const dd = document.createElement('dd');
-        dd.textContent = hotel;
-        protectBrand(dd);
-        row.append(dt, dd);
-        dl.prepend(row);
-      }
+      document.querySelectorAll('.offer-hotel strong,.offer-detail-card dd').forEach(el => {
+        const value = String(el.textContent || '').trim();
+        if (value === hotel) protectBrand(el);
+      });
     } catch (_) {}
   }
-
   hydrateHotelBrand();
 
   const title = card.dataset.shareTitle || document.title;
