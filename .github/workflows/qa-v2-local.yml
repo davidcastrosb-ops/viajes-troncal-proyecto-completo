@@ -23,6 +23,7 @@ jobs:
           node --check api/offer-pdf.js
           node --check assets/js/site.js
           node --check assets/js/v2-directories.js
-          node --check apps-script/Code.gs
+          cp apps-script/Code.gs /tmp/Trhoncal-Code.js
+          node --check /tmp/Trhoncal-Code.js
       - name: Regresiones P1 XSS, galerias y precios
         run: node --experimental-vm-modules --test tests/v2-blockers.test.mjs
