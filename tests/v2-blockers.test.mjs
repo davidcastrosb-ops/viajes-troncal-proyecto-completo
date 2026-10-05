@@ -189,3 +189,30 @@ test('Trhoncal Travel no publica el número de Homes', async () => {
     assert.doesNotMatch(source, /33\s*2933\s*5952|523329335952/, path + ' no debe contener el WhatsApp de Trhoncal Homes');
   }
 });
+
+
+test('oferta no repite el hotel cuando ya viene en el título', async () => {
+  const payload = {
+    destinations: [{ id: 'MX-NAY-NN-001', name: 'Bucerías' }],
+    offers: [{
+      id: 'OF-PA-NAY-REV26-003',
+      destinationId: 'MX-NAY-NN-001',
+      title: 'Puente de la Revolución · Grand Decameron Complex · Bucerías · Todo incluido',
+      hotel: 'Grand Decameron Complex',
+      showWeb: true,
+      price: 4511,
+      priceUnit: 'por habitación por noche',
+      commercialType: 'TARIFA_DINAMICA',
+      rooms: 2,
+      persons: 2,
+      occupancy: '2 adultos',
+      plan: 'Todo incluido'
+    }]
+  };
+  const handler = await loadHandler('api/offer.js', async () => jsonResponse(payload));
+  const req = { method: 'GET', query: { id: 'OF-PA-NAY-REV26-003' }, headers: { host: 'preview.example.test' } };
+  const res = mockRes();
+  await handler(req, res);
+  assert.equal(res.statusCode, 200);
+  assert.doesNotMatch(res.body, /class="offer-hotel"[^>]*><strong>Hotel:/);
+});
