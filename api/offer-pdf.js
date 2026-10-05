@@ -234,7 +234,7 @@ export default async function handler(req, res) {
 
   page.drawLine({ start: { x: 42, y: 76 }, end: { x: width - 42, y: 76 }, thickness: 1, color: rgb(.83,.78,.66) });
   page.drawText('Trhoncal Travel', { x: 42, y: 55, font: bold, size: 10, color: navy });
-  page.drawText('WhatsApp 33 2933 5952  |  viajestroncal@gmail.com', { x: 42, y: 40, font: regular, size: 8.8, color: gray });
+  page.drawText('WhatsApp 33 2927 9412  |  viajestroncal@gmail.com', { x: 42, y: 40, font: regular, size: 8.8, color: gray });
   page.drawText('Sujeto a disponibilidad y cambios sin previo aviso. Reconfirma antes de reservar.', { x: 42, y: 26, font: regular, size: 8.3, color: gray });
   page.drawText('El QR abre la versión vigente de esta promoción en Trhoncal Travel.', { x: 312, y: 26, font: regular, size: 7.3, color: gray });
 
