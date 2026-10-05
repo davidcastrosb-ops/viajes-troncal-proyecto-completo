@@ -12,6 +12,32 @@ function setText(id,text){const el=document.getElementById(id);if(el)el.textCont
 function setHref(id,href){const el=document.getElementById(id);if(el)el.href=href||'#'}
 function escapeHTML(value=''){return String(value).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]))}
 function destinationSlug(d={}){return String(d.slug||d.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
+function offerPriceText(o={}){
+  if(!o.price)return '';
+  const type=String(o.commercialType||'').toUpperCase();
+  const raw=String(o.priceUnit||'').trim();
+  const low=raw.toLowerCase();
+  let unit=raw||'precio publicado';
+  if(/total\s+por\s+estancia/.test(low))unit='total por estancia';
+  else if(/por\s*persona.*estancia/.test(low))unit='por persona · estancia completa';
+  else if(/por\s*habitaci[oó]n.*noche/.test(low)||/promedio.*noche/.test(low))unit='por habitación · por noche';
+  else if(/por\s*persona.*noche/.test(low))unit='por persona · por noche';
+  else if(/por\s+paquete/.test(low))unit='por paquete';
+  const prefix=type==='PAQUETE_FIJO'?'':'Desde ';
+  const basis=[o.rooms?(Number(o.rooms)===1?'1 habitación':o.rooms+' habitaciones'):'',o.persons?o.persons+' persona'+(Number(o.persons)===1?'':'s'):''].filter(Boolean).join(' · ');
+  return `${prefix}${o.price} MXN ${unit}${basis?' · '+basis:''}`;
+}
+function publicSafeText(text=''){
+  const value=String(text||'').trim();
+  if(!value)return '';
+  const internal=/(priceagencies|travel\s*promo\s*maker|proveedor|captura\s+directa|evidencia\s+interna|nota\s+interna|uso\s+interno|\/promotion\/)/i;
+  return internal.test(value)?'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.':value;
+}
+function ensurePriceDisclaimer(text=''){
+  const value=publicSafeText(text);
+  if(/sujeto a disponibilidad|sujeta a disponibilidad|sujetos a reconfirmación/i.test(value))return value;
+  return `${value}${value?' ':''}Sujeto a disponibilidad y cambios sin previo aviso.`;
+}
 
 function whatsappLink(message='Hola, quiero cotizar un viaje con Trhoncal Travel.'){
   return `https://wa.me/${SITE.contact.whatsapp}?text=${encodeURIComponent(message)}`;
@@ -193,7 +219,7 @@ function renderSourceSummary(){
     ['Turismo oficial','Secretarías estatales, FONATUR y organismos oficiales de promoción.'],
     ['Patrimonio','INAH y UNESCO para historia, arqueología y reconocimientos.'],
     ['Naturaleza','CONANP y autoridades de áreas naturales protegidas.'],
-    ['Producto','PriceAgencies y otros proveedores solamente para precio, cupo, condiciones y materiales de difusión.']
+    ['Producto','Fuentes comerciales verificadas para precio, cupo, condiciones y materiales de difusión.']
   ];
   holder.innerHTML=groups.map(g=>`<div class="source-item"><b>${g[0]}</b><span>${g[1]}</span></div>`).join('');
 }
@@ -233,12 +259,30 @@ function renderOffers(){
   if(footerLink)footerLink.closest('p')?.removeAttribute('hidden');
   publishable.forEach(entry=>{
     const title=escapeHTML(entry.title||'Promoción especial');
-    const desc=escapeHTML(entry.description||entry.note||'Cotiza disponibilidad y condiciones vigentes.');
+    const desc=escapeHTML(ensurePriceDisclaimer(entry.description||entry.note||'Cotiza disponibilidad y condiciones vigentes.'));
     const image=escapeHTML(entry.image||'');
-    const price=entry.price?`<div class="promo-price">${escapeHTML(entry.price)}</div>`:'';
+    const priceText=offerPriceText(entry);
+    const price=priceText?`<div class="promo-price">${escapeHTML(priceText)}</div>`:'';
     const destination=DESTINATIONS.find(d=>d.id===entry.destinationId)?.name||entry.leadDestinationVerified||'';
-    grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}" loading="lazy">`:''}<h3>${title}</h3>${price}<p>${desc}</p><div class="promo-actions"><a class="btn btn-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destination)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}" data-promo-url="${escapeHTML(entry.publicPromoUrl||entry.sharePromoUrl||'')}" data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje →</a></div></article>`);
+    const offerId=escapeHTML(entry.id||'');
+    const offerPath=entry.id?`/oferta/${encodeURIComponent(entry.id)}`:'#cotizar';
+    const offerUrl=entry.id?`${location.origin}/oferta/${encodeURIComponent(entry.id)}`:location.href;
+    const waText=`Hola, quiero información sobre esta promoción de Trhoncal Travel: ${entry.title||destination||'viaje'}. ${offerUrl}`;
+    const waHref=whatsappLink(waText);
+    grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}" loading="lazy">`:''}<h3>${title}</h3>${price}<p>${desc}</p><div class="promo-actions promo-actions-grid"><a class="btn promo-cta promo-cta-view" href="${offerPath}">Ver promoción</a><a class="btn btn-primary promo-cta" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destination)}" data-offer="${offerId}" data-occasion="${escapeHTML(entry.occasionId||'')}" data-promo-url="${escapeHTML(entry.publicPromoUrl||entry.sharePromoUrl||'')}" data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje</a><button class="btn promo-cta promo-cta-share" type="button" data-share-offer data-share-title="${title}" data-share-url="${escapeHTML(offerUrl)}">Compartir promoción</button><a class="btn promo-cta promo-cta-whatsapp" href="${escapeHTML(waHref)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a></div></article>`);
   });
+  grid.querySelectorAll('[data-share-offer]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const shareData={title:btn.dataset.shareTitle||'Trhoncal Travel',text:'Mira esta promoción de Trhoncal Travel.',url:btn.dataset.shareUrl||location.href};
+    try{
+      if(navigator.share)await navigator.share(shareData);
+      else{
+        await navigator.clipboard.writeText(shareData.url);
+        const original=btn.textContent;
+        btn.textContent='Enlace copiado';
+        setTimeout(()=>{btn.textContent=original;},1400);
+      }
+    }catch(_){}
+  }));
 }
 
 async function init(){

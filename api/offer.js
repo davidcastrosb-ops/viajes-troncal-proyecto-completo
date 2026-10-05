@@ -30,6 +30,36 @@ function dateMx(value = '') {
   return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
 }
 
+function priceUnitLabel(offer = {}) {
+  const raw = String(offer.priceUnit || '').trim();
+  const type = String(offer.commercialType || '').toUpperCase();
+  const low = raw.toLowerCase();
+  const prefix = type === 'PAQUETE_FIJO' ? '' : 'Desde';
+  let unit = raw || 'Precio publicado';
+  if (/total\s+por\s+estancia/.test(low)) unit = 'Total por estancia';
+  else if (/por\s*persona.*estancia/.test(low)) unit = 'Por persona · estancia completa';
+  else if (/por\s*habitaci[oó]n.*noche/.test(low) || /promedio.*noche/.test(low)) unit = 'Por habitación · por noche';
+  else if (/por\s*persona.*noche/.test(low)) unit = 'Por persona · por noche';
+  else if (/por\s+paquete/.test(low)) unit = 'Por paquete';
+  else if (/por\s*persona/.test(low)) unit = 'Por persona';
+  else if (/total/.test(low)) unit = 'Total publicado';
+  else if (/desde/.test(low)) unit = '';
+  return prefix ? (unit ? `${prefix} · ${unit}` : prefix) : (unit || 'Precio publicado');
+}
+
+function publicNote(value = '') {
+  const raw = String(value || '').trim();
+  const fallback = 'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.';
+  if (!raw) return fallback;
+  const internal = /(priceagencies|travel\s*promo\s*maker|proveedor|captura\s+directa|evidencia\s+interna|nota\s+interna|uso\s+interno|\/promotion\/|url\s+del\s+proveedor)/i;
+  return internal.test(raw) ? fallback : raw;
+}
+
+function sharePriceText(offer = {}) {
+  if (!offer.price) return '';
+  return `${priceUnitLabel(offer)} ${money(offer.price)}`;
+}
+
 async function loadMaster() {
   const separator = MASTER_ENDPOINT.includes('?') ? '&' : '?';
   const controller = new AbortController();
@@ -82,7 +112,7 @@ export default async function handler(req, res) {
   const destination = destinations.find(d => d && d.id === offer.destinationId) || null;
   const destinationName = destination?.name || offer.leadDestinationVerified || 'Viaje especial';
   const canonical = `https://${PUBLIC_HOST}/oferta/${encodeURIComponent(offer.id)}`;
-  const shareText = `${destinationName}: ${offer.title || 'promoción de viaje'}${offer.price ? ` desde ${money(offer.price)}` : ''}. Consulta disponibilidad y condiciones actuales con Trhoncal Travel.`;
+  const shareText = `${destinationName}: ${offer.title || 'promoción de viaje'}${offer.price ? ` · ${sharePriceText(offer)}` : ''}. Sujeto a disponibilidad y cambios sin previo aviso; reconfirmamos antes de reservar.`;
   // Una promoción de hotel debe usar su propia imagen. Si falta, mostramos fallback de marca;
   // nunca sustituimos silenciosamente con la foto genérica del destino.
   const image = safeHttpUrl(offer.image || (!offer.hotel ? destination?.mainImage : '') || '');
@@ -108,7 +138,13 @@ export default async function handler(req, res) {
   const price = money(offer.price);
   const includes = Array.isArray(offer.includes) ? offer.includes : [];
   const excludes = Array.isArray(offer.excludes) ? offer.excludes : [];
-  const description = offer.note || `Opción de viaje a ${destinationName}. Precio, disponibilidad y condiciones se reconfirman antes de reservar.`;
+  const description = publicNote(offer.note || `Opción de viaje a ${destinationName}. Precio, disponibilidad y condiciones se reconfirman antes de reservar.`);
+  const normalizeName = value => String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  const normalizedTitle = normalizeName(offer.title);
+  const normalizedHotel = normalizeName(offer.hotel);
+  const hotelCore = normalizeName(String(offer.hotel || '').split(',')[0]);
+  const titleAlreadyNamesHotel = !!hotelCore && (normalizedTitle.includes(normalizedHotel) || normalizedTitle.includes(hotelCore));
+  const showHotelSubtitle = !!offer.hotel && !titleAlreadyNamesHotel;
 
   const structured = JSON.stringify({
     '@context': 'https://schema.org',
@@ -120,7 +156,7 @@ export default async function handler(req, res) {
         url: `https://${PUBLIC_HOST}/`,
         logo: `https://${PUBLIC_HOST}/assets/images/trhoncal-travel-logo.svg`,
         email: 'viajestroncal@gmail.com',
-        telephone: '+52 33 2933 5952'
+        telephone: '+52 33 2927 9412'
       },
       {
         '@type': 'WebPage',
@@ -160,7 +196,7 @@ export default async function handler(req, res) {
   <script type="application/ld+json">${structured}</script>
 </head>
 <body class="offer-page">
-  <header class="site-header"><div class="container header-inner"><a class="brand" href="/" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#promociones">Ofertas</a><a href="/#cotizar">Arma tu viaje</a></nav><a class="btn btn-outline" href="https://wa.me/523329335952" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
+  <header class="site-header"><div class="container header-inner"><a class="brand" href="/" aria-label="Trhoncal Travel"><img class="brand-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"></a><nav class="nav" aria-label="Navegación principal"><a href="/#destinos">Destinos</a><a href="/cuando-viajar/">Cuándo viajar</a><a href="/#promociones">Ofertas</a><a href="/#cotizar">Arma tu viaje</a></nav><a class="btn btn-outline" href="https://wa.me/523329279412" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></header>
 
   <main class="offer-main">
     <section class="offer-hero">
@@ -168,15 +204,17 @@ export default async function handler(req, res) {
         <div class="offer-copy">
           <span class="eyebrow">Una opción para compartir</span>
           <h1${offer.hotel ? ' translate="no" class="notranslate"' : ''}>${esc(offer.title || destinationName)}</h1>
-          ${offer.hotel ? `<p class="offer-hotel" translate="no"><strong>Hotel: ${esc(offer.hotel)}</strong></p>` : ''}
+          ${showHotelSubtitle ? `<p class="offer-hotel" translate="no"><strong>Hotel: ${esc(offer.hotel)}</strong></p>` : ''}
           <p>${esc(description)}</p>
           <div class="offer-tags">
             ${dates.length ? `<span>${esc(dates.join(' - '))}</span>` : ''}
             ${duration ? `<span>${esc(duration)}</span>` : ''}
             ${plan ? `<span>${esc(plan)}</span>` : ''}
+            ${offer.rooms ? `<span>${esc(Number(offer.rooms)===1?'1 habitación':offer.rooms+' habitaciones')}</span>` : ''}
+            ${offer.persons ? `<span>${esc(offer.persons)} persona${Number(offer.persons)===1?'':'s'}</span>` : ''}
             ${offer.occupancy ? `<span>${esc(offer.occupancy)}</span>` : ''}
           </div>
-          ${price ? `<div class="offer-price"><small>${esc(offer.priceUnit || 'Precio publicado')}</small><strong>${esc(price)}</strong><span>MXN</span></div>` : ''}
+          ${price ? `<div class="offer-price"><small>${esc(priceUnitLabel(offer))}</small><strong>${esc(price)}</strong><span>MXN</span></div>` : ''}
           <p class="offer-disclaimer">Precio, disponibilidad y condiciones se reconfirman antes de reservar.</p>
         </div>
         <div class="offer-visual">${image ? `<img src="${esc(image)}" alt="${esc(imageAlt)}">` : `<div class="offer-image-fallback"><span>TRHONCAL TRAVEL</span><strong>${esc(offer.hotel || destinationName)}</strong><small>Imagen de esta promoción pendiente de cargar</small></div>`}</div>
@@ -203,7 +241,9 @@ export default async function handler(req, res) {
         ${offer.hotel ? `<div><dt>Hotel</dt><dd translate="no" class="notranslate">${esc(offer.hotel)}</dd></div>` : ''}
         ${duration ? `<div><dt>Duración</dt><dd>${esc(duration)}</dd></div>` : ''}
         ${plan ? `<div><dt>Plan</dt><dd>${esc(plan)}</dd></div>` : ''}
-        ${offer.occupancy ? `<div><dt>Viajeros</dt><dd>${esc(offer.occupancy)}</dd></div>` : ''}
+        ${offer.rooms ? `<div><dt>Habitaciones</dt><dd>${esc(offer.rooms)}</dd></div>` : ''}
+        ${offer.persons ? `<div><dt>Personas</dt><dd>${esc(offer.persons)}</dd></div>` : ''}
+        ${offer.occupancy ? `<div><dt>Ocupación</dt><dd>${esc(offer.occupancy)}</dd></div>` : ''}
         ${dates.length ? `<div><dt>Fechas</dt><dd>${esc(dates.join(' - '))}</dd></div>` : ''}
         ${offer.verifiedAt ? `<div><dt>Precio confirmado</dt><dd>${esc(dateMx(offer.verifiedAt))}</dd></div>` : ''}
       </dl></article>
@@ -213,7 +253,7 @@ export default async function handler(req, res) {
     <section class="offer-final"><div class="container offer-final-card"><div><span class="eyebrow">Siguiente paso</span><h2>¿Quieres avanzar con este viaje?</h2><p>Revisamos disponibilidad y condiciones actuales antes de cualquier pago.</p></div><div class="offer-final-actions"><a class="btn btn-primary" href="${esc(quoteUrl)}">Quiero este viaje →</a><a class="btn btn-soft" href="${esc(customQuoteUrl)}">Arma tu viaje →</a></div></div></section>
   </main>
 
-  <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"><p>Tu viaje comienza desde que lo imaginas.</p></div><div><h3>Contacto</h3><p><a href="https://wa.me/523329335952" target="_blank" rel="noopener noreferrer">WhatsApp 33 2933 5952</a></p><p><a href="mailto:viajestroncal@gmail.com">viajestroncal@gmail.com</a></p></div></div></footer>
+  <footer class="footer"><div class="container footer-grid"><div><img class="footer-logo" src="/assets/images/trhoncal-travel-logo.svg" alt="Trhoncal Travel"><p>Tu viaje comienza desde que lo imaginas.</p></div><div><h3>Contacto</h3><p><a href="https://wa.me/523329279412" target="_blank" rel="noopener noreferrer">WhatsApp 33 2927 9412</a></p><p><a href="mailto:viajestroncal@gmail.com">viajestroncal@gmail.com</a></p></div></div></footer>
   <script src="/assets/js/tracking-v1.js"></script>
   <script src="/assets/js/offer-share-v1.js"></script>
 </body>

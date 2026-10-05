@@ -70,7 +70,7 @@ function buildPublicPayload_() {
   });
 
   const visibleSources = sourceRows
-    .filter(row => sourceIds[text_(row.Fuente_ID)])
+    .filter(row => sourceIds[text_(row.Fuente_ID)] && !isInternalSource_(row))
     .map(publicSource_);
 
   const visibleOffers = offerRows
@@ -188,6 +188,20 @@ function publicDestination_(row, ficha) {
   };
 }
 
+function isInternalSource_(row) {
+  const level = text_(row.Nivel).toLowerCase();
+  const type = text_(row.Tipo).toLowerCase();
+  return level.indexOf('interna') !== -1 || type.indexOf('interna') !== -1;
+}
+
+function publicNote_(value) {
+  const raw = text_(value);
+  const fallback = 'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.';
+  if (!raw) return fallback;
+  const internal = /(priceagencies|travel\s*promo\s*maker|proveedor|captura\s+directa|evidencia\s+interna|nota\s+interna|uso\s+interno|\/promotion\/|url\s+del\s+proveedor)/i;
+  return internal.test(raw) ? fallback : raw;
+}
+
 function publicSource_(row) {
   return {
     id: text_(row.Fuente_ID),
@@ -222,7 +236,6 @@ function publicOffer_(row) {
 
   return {
     id: text_(row.Oferta_ID),
-    providerId: text_(row.Proveedor_ID),
     destinationId: text_(row.Destino_ID),
     hotelId: text_(row.Hotel_ID),
     occasionId: text_(row.Ocasion_ID),
@@ -234,14 +247,20 @@ function publicOffer_(row) {
     price: text_(row.Precio_MXN),
     currency: 'MXN',
     priceUnit: text_(row.Unidad_precio),
+    commercialType: commercialType_(row.Tipo_comercial, row.Unidad_precio),
+    priceAgeDays: priceAgeDays_(row),
+    priceFresh: priceFresh_(row),
+    requiresReconfirmation: true,
     occupancy: text_(row.Ocupación),
+    rooms: number_(row.Habitaciones),
+    persons: number_(row.Personas),
     featuredHome: yes_(row.Destacada_Home),
     ordenWeb: number_(row.Orden_Web),
     verifiedAt: dateText_(row.Ultima_Confirmacion_Precio || row.Última_verificación),
     expiresAt: dateText_(row.Fecha_Expiracion_Web),
     includes: split_(row.Incluye),
     excludes: split_(row.No_Incluye),
-    note: text_(row.Notas_Publicacion),
+    note: publicNote_(row.Notas_Publicacion),
     publicPromoUrl,
     sharePromoUrl,
     leadFormUrl,
@@ -341,6 +360,29 @@ function publicOccasion_(row) {
     note: text_(row.Nota_publica),
     imageDestinationId: text_(row.Imagen_Destino_ID)
   };
+}
+
+function commercialType_(value, unit) {
+  const explicit = text_(value).toUpperCase();
+  if (['PAQUETE_FIJO', 'TARIFA_DINAMICA', 'CAMPANA_DESDE'].indexOf(explicit) !== -1) return explicit;
+  const rawUnit = text_(unit).toLowerCase();
+  if (rawUnit.indexOf('desde') !== -1 || rawUnit.indexOf('promedio') !== -1 || rawUnit.indexOf('noche') !== -1) return 'CAMPANA_DESDE';
+  return 'TARIFA_DINAMICA';
+}
+
+function priceAgeDays_(row) {
+  const confirmed = parseDate_(row.Ultima_Confirmacion_Precio || row.Última_verificación);
+  if (!confirmed) return null;
+  const today = startToday_().getTime();
+  const confirmedDay = new Date(confirmed.getFullYear(), confirmed.getMonth(), confirmed.getDate()).getTime();
+  return Math.max(0, Math.floor((today - confirmedDay) / 86400000));
+}
+
+function priceFresh_(row) {
+  const type = commercialType_(row.Tipo_comercial, row.Unidad_precio);
+  if (type === 'PAQUETE_FIJO') return true;
+  const age = priceAgeDays_(row);
+  return age !== null && age <= 1;
 }
 
 function yes_(value) {

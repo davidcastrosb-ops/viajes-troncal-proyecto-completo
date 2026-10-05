@@ -22,8 +22,8 @@
     if(existingScript&&!existingScript.hasAttribute('data-when-travel-v1')) existingScript.dataset.whenTravelV1='';
   }
 
-  // Todas las tarjetas de ofertas comparten la misma regla: proveedor para "Ver promoción"
-  // y página Trhoncal propia para compartir/descargar PDF.
+  // Las acciones públicas de ofertas permanecen dentro de Trhoncal Travel.
+  // No exponemos enlaces ni nombres de proveedores en las tarjetas para clientes.
   if (!document.querySelector('script[src="/assets/js/offer-links-v1.js"]')) {
     const shareScript=document.createElement('script');
     shareScript.src='/assets/js/offer-links-v1.js';
