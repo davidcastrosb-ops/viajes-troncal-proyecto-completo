@@ -254,6 +254,8 @@ function publicOffer_(row) {
     occupancy: text_(row.Ocupación),
     rooms: number_(row.Habitaciones),
     persons: number_(row.Personas),
+    allowsDeposits: yes_(row.Permite_Abonos),
+    depositText: yes_(row.Permite_Abonos) ? text_(row.Texto_Abonos || 'Pregunta por opción de apartar y abonar') : '',
     featuredHome: yes_(row.Destacada_Home),
     ordenWeb: number_(row.Orden_Web),
     verifiedAt: dateText_(row.Ultima_Confirmacion_Precio || row.Última_verificación),
