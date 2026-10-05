@@ -307,3 +307,18 @@ test('abonos quedan opt-in por oferta', async () => {
   assert.match(apps, /allowsDeposits: yes_\(row\.Permite_Abonos\)/);
   assert.match(apps, /depositText:/);
 });
+
+
+test('total de viaje no inventa multiplicadores faltantes', async () => {
+  const sources = [
+    '../api/offer.js',
+    '../assets/js/promo-maker-v1.js',
+    '../assets/js/site.js',
+    '../api/offer-pdf-v2.js',
+    '../api/offer-pdf.js'
+  ];
+  for (const path of sources) {
+    const source = await fs.readFile(new URL(path, import.meta.url), 'utf8');
+    assert.doesNotMatch(source, /Math\.max\(1,\s*Number\([^\n]+\)\s*\|\|\s*1\)/, path + ' no debe inventar 1 como multiplicador');
+  }
+});
