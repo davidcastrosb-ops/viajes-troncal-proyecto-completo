@@ -216,3 +216,15 @@ test('oferta no repite el hotel cuando ya viene en el título', async () => {
   assert.equal(res.statusCode, 200);
   assert.doesNotMatch(res.body, /class="offer-hotel"[^>]*><strong>Hotel:/);
 });
+
+
+test('promo maker usa cuatro CTA simétricos y sin flechas ambiguas', async () => {
+  const source = await fs.readFile(new URL('../assets/js/promo-maker-v1.js', import.meta.url), 'utf8');
+  assert.match(source, />Ver promoción</);
+  assert.match(source, />Quiero este viaje</);
+  assert.match(source, />Compartir promoción</);
+  assert.match(source, />Prefiero WhatsApp</);
+  assert.doesNotMatch(source, /Ver promoción →/);
+  assert.doesNotMatch(source, /Quiero este viaje →/);
+  assert.match(source, /promo-maker-whatsapp/);
+});
