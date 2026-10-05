@@ -196,6 +196,8 @@ export default async function handler(req, res) {
             ${dates.length ? `<span>${esc(dates.join(' - '))}</span>` : ''}
             ${duration ? `<span>${esc(duration)}</span>` : ''}
             ${plan ? `<span>${esc(plan)}</span>` : ''}
+            ${offer.rooms ? `<span>${esc(offer.rooms)} habitación${Number(offer.rooms)===1?'':'es'}</span>` : ''}
+            ${offer.persons ? `<span>${esc(offer.persons)} persona${Number(offer.persons)===1?'':'s'}</span>` : ''}
             ${offer.occupancy ? `<span>${esc(offer.occupancy)}</span>` : ''}
           </div>
           ${price ? `<div class="offer-price"><small>${esc(priceUnitLabel(offer))}</small><strong>${esc(price)}</strong><span>MXN</span></div>` : ''}
@@ -225,7 +227,9 @@ export default async function handler(req, res) {
         ${offer.hotel ? `<div><dt>Hotel</dt><dd translate="no" class="notranslate">${esc(offer.hotel)}</dd></div>` : ''}
         ${duration ? `<div><dt>Duración</dt><dd>${esc(duration)}</dd></div>` : ''}
         ${plan ? `<div><dt>Plan</dt><dd>${esc(plan)}</dd></div>` : ''}
-        ${offer.occupancy ? `<div><dt>Viajeros</dt><dd>${esc(offer.occupancy)}</dd></div>` : ''}
+        ${offer.rooms ? `<div><dt>Habitaciones</dt><dd>${esc(offer.rooms)}</dd></div>` : ''}
+        ${offer.persons ? `<div><dt>Personas</dt><dd>${esc(offer.persons)}</dd></div>` : ''}
+        ${offer.occupancy ? `<div><dt>Ocupación</dt><dd>${esc(offer.occupancy)}</dd></div>` : ''}
         ${dates.length ? `<div><dt>Fechas</dt><dd>${esc(dates.join(' - '))}</dd></div>` : ''}
         ${offer.verifiedAt ? `<div><dt>Precio confirmado</dt><dd>${esc(dateMx(offer.verifiedAt))}</dd></div>` : ''}
       </dl></article>
