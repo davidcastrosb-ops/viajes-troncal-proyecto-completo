@@ -34,7 +34,7 @@ function priceUnitLabel(offer = {}) {
   const raw = String(offer.priceUnit || '').trim();
   const type = String(offer.commercialType || '').toUpperCase();
   const low = raw.toLowerCase();
-  const prefix = type === 'PAQUETE_FIJO' ? '' : 'Desde';
+  const prefix = type === 'CAMPANA_DESDE' ? 'Desde' : '';
   let unit = raw || 'Precio publicado';
   if (/total\s+por\s+estancia/.test(low)) unit = 'Total por estancia';
   else if (/por\s*persona.*estancia/.test(low)) unit = 'Por persona · estancia completa';
@@ -47,6 +47,19 @@ function priceUnitLabel(offer = {}) {
   return prefix ? (unit ? `${prefix} · ${unit}` : prefix) : (unit || 'Precio publicado');
 }
 
+function tripTotal(offer = {}) {
+  const price = Number(String(offer.price ?? '').replace(/[^0-9.-]/g, ''));
+  if (!Number.isFinite(price) || price <= 0) return null;
+  const unit = String(offer.priceUnit || '').toLowerCase();
+  const nights = Math.max(1, Number(offer.nights) || 1);
+  const rooms = Math.max(1, Number(offer.rooms) || 1);
+  const persons = Math.max(1, Number(offer.persons) || 1);
+  if (/por\s*habitaci[oó]n.*noche/.test(unit)) return price * rooms * nights;
+  if (/por\s*persona.*noche/.test(unit)) return price * persons * nights;
+  if (/por\s*persona.*estancia/.test(unit)) return price * persons;
+  if (/total\s+por\s+estancia|por\s+paquete/.test(unit)) return price;
+  return null;
+}
 function publicNote(value = '') {
   const raw = String(value || '').trim();
   const fallback = 'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.';
@@ -136,6 +149,10 @@ export default async function handler(req, res) {
   const dates = [offer.travelStart ? dateMx(offer.travelStart) : '', offer.travelEnd ? dateMx(offer.travelEnd) : ''].filter(Boolean);
   const duration = [offer.days ? `${offer.days} días` : '', offer.nights ? `${offer.nights} noches` : ''].filter(Boolean).join(' · ');
   const price = money(offer.price);
+  const totalValue = tripTotal(offer);
+  const total = totalValue ? money(totalValue) : '';
+  const unitIsTotal = /total\s+por\s+estancia|por\s+paquete/i.test(String(offer.priceUnit || ''));
+  const showTripTotal = !!total && !unitIsTotal;
   const includes = Array.isArray(offer.includes) ? offer.includes : [];
   const excludes = Array.isArray(offer.excludes) ? offer.excludes : [];
   const description = publicNote(offer.note || `Opción de viaje a ${destinationName}. Precio, disponibilidad y condiciones se reconfirman antes de reservar.`);
@@ -215,6 +232,8 @@ export default async function handler(req, res) {
             ${offer.occupancy ? `<span>${esc(offer.occupancy)}</span>` : ''}
           </div>
           ${price ? `<div class="offer-price"><small>${esc(priceUnitLabel(offer))}</small><strong>${esc(price)}</strong><span>MXN</span></div>` : ''}
+          ${showTripTotal ? `<div class="offer-total"><span>Total de esta opción</span><strong>${esc(total)}</strong><small>MXN</small></div>` : ''}
+          <div class="offer-payment-benefits"><span>Hasta 18 meses con tarjetas participantes</span>${offer.allowsDeposits ? `<span>${esc(offer.depositText || 'Pregunta por opción de apartar y abonar')}</span>` : ''}</div>
           <p class="offer-disclaimer">Precio, disponibilidad y condiciones se reconfirman antes de reservar.</p>
         </div>
         <div class="offer-visual">${image ? `<img src="${esc(image)}" alt="${esc(imageAlt)}">` : `<div class="offer-image-fallback"><span>TRHONCAL TRAVEL</span><strong>${esc(offer.hotel || destinationName)}</strong><small>Imagen de esta promoción pendiente de cargar</small></div>`}</div>
