@@ -322,3 +322,18 @@ test('total de viaje no inventa multiplicadores faltantes', async () => {
     assert.doesNotMatch(source, /Math\.max\(1,\s*Number\([^\n]+\)\s*\|\|\s*1\)/, path + ' no debe inventar 1 como multiplicador');
   }
 });
+
+
+test('muestra total por persona para dividir gastos', async () => {
+  const offer = await fs.readFile(new URL('../api/offer.js', import.meta.url), 'utf8');
+  const promo = await fs.readFile(new URL('../assets/js/promo-maker-v1.js', import.meta.url), 'utf8');
+  const pdf = await fs.readFile(new URL('../api/offer-pdf-v2.js', import.meta.url), 'utf8');
+
+  for (const source of [offer, promo, pdf]) {
+    assert.match(source, /Por persona|POR PERSONA/);
+    assert.match(source, /totalValue\s*\/\s*personsCount|totalValue\/personsCount/);
+  }
+
+  assert.equal(18044 / 2, 9022);
+  assert.equal(11714 / 2, 5857);
+});
