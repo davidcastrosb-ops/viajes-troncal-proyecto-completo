@@ -46,8 +46,33 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Invalid Master payload' });
     }
 
+    const internalPattern = /(priceagencies|travel\s*promo\s*maker|proveedor|captura\s+directa|evidencia\s+interna|nota\s+interna|uso\s+interno|\/promotion\/)/i;
+    const safePayload = { ...payload };
+    if (Array.isArray(payload.offers)) {
+      safePayload.offers = payload.offers.map(item => {
+        if (!item || typeof item !== 'object') return item;
+        const clean = { ...item };
+        delete clean.providerId;
+        delete clean.Proveedor_ID;
+        delete clean.URL_proveedor_interna;
+        delete clean.publicPromoUrl;
+        delete clean.sharePromoUrl;
+        if (typeof clean.note === 'string' && internalPattern.test(clean.note)) {
+          clean.note = 'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.';
+        }
+        return clean;
+      });
+    }
+    if (Array.isArray(payload.sources)) {
+      safePayload.sources = payload.sources.filter(item => {
+        if (!item || typeof item !== 'object') return false;
+        const haystack = [item.level, item.type, item.organization, item.title].filter(Boolean).join(' ');
+        return !/\binterna\b|priceagencies|travel\s*promo\s*maker/i.test(haystack);
+      });
+    }
+
     res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate');
-    return res.status(200).json(payload);
+    return res.status(200).json(safePayload);
   } catch (error) {
     console.error('Could not load Trhoncal Travel Master Sheet', error);
     res.setHeader('Cache-Control', 'no-store, max-age=0');
