@@ -11,7 +11,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const safe=v=>{try{const u=new URL(String(v));return /^https?:$/.test(u.protocol)?u.toString():'';}catch(_){return '';}};
   const numberMx=v=>{const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?new Intl.NumberFormat('es-MX',{maximumFractionDigits:0}).format(n):'';};
-  const priceUnit=o=>{const raw=String(o?.priceUnit||'').trim();if(/por\s*persona/i.test(raw))return 'Por persona';if(/total/i.test(raw))return 'Total publicado';if(/desde/i.test(raw))return 'Desde';return raw||'Precio publicado';};
+  const priceUnit=o=>{const raw=String(o?.priceUnit||'').trim(),type=String(o?.commercialType||'').toUpperCase(),low=raw.toLowerCase(),prefix=type==='PAQUETE_FIJO'?'':'Desde';if(/por\s*persona/i.test(low))return prefix?prefix+' · por persona':'Por persona';if(/noche|promedio/i.test(low))return prefix?prefix+' · por habitación por noche':'Por habitación por noche';if(/total/i.test(low))return prefix?prefix+' · total':'Total publicado';if(/desde/i.test(low))return 'Desde';return prefix||raw||'Precio publicado';};
   const dateMx=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v))?new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric'}).format(new Date(v+'T12:00:00')):String(v||'');
   const visible=o=>{if(!o)return false;if(o.showWeb===false||/^(no|false|0)$/i.test(String(o.showWeb||'').trim()))return false;const e=o.expirationDate||o.expiresAt||o.fechaExpiracionWeb||'';return !(/^\d{4}-\d{2}-\d{2}$/.test(String(e))&&new Date(e+'T23:59:59')<new Date());};
   const offerTarget=(o,hotels)=>{
