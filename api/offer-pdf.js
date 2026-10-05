@@ -187,7 +187,7 @@ export default async function handler(req, res) {
   page.drawText(destinationName, { x: 42, y, font: bold, size: 11, color: gold });
   y -= 24;
 
-  const meta = [dates, duration, offer.rooms ? `${offer.rooms} habitación${Number(offer.rooms)===1?'':'es'}` : '', offer.persons ? `${offer.persons} persona${Number(offer.persons)===1?'':'s'}` : '', clean(offer.plan), clean(offer.occupancy)].filter(Boolean).join('  |  ');
+  const meta = [dates, duration, offer.rooms ? ${Number(offer.rooms)===1?'1 habitación':offer.rooms+' habitaciones'} : '', offer.persons ? `${offer.persons} persona${Number(offer.persons)===1?'':'s'}` : '', clean(offer.plan), clean(offer.occupancy)].filter(Boolean).join('  |  ');
   if (meta) {
     y = drawWrapped(page, meta, { x: 42, y, font: regular, size: 10.5, maxWidth: width - 84, color: gray, lineHeight: 14, maxLines: 3 }) - 8;
   }
