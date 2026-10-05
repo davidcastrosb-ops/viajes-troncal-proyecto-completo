@@ -2,7 +2,7 @@
   "name": "viajes-troncal",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "scripts": {
     "test:blockers": "node --experimental-vm-modules --test tests/v2-blockers.test.mjs"
