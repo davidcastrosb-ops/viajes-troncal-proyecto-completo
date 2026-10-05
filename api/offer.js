@@ -47,6 +47,14 @@ function priceUnitLabel(offer = {}) {
   return prefix ? (unit ? `${prefix} · ${unit}` : prefix) : (unit || 'Precio publicado');
 }
 
+function publicNote(value = '') {
+  const raw = String(value || '').trim();
+  const fallback = 'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.';
+  if (!raw) return fallback;
+  const internal = /(priceagencies|travel\s*promo\s*maker|proveedor|captura\s+directa|evidencia\s+interna|nota\s+interna|uso\s+interno|\/promotion\/|url\s+del\s+proveedor)/i;
+  return internal.test(raw) ? fallback : raw;
+}
+
 function sharePriceText(offer = {}) {
   if (!offer.price) return '';
   return `${priceUnitLabel(offer)} ${money(offer.price)}`;
@@ -130,7 +138,7 @@ export default async function handler(req, res) {
   const price = money(offer.price);
   const includes = Array.isArray(offer.includes) ? offer.includes : [];
   const excludes = Array.isArray(offer.excludes) ? offer.excludes : [];
-  const description = offer.note || `Opción de viaje a ${destinationName}. Precio, disponibilidad y condiciones se reconfirman antes de reservar.`;
+  const description = publicNote(offer.note || `Opción de viaje a ${destinationName}. Precio, disponibilidad y condiciones se reconfirman antes de reservar.`);
 
   const structured = JSON.stringify({
     '@context': 'https://schema.org',
