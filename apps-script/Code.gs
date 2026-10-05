@@ -239,6 +239,8 @@ function publicOffer_(row) {
     priceFresh: priceFresh_(row),
     requiresReconfirmation: true,
     occupancy: text_(row.Ocupación),
+    rooms: number_(row.Habitaciones),
+    persons: number_(row.Personas),
     featuredHome: yes_(row.Destacada_Home),
     ordenWeb: number_(row.Orden_Web),
     verifiedAt: dateText_(row.Ultima_Confirmacion_Precio || row.Última_verificación),
