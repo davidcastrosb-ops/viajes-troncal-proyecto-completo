@@ -23,6 +23,18 @@ function money(value) {
     : clean(value);
 }
 
+function priceUnitLabel(offer = {}) {
+  const raw = String(offer.priceUnit || '').trim();
+  const type = String(offer.commercialType || '').toUpperCase();
+  const low = raw.toLowerCase();
+  const prefix = type === 'PAQUETE_FIJO' ? '' : 'Desde';
+  if (/por\s*persona/i.test(low)) return prefix ? `${prefix} - por persona` : 'Por persona';
+  if (/noche|promedio/i.test(low)) return prefix ? `${prefix} - por habitación por noche` : 'Por habitación por noche';
+  if (/total/i.test(low)) return prefix ? `${prefix} - total` : 'Total publicado';
+  if (/desde/i.test(low)) return 'Desde';
+  return prefix || raw || 'Precio publicado';
+}
+
 function dateMx(value = '') {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return clean(value);
   const d = new Date(`${value}T12:00:00`);
@@ -181,7 +193,7 @@ export default async function handler(req, res) {
   }
 
   if (price) {
-    page.drawText('PRECIO PUBLICADO', { x: 42, y, font: bold, size: 9, color: gold });
+    page.drawText(priceUnitLabel(offer).toUpperCase(), { x: 42, y, font: bold, size: 9, color: gold });
     page.drawText(price, { x: 42, y: y - 30, font: bold, size: 28, color: navy });
     page.drawText('MXN', { x: 170, y: y - 25, font: bold, size: 10, color: navy });
     y -= 52;
@@ -208,14 +220,14 @@ export default async function handler(req, res) {
 
   const noteY = Math.min(y - 8, 205);
   page.drawText('IMPORTANTE', { x: 42, y: noteY, font: bold, size: 9, color: gold });
-  drawWrapped(page, clean(offer.note || 'Precio, disponibilidad y condiciones se reconfirman antes de reservar.'), {
+  drawWrapped(page, clean(offer.note || 'Sujeto a disponibilidad y cambios sin previo aviso. Precio final a reconfirmar antes de reservar.'), {
     x: 42, y: noteY - 17, font: regular, size: 9.3, maxWidth: 335, color: gray, lineHeight: 13, maxLines: 5
   });
 
   page.drawLine({ start: { x: 42, y: 76 }, end: { x: width - 42, y: 76 }, thickness: 1, color: rgb(.83,.78,.66) });
   page.drawText('Trhoncal Travel', { x: 42, y: 55, font: bold, size: 10, color: navy });
   page.drawText('WhatsApp 33 2933 5952  |  viajestroncal@gmail.com', { x: 42, y: 40, font: regular, size: 8.8, color: gray });
-  page.drawText('Consulta siempre la versión vigente antes de pagar o reservar.', { x: 42, y: 26, font: regular, size: 8.3, color: gray });
+  page.drawText('Sujeto a disponibilidad y cambios sin previo aviso. Reconfirma antes de reservar.', { x: 42, y: 26, font: regular, size: 8.3, color: gray });
   page.drawText('El QR abre la versión vigente de esta promoción en Trhoncal Travel.', { x: 312, y: 26, font: regular, size: 7.3, color: gray });
 
   const bytes = await pdfDoc.save();
