@@ -14,10 +14,10 @@
     const price=Number(String(entry.price??'').replace(/[^0-9.-]/g,''));
     if(!Number.isFinite(price)||price<=0)return null;
     const unit=String(entry.priceUnit||'').toLowerCase();
-    const nights=Math.max(1,Number(entry.nights)||1),rooms=Math.max(1,Number(entry.rooms)||1),persons=Math.max(1,Number(entry.persons)||1);
-    if(/por\s*habitaci[oó]n.*noche/.test(unit))return price*rooms*nights;
-    if(/por\s*persona.*noche/.test(unit))return price*persons*nights;
-    if(/por\s*persona.*estancia/.test(unit))return price*persons;
+    const nights=Number(entry.nights),rooms=Number(entry.rooms),persons=Number(entry.persons);
+    if(/por\s*habitaci[oó]n.*noche/.test(unit))return nights>0&&rooms>0?price*rooms*nights:null;
+    if(/por\s*persona.*noche/.test(unit))return nights>0&&persons>0?price*persons*nights:null;
+    if(/por\s*persona.*estancia/.test(unit))return persons>0?price*persons:null;
     if(/total\s+por\s+estancia|por\s+paquete/.test(unit))return price;
     return null;
   }
