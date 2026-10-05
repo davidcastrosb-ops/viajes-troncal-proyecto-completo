@@ -98,3 +98,50 @@ test('lead reserva tiempo suficiente para la latencia observada de Apps Script',
   assert.ok(Number(timeoutMatch[1]) >= 30000, 'El timeout upstream debe ser >= 30 s');
   assert.ok(Number(vercel?.functions?.['api/lead.js']?.maxDuration) >= 60, 'Vercel debe reservar al menos 60 s para api/lead.js');
 });
+
+
+test('Decameron conserva base por habitación por noche con habitaciones y personas explícitas', async () => {
+  const payload = {
+    destinations: [{ id: 'MX-NAY-NN-001', slug: 'nuevo-nayarit-bahia-de-banderas', name: 'Bucerías' }],
+    offers: [{
+      id: 'OF-PA-NAY-REV26-003',
+      destinationId: 'MX-NAY-NN-001',
+      hotelId: 'HOT-NAY-DECAMERON-001',
+      title: 'Grand Decameron Complex · Todo incluido',
+      hotel: 'Grand Decameron Complex, A Trademark All Inclusive',
+      showWeb: true,
+      price: 4511,
+      priceUnit: 'por habitación por noche',
+      commercialType: 'TARIFA_DINAMICA',
+      rooms: 2,
+      persons: 2,
+      occupancy: '2 adultos',
+      plan: 'Todo incluido',
+      travelStart: '2026-11-14',
+      travelEnd: '2026-11-16',
+      days: 3,
+      nights: 2
+    }],
+    hotels: [{
+      id: 'HOT-NAY-DECAMERON-001',
+      slug: 'grand-decameron-bucerias',
+      name: 'Grand Decameron Complex, A Trademark All Inclusive',
+      destinationId: 'MX-NAY-NN-001'
+    }],
+    hotelImages: []
+  };
+  const handler = await loadHandler('api/hotel-v2.js', async () => jsonResponse(payload));
+  const req = {
+    method: 'GET',
+    query: { slug: 'grand-decameron-bucerias', oferta: 'OF-PA-NAY-REV26-003' },
+    headers: { host: 'preview.example.test', 'x-forwarded-host': 'preview.example.test', 'x-forwarded-proto': 'https' }
+  };
+  const res = mockRes();
+  await handler(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.match(res.body, /Desde · Por habitación · por noche/);
+  assert.match(res.body, />2 habitaciones</);
+  assert.match(res.body, />2 personas</);
+  assert.doesNotMatch(res.body, /Por persona · estancia completa/);
+});
