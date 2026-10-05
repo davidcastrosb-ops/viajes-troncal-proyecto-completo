@@ -139,9 +139,12 @@ export default async function handler(req, res) {
   const includes = Array.isArray(offer.includes) ? offer.includes : [];
   const excludes = Array.isArray(offer.excludes) ? offer.excludes : [];
   const description = publicNote(offer.note || `Opción de viaje a ${destinationName}. Precio, disponibilidad y condiciones se reconfirman antes de reservar.`);
-  const normalizedTitle = String(offer.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const normalizedHotel = String(offer.hotel || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const showHotelSubtitle = !!offer.hotel && !normalizedTitle.includes(normalizedHotel);
+  const normalizeName = value => String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  const normalizedTitle = normalizeName(offer.title);
+  const normalizedHotel = normalizeName(offer.hotel);
+  const hotelCore = normalizeName(String(offer.hotel || '').split(',')[0]);
+  const titleAlreadyNamesHotel = !!hotelCore && (normalizedTitle.includes(normalizedHotel) || normalizedTitle.includes(hotelCore));
+  const showHotelSubtitle = !!offer.hotel && !titleAlreadyNamesHotel;
 
   const structured = JSON.stringify({
     '@context': 'https://schema.org',
