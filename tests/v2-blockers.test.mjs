@@ -287,7 +287,7 @@ test('pagos y total del viaje quedan claros sin prometer MSI', async () => {
   for (const source of [offer, promo, pdf]) {
     assert.match(source, /Hasta 18 meses con tarjetas participantes/);
     assert.doesNotMatch(source, /meses sin intereses/i);
-    assert.match(source, /Total de esta opción|TOTAL DE ESTA OPCIÓN/);
+    assert.match(source, /Total del viaje|TOTAL DEL VIAJE|Total de esta opción|TOTAL DE ESTA OPCIÓN/);
   }
 
   assert.match(offer, /CAMPANA_DESDE/);
