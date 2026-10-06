@@ -395,3 +395,17 @@ test('feed Meta usa precio por persona y no expone proveedor', async () => {
   assert.match(res.body, /Trhoncal Travel/);
   assert.doesNotMatch(res.body, /PriceAgencies|proveedor/i);
 });
+
+
+test('ofertas vencidas quedan fuera de web y catálogo Meta', async () => {
+  const apps = await fs.readFile(new URL('../apps-script/Code.gs', import.meta.url), 'utf8');
+  const site = await fs.readFile(new URL('../assets/js/site.js', import.meta.url), 'utf8');
+  const master = await fs.readFile(new URL('../api/master.js', import.meta.url), 'utf8');
+
+  assert.match(apps, /Fecha_Expiracion_Web/);
+  assert.match(apps, /expiry\.getTime\(\)\s*<\s*startToday_\(\)\.getTime\(\)/);
+  assert.match(site, /expiresAt\|\|o\.fechaExpiracionWeb/);
+  assert.match(site, /expiry\s*&&\s*expiry\s*<\s*new Date\(\)/);
+  assert.match(master, /const offers = Array\.isArray\(payload\.offers\)/);
+  assert.doesNotMatch(master, /expired.*in stock/i);
+});
