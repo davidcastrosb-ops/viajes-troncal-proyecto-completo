@@ -211,7 +211,6 @@ export default async function handler(req, res) {
           <span class="eyebrow">Una opción para compartir</span>
           <h1${offer.hotel ? ' translate="no" class="notranslate"' : ''}>${esc(offer.title || destinationName)}</h1>
           ${showHotelSubtitle ? `<p class="offer-hotel" translate="no"><strong>Hotel: ${esc(offer.hotel)}</strong></p>` : ''}
-          <p>${esc(description)}</p>
       ${showTripTotal ? `<div class="commercial-total"><span>${globalThis.TravelCommercial.prefix(offer)?'Desde · ':''}Total del viaje</span><strong>${esc(total)}</strong><small>MXN</small></div>` : ''}
           ${showPerPerson ? `<div class="commercial-person"><span>Por persona</span><strong>${esc(perPerson)}</strong><small>MXN</small></div>` : ''}
           <div class="commercial-payment"><span>Hasta 18 meses con tarjetas participantes</span>${allowsDeposits(offer.allowsDeposits) ? `<span>${esc(offer.depositText || 'Pregunta por opción de apartar y abonar')}</span>` : ''}</div>
@@ -225,6 +224,7 @@ export default async function handler(req, res) {
           </div>
 
           ${price && !/total\s+por\s+estancia|por\s+paquete/i.test(offer.priceUnit||'') ? `<p class="offer-base-rate">Tarifa base: ${esc(price)} MXN · ${esc(priceUnitLabel(offer))}</p>` : ''}
+          <p>${esc(globalThis.TravelCommercial.shortNote(offer,description))}</p>
           <p class="offer-disclaimer">Precio, disponibilidad y condiciones se reconfirman antes de reservar.</p>
         </div>
         <div class="offer-visual">${image ? `<img src="${esc(image)}" alt="${esc(imageAlt)}">` : `<div class="offer-image-fallback"><span>TRHONCAL TRAVEL</span><strong>${esc(offer.hotel || destinationName)}</strong><small>Imagen de esta promoción pendiente de cargar</small></div>`}</div>

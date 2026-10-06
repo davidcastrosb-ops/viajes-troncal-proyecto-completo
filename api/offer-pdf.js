@@ -239,7 +239,7 @@ export default async function handler(req, res) {
 
   const noteY = Math.min(y - 8, 205);
   page.drawText('IMPORTANTE', { x: 42, y: noteY, font: bold, size: 9, color: gold });
-  drawWrapped(page, publicNote(offer.note || 'Sujeto a disponibilidad y cambios sin previo aviso. Precio final a reconfirmar antes de reservar.'), {
+  drawWrapped(page, globalThis.TravelCommercial.shortNote(offer,publicNote(offer.note || 'Sujeto a disponibilidad y cambios sin previo aviso. Precio final a reconfirmar antes de reservar.')), {
     x: 42, y: noteY - 17, font: regular, size: 9.3, maxWidth: 335, color: gray, lineHeight: 13, maxLines: 5
   });
 

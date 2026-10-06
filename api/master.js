@@ -40,7 +40,7 @@ function buildMetaFeed(payload = {}) {
       const destinationName = metaCleanText(destination?.name || offer.leadDestinationVerified || 'Viaje');
       const price = metaCatalogPrice(offer);
       if (!price) return null;
-      const people = Number(offer.persons);
+      const people = commercial.count(offer.persons);
       const priceText = people > 0
         ? `Precio por persona para ${people} viajero${people === 1 ? '' : 's'}.`
         : 'Precio publicado sujeto a reconfirmación.';

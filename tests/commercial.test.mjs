@@ -96,3 +96,36 @@ test('Apps Script only grants Desde from explicit Tipo_comercial', async () => {
   assert.equal(ctx.commercialType_('TARIFA_DINAMICA', 'promedio por noche'), 'TARIFA_DINAMICA');
   assert.equal(ctx.commercialType_('CAMPANA_DESDE', 'total por estancia'), 'CAMPANA_DESDE');
 });
+test('the actual home renderer uses one hierarchy, four CTAs and hides a fully visible carousel', async () => {
+  const control = () => ({ addEventListener() {}, setAttribute() {}, hidden: false, textContent: '' });
+  const controls = new Map();
+  const toolbar = { hidden: false, querySelector(selector) { if (!controls.has(selector)) controls.set(selector, control()); return controls.get(selector); } };
+  const grid = { innerHTML: '', classList: { add() {}, toggle() {} }, addEventListener() {}, querySelectorAll(selector) { return selector === '.promo-maker-card' ? [{}, {}, {}] : []; } };
+  const section = { hidden: false, dataset: {}, querySelector() { return toolbar; } };
+  const offers = cases.map(o => ({ ...o, hotel: o.id, title: o.id, _fromMaster: true }));
+  offers.push({ ...offers[0], id: 'EXPIRED', expiresAt: '2000-01-01' });
+  const ctx = vm.createContext({ Intl, Date, URL, console, clearInterval, setInterval, OFFERS: offers, DESTINATIONS: [], escapeHTML: value => String(value), publicSafeText: value => value, whatsappLink: () => 'https://wa.me/523329279412', document: { hidden: false, getElementById: id => id === 'promosCards' ? grid : section, querySelector: () => null, addEventListener() {} }, window: { innerWidth: 1440, location: { origin: 'https://example.test', href: 'https://example.test' }, matchMedia: () => ({ matches: true }), addEventListener() {} } });
+  vm.runInContext(contract, ctx);
+  ctx.isOfferVisible = offer => ctx.TravelCommercial.visible(offer);
+  vm.runInContext(await fs.readFile(new URL('../assets/js/promo-maker-v1.js', import.meta.url), 'utf8'), ctx);
+  ctx.window.renderOffers();
+  assert.equal(toolbar.hidden, true);
+  assert.doesNotMatch(grid.innerHTML, /EXPIRED|promo-maker-price|meses sin intereses/);
+  for (const offer of cases) assert.ok(grid.innerHTML.includes(commercial.formatCents(offer.total)));
+  const cards = grid.innerHTML.split('<article class="promo-maker-card">').slice(1);
+  assert.equal(cards.length, 3);
+  for (const html of cards) {
+    assert.ok(html.indexOf('Total del viaje') < html.indexOf('Por persona'));
+    assert.ok(html.indexOf('Por persona') < html.indexOf('Hasta 18 meses con tarjetas participantes'));
+    assert.equal((html.match(/class="promo-maker-cta /g) || []).length, 4);
+  }
+});
+test('concise notes preserve taxes and dates after removing repeated price sentences', () => {
+  const offer = { ...cases[0], rooms: 1, occupancy: '2 adultos' };
+  const note = commercial.shortNote(offer, 'Precio total por estancia para 2 adultos. Viaje del 14 al 16 de noviembre. Impuestos incluidos. Disponibilidad sujeta a reconfirmación.');
+  assert.match(note, /1 habitación y 2 adultos/);
+  assert.match(note, /Viaje del 14 al 16/);
+  assert.match(note, /Impuestos incluidos/);
+  assert.match(note, /reconfirmación/);
+  assert.match(commercial.shortNote(offer, 'Precio total incluye transportación y desayuno.'), /incluye transportación y desayuno/);
+});

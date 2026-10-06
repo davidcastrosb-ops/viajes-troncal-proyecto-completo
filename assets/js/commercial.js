@@ -72,7 +72,8 @@
   function shortNote(offer, safeNote) {
     if (amounts(offer).totalCents === null) return safeNote;
     // Only remove repeated price/quantity sentences. Preserve dates, taxes and all conditions.
-    const conditions = safeNote.split(/(?<=\.)\s+/).filter(sentence => !/^(Precio (?:total|por habitación por noche|por persona)|Total(?: de esta opción)?\s*[:$]|Esta opción contempla)/i.test(sentence)).join(' ');
+    const duplicate = /^(?:Precio total (?:por estancia|del viaje) para (?:\d+ (?:habitación|habitaciones) y )?\d+ adultos(?:, \d+ noches)?|Precio por habitación por noche: \$[\d,.]+ MXN|Esta opción contempla \d+ habitaciones durante \d+ noches|Total(?: de esta opción:)? \$[\d,.]+ MXN|Precio por persona \$[\d,.]+ MXN)\.$/i;
+    const conditions = safeNote.split(/(?<=\.)\s+/).filter(sentence => !duplicate.test(sentence)).join(' ');
     const rooms = count(offer.rooms), persons = count(offer.persons);
     const occupancy = String(offer.occupancy || '').trim();
     const basis = [rooms ? `${rooms} ${rooms === 1 ? 'habitación' : 'habitaciones'}` : '', persons ? (occupancy || `${persons} personas`) : ''].filter(Boolean).join(' y ');
