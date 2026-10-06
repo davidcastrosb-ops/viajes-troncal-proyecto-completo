@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/meta-feed.csv",
-      "destination": "/api/meta-feed"
+      "destination": "/api/master?format=meta"
     },
     {
       "source": "/sitemap.xml",
