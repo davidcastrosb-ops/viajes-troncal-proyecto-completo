@@ -6,6 +6,7 @@ on:
       - feature/destination-hubs-v2-2026-08-29
       - codex/cierre-funcional-mvp-2026-09
       - codex/pagos-total-viaje-2026-10-05
+      - codex/travel-meta-feed-captura-rapida-2026-10-06
   workflow_dispatch:
 
 jobs:
@@ -20,6 +21,7 @@ jobs:
         run: |
           node --check api/hotel-v2.js
           node --check api/offer.js
+          node --check api/meta-feed.js
           node --check api/offer-pdf-v2.js
           node --check api/offer-pdf.js
           node --check assets/js/site.js
