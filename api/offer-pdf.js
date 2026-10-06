@@ -58,7 +58,7 @@ function safeHttpUrl(value = '') {
 async function loadMaster() {
   const separator = MASTER_ENDPOINT.includes('?') ? '&' : '?';
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+  const timeout = setTimeout(() => controller.abort(), 30000);
   try {
     const response = await fetch(`${MASTER_ENDPOINT}${separator}_ts=${Date.now()}`, {
       method: 'GET', redirect: 'follow', cache: 'no-store', signal: controller.signal,
