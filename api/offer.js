@@ -1,3 +1,5 @@
+import '../assets/js/commercial.js';
+const { tripTotal, perPerson: commercialPerPerson, visible: publicOfferVisible, deposits: allowsDeposits } = globalThis.TravelCommercial;
 const PUBLIC_HOST = 'viajes.trhoncalhomes.com.mx';
 const MASTER_ENDPOINT = process.env.TRHONCAL_MASTER_ENDPOINT ||
   'https://script.google.com/macros/s/AKfycbxq6OxUnMWH004OKyspo7eAbI0GvJvwwDgSnfffSzn9amtKzOWqaDmtWUnrk52rz7U8/exec';
@@ -17,12 +19,7 @@ function safeHttpUrl(value = '') {
   }
 }
 
-function money(value) {
-  const n = Number(String(value ?? '').replace(/[^0-9.-]/g, ''));
-  return Number.isFinite(n)
-    ? new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n)
-    : String(value || '');
-}
+function money(value) { return globalThis.TravelCommercial.money(value); }
 
 function dateMx(value = '') {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return String(value || '');
@@ -47,19 +44,6 @@ function priceUnitLabel(offer = {}) {
   return prefix ? (unit ? `${prefix} · ${unit}` : prefix) : (unit || 'Precio publicado');
 }
 
-function tripTotal(offer = {}) {
-  const price = Number(String(offer.price ?? '').replace(/[^0-9.-]/g, ''));
-  if (!Number.isFinite(price) || price <= 0) return null;
-  const unit = String(offer.priceUnit || '').toLowerCase();
-  const nights = Number(offer.nights);
-  const rooms = Number(offer.rooms);
-  const persons = Number(offer.persons);
-  if (/por\s*habitaci[oó]n.*noche/.test(unit)) return nights > 0 && rooms > 0 ? price * rooms * nights : null;
-  if (/por\s*persona.*noche/.test(unit)) return nights > 0 && persons > 0 ? price * persons * nights : null;
-  if (/por\s*persona.*estancia/.test(unit)) return persons > 0 ? price * persons : null;
-  if (/total\s+por\s+estancia|por\s+paquete/.test(unit)) return price;
-  return null;
-}
 function publicNote(value = '') {
   const raw = String(value || '').trim();
   const fallback = 'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.';
@@ -120,7 +104,7 @@ export default async function handler(req, res) {
   const offers = Array.isArray(payload.offers) ? payload.offers : [];
   const destinations = Array.isArray(payload.destinations) ? payload.destinations : [];
   const offer = offers.find(x => x && x.id === id);
-  if (!offer) return renderUnavailable(res, isPublicHost);
+  if (!publicOfferVisible(offer)) return renderUnavailable(res, isPublicHost);
 
   const destination = destinations.find(d => d && d.id === offer.destinationId) || null;
   const destinationName = destination?.name || offer.leadDestinationVerified || 'Viaje especial';
@@ -152,10 +136,10 @@ export default async function handler(req, res) {
   const totalValue = tripTotal(offer);
   const total = totalValue ? money(totalValue) : '';
   const personsCount = Number(offer.persons);
-  const perPersonValue = totalValue && personsCount > 0 ? totalValue / personsCount : null;
+  const perPersonValue = commercialPerPerson(offer);
   const perPerson = perPersonValue ? money(perPersonValue) : '';
   const unitIsTotal = /total\s+por\s+estancia|por\s+paquete/i.test(String(offer.priceUnit || ''));
-  const showTripTotal = !!total && !unitIsTotal;
+  const showTripTotal = !!total;
   const showPerPerson = !!perPerson && personsCount > 0;
   const includes = Array.isArray(offer.includes) ? offer.includes : [];
   const excludes = Array.isArray(offer.excludes) ? offer.excludes : [];
@@ -201,7 +185,7 @@ export default async function handler(req, res) {
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>${esc(offer.title || destinationName)} | Trhoncal Travel</title>
   <meta name="description" content="${esc(description)}">
-  <meta name="robots" content="noindex,follow,max-image-preview:large">
+  <meta name="robots" content="${isPublicHost ? 'index' : 'noindex'},follow,max-image-preview:large">
   <link rel="canonical" href="${esc(canonical)}">
   <link rel="icon" type="image/svg+xml" href="/assets/images/trhoncal-travel-logo.svg">
   <meta property="og:type" content="website">
@@ -214,6 +198,7 @@ export default async function handler(req, res) {
   <link rel="stylesheet" href="/assets/css/styles.css">
   <link rel="stylesheet" href="/assets/css/brand-v2.css">
   <link rel="stylesheet" href="/assets/css/offer-v1.css">
+  <link rel="stylesheet" href="/assets/css/commercial.css">
   <script type="application/ld+json">${structured}</script>
 </head>
 <body class="offer-page">
@@ -227,6 +212,9 @@ export default async function handler(req, res) {
           <h1${offer.hotel ? ' translate="no" class="notranslate"' : ''}>${esc(offer.title || destinationName)}</h1>
           ${showHotelSubtitle ? `<p class="offer-hotel" translate="no"><strong>Hotel: ${esc(offer.hotel)}</strong></p>` : ''}
           <p>${esc(description)}</p>
+      ${showTripTotal ? `<div class="commercial-total"><span>${globalThis.TravelCommercial.prefix(offer)?'Desde · ':''}Total del viaje</span><strong>${esc(total)}</strong><small>MXN</small></div>` : ''}
+          ${showPerPerson ? `<div class="commercial-person"><span>Por persona</span><strong>${esc(perPerson)}</strong><small>MXN</small></div>` : ''}
+          <div class="commercial-payment"><span>Hasta 18 meses con tarjetas participantes</span>${allowsDeposits(offer.allowsDeposits) ? `<span>${esc(offer.depositText || 'Pregunta por opción de apartar y abonar')}</span>` : ''}</div>
           <div class="offer-tags">
             ${dates.length ? `<span>${esc(dates.join(' - '))}</span>` : ''}
             ${duration ? `<span>${esc(duration)}</span>` : ''}
@@ -235,10 +223,8 @@ export default async function handler(req, res) {
             ${offer.persons ? `<span>${esc(offer.persons)} persona${Number(offer.persons)===1?'':'s'}</span>` : ''}
             ${offer.occupancy ? `<span>${esc(offer.occupancy)}</span>` : ''}
           </div>
-          ${price ? `<div class="offer-price"><small>${esc(priceUnitLabel(offer))}</small><strong>${esc(price)}</strong><span>MXN</span></div>` : ''}
-          ${showTripTotal ? `<div class="offer-total"><span>Total del viaje</span><strong>${esc(total)}</strong><small>MXN</small></div>` : ''}
-          ${showPerPerson ? `<div class="offer-person-total"><span>Por persona</span><strong>${esc(perPerson)}</strong><small>MXN</small></div>` : ''}
-          <div class="offer-payment-benefits"><span>Hasta 18 meses con tarjetas participantes</span>${offer.allowsDeposits ? `<span>${esc(offer.depositText || 'Pregunta por opción de apartar y abonar')}</span>` : ''}</div>
+
+          ${price && !/total\s+por\s+estancia|por\s+paquete/i.test(offer.priceUnit||'') ? `<p class="offer-base-rate">Tarifa base: ${esc(price)} MXN · ${esc(priceUnitLabel(offer))}</p>` : ''}
           <p class="offer-disclaimer">Precio, disponibilidad y condiciones se reconfirman antes de reservar.</p>
         </div>
         <div class="offer-visual">${image ? `<img src="${esc(image)}" alt="${esc(imageAlt)}">` : `<div class="offer-image-fallback"><span>TRHONCAL TRAVEL</span><strong>${esc(offer.hotel || destinationName)}</strong><small>Imagen de esta promoción pendiente de cargar</small></div>`}</div>

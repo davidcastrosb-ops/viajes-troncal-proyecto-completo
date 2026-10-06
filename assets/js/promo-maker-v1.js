@@ -1,26 +1,11 @@
 (()=>{
+  const { money, tripTotal, perPerson: commercialPerPerson, deposits } = TravelCommercial;
   const motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
 
   function validHttp(value=''){
     try{const u=new URL(String(value));return /^https?:$/.test(u.protocol)?u.toString():'';}catch(_){return '';}
   }
-  function money(value){
-    if(value===null||value===undefined||value==='')return '';
-    const numeric=Number(String(value).replace(/[^0-9.-]/g,''));
-    if(Number.isFinite(numeric))return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(numeric);
-    return String(value);
-  }
-  function tripTotal(entry={}){
-    const price=Number(String(entry.price??'').replace(/[^0-9.-]/g,''));
-    if(!Number.isFinite(price)||price<=0)return null;
-    const unit=String(entry.priceUnit||'').toLowerCase();
-    const nights=Number(entry.nights),rooms=Number(entry.rooms),persons=Number(entry.persons);
-    if(/por\s*habitaci[oó]n.*noche/.test(unit))return nights>0&&rooms>0?price*rooms*nights:null;
-    if(/por\s*persona.*noche/.test(unit))return nights>0&&persons>0?price*persons*nights:null;
-    if(/por\s*persona.*estancia/.test(unit))return persons>0?price*persons:null;
-    if(/total\s+por\s+estancia|por\s+paquete/.test(unit))return price;
-    return null;
-  }
+
   function pricePrefix(entry={}){return String(entry.commercialType||'').toUpperCase()==='CAMPANA_DESDE'?'Desde':'';}
   function destinationFor(entry){
     return (typeof DESTINATIONS!=='undefined'?DESTINATIONS:[]).find(d=>d.id===entry.destinationId)||null;
@@ -42,15 +27,14 @@
     const brandedUrl=brandedOfferUrl(entry);
     const publicUrl=brandedUrl?new URL(brandedUrl,window.location.origin).toString():window.location.href;
     const wa=typeof whatsappLink==='function'?whatsappLink(`Hola, quiero información sobre esta promoción de Trhoncal Travel: ${entry.title||destinationName}. ${publicUrl}`):'#cotizar';
-    const price=money(entry.price);
+
     const totalValue=tripTotal(entry),total=totalValue?money(totalValue):'';
-    const personsCount=Number(entry.persons),perPersonValue=totalValue&&personsCount>0?totalValue/personsCount:null,perPerson=perPersonValue?money(perPersonValue):'';
-    const unitIsTotal=/total\s+por\s+estancia|por\s+paquete/i.test(String(entry.priceUnit||''));
-    const showTripTotal=!!total&&!unitIsTotal;
+    const personsCount=Number(entry.persons),perPersonValue=commercialPerPerson(entry),perPerson=perPersonValue?money(perPersonValue):'';
+    const showTripTotal=!!total;
     const showPerPerson=!!perPerson&&personsCount>0;
     const duration=[entry.days?`${entry.days} días`:'',entry.nights?`${entry.nights} noches`:''].filter(Boolean).join(' · ');
     const expiry=entry.expiresAt||'';
-    const verified=entry.verifiedAt||'';
+    const verified=entry.lastPriceConfirmation||entry.ultimaConfirmacionPrecio||entry.verifiedAt||'';
     const title=entry.title||destinationName;
     const planAttr=entry.plan?` data-plan="${escapeHTML(entry.plan)}"`:'';
     return `<article class="promo-maker-card">
@@ -59,12 +43,11 @@
         <span class="promo-maker-destination">${escapeHTML(destinationName)}</span>
         <h3${entry.hotel?' translate="no" class="notranslate"':''}>${escapeHTML(title)}</h3>
         ${entry.hotel?`<p class="promo-maker-hotel notranslate" translate="no">${escapeHTML(entry.hotel)}</p>`:''}
-        ${price?`<div class="promo-maker-price">${pricePrefix(entry)?`<small>${pricePrefix(entry)}</small>`:'' }<strong>${escapeHTML(price)}</strong>${entry.priceUnit?`<span>${escapeHTML(entry.priceUnit)}</span>`:''}</div>`:''}
-        ${showTripTotal?`<div class="promo-maker-total"><span>Total del viaje</span><strong>${escapeHTML(total)}</strong><small>MXN</small></div>`:''}
-        ${showPerPerson?`<div class="promo-maker-person"><span>Por persona</span><strong>${escapeHTML(perPerson)}</strong><small>MXN</small></div>`:''}
-        <div class="promo-maker-payment"><span>Hasta 18 meses con tarjetas participantes</span>${entry.allowsDeposits?`<span>${escapeHTML(entry.depositText||'Pregunta por opción de apartar y abonar')}</span>`:''}</div>
+        ${showTripTotal?`<div class="promo-maker-total commercial-total"><span>${pricePrefix(entry)?'Desde · ':''}Total del viaje</span><strong>${escapeHTML(total)}</strong><small>MXN</small></div>`:'<div class="commercial-pending">Importe por confirmar</div>'}
+        ${showPerPerson?`<div class="promo-maker-person commercial-person"><span>Por persona</span><strong>${escapeHTML(perPerson)}</strong><small>MXN</small></div>`:'<div class="commercial-pending">Importe por confirmar</div>'}
+        <div class="promo-maker-payment commercial-payment"><span>Hasta 18 meses con tarjetas participantes</span>${deposits(entry.allowsDeposits)?`<span>${escapeHTML(entry.depositText||'Pregunta por opción de apartar y abonar')}</span>`:''}</div>
         <div class="promo-maker-meta">${duration?`<span>${escapeHTML(duration)}</span>`:''}${expiry?`<span>Vigente hasta ${escapeHTML(expiry)}</span>`:''}${verified?`<span>Precio confirmado ${escapeHTML(verified)}</span>`:''}</div>
-        ${entry.note?`<p class="promo-maker-note">${escapeHTML(entry.note)}</p>`:''}
+        <p class="promo-maker-note">${escapeHTML(TravelCommercial.shortNote(entry,publicSafeText(entry.note||entry.description||'Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.')))}</p>
         <div class="promo-maker-actions">
           ${brandedUrl?`<a class="promo-maker-cta promo-maker-view" href="${escapeHTML(brandedUrl)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}">Ver promoción</a>`:''}
           <a class="promo-maker-cta promo-maker-primary" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destinationName)}" data-offer="${escapeHTML(entry.id||'')}" data-occasion="${escapeHTML(entry.occasionId||'')}"${planAttr} data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje</a>
@@ -90,7 +73,11 @@
     const maxIndex=()=>Math.max(0,cards().length-visibleCount());
     function sync(){
       index=Math.min(index,maxIndex());
-      if(status)status.textContent=`${Math.min(index+1,count)} de ${count}`;
+      const fits=count<=visibleCount();
+      toolbar.hidden=fits;
+      if(status)status.textContent=fits||expanded?`${count} ofertas`:`${index+1}–${Math.min(index+visibleCount(),count)} de ${count}`;
+      [prev,next,pause].forEach(control=>{if(control)control.hidden=expanded;});
+      if(fits)stop();
     }
     function go(nextIndex){
       if(expanded)return;
@@ -103,22 +90,22 @@
     function stop(){if(timer){clearInterval(timer);timer=null;}}
     function start(){
       stop();
-      if(paused||expanded||motionQuery.matches||document.hidden)return;
+      if(paused||expanded||count<=visibleCount()||motionQuery.matches||document.hidden)return;
       timer=setInterval(()=>go(index+1),6200);
     }
     prev?.addEventListener('click',()=>{go(index-1);start();});
     next?.addEventListener('click',()=>{go(index+1);start();});
     pause?.addEventListener('click',()=>{paused=!paused;pause.textContent=paused?'Reanudar movimiento':'Pausar movimiento';pause.setAttribute('aria-pressed',String(paused));start();});
-    all?.addEventListener('click',()=>{expanded=!expanded;track.classList.toggle('is-expanded',expanded);all.textContent=expanded?'Ver carrusel':'Ver todas';all.setAttribute('aria-expanded',String(expanded));if(expanded)stop();else start();});
+    all?.addEventListener('click',()=>{expanded=!expanded;track.classList.toggle('is-expanded',expanded);all.textContent=expanded?'Ver carrusel':'Ver todas';all.setAttribute('aria-expanded',String(expanded));sync();if(expanded)stop();else start();});
     ['mouseenter','focusin','touchstart','pointerdown'].forEach(evt=>track.addEventListener(evt,stop,{passive:true}));
     ['mouseleave','focusout','touchend','pointerup'].forEach(evt=>track.addEventListener(evt,start,{passive:true}));
     track.addEventListener('scroll',()=>{if(expanded)return;const list=cards();if(!list.length)return;let closest=0,best=Infinity;list.forEach((card,i)=>{const delta=Math.abs((card.offsetLeft-track.offsetLeft)-track.scrollLeft);if(delta<best){best=delta;closest=i;}});index=closest;sync();},{passive:true});
-    window.addEventListener('resize',sync,{passive:true});
+    window.addEventListener('resize',()=>{sync();start();},{passive:true});
     document.addEventListener('visibilitychange',start);
     sync();start();
   }
 
-  renderOffers=function(){
+  window.renderOffers=function(){
     const grid=document.getElementById('promosCards');if(!grid)return;
     const section=document.getElementById('promociones');
     const navLink=document.querySelector('.nav a[href="#promociones"]');
@@ -156,5 +143,12 @@
       grid.before(toolbar);
     }
     setupCarousel(grid,toolbar,publishable.length);
+    if(window.IntersectionObserver && !section.dataset.floatGuard){
+      section.dataset.floatGuard='true';
+      new IntersectionObserver(([entry])=>{
+        const floating=document.getElementById('whatsFloat');
+        if(floating)floating.hidden=entry.isIntersecting;
+      }).observe(section);
+    }
   };
 })();

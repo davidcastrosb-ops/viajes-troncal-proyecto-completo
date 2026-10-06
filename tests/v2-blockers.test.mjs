@@ -18,7 +18,10 @@ async function loadHandler(path, fetchImpl) {
     process: { env: { VERCEL_ENV: 'preview' } }
   });
   const mod = new vm.SourceTextModule(source, { context });
-  await mod.link(() => { throw new Error('Unexpected import'); });
+  await mod.link(async specifier => {
+    if (specifier !== '../assets/js/commercial.js') throw new Error('Unexpected import: ' + specifier);
+    return new vm.SourceTextModule(await fs.readFile(new URL('../assets/js/commercial.js', import.meta.url), 'utf8'), { context });
+  });
   await mod.evaluate();
   return mod.namespace.default;
 }
@@ -99,7 +102,6 @@ test('lead reserva tiempo suficiente para la latencia observada de Apps Script',
   assert.ok(Number(vercel?.functions?.['api/lead.js']?.maxDuration) >= 60, 'Vercel debe reservar al menos 60 s para api/lead.js');
 });
 
-
 test('Decameron conserva base por habitación por noche con habitaciones y personas explícitas', async () => {
   const payload = {
     destinations: [{ id: 'MX-NAY-NN-001', slug: 'nuevo-nayarit-bahia-de-banderas', name: 'Bucerías' }],
@@ -140,12 +142,12 @@ test('Decameron conserva base por habitación por noche con habitaciones y perso
   await handler(req, res);
 
   assert.equal(res.statusCode, 200);
-  assert.match(res.body, /Desde · Por habitación · por noche/);
+  assert.match(res.body, /Por habitación · por noche/);
+  assert.doesNotMatch(res.body, /Desde · Por habitación · por noche/);
   assert.match(res.body, />2 habitaciones</);
   assert.match(res.body, />2 personas</);
   assert.doesNotMatch(res.body, /Por persona · estancia completa/);
 });
-
 
 test('oferta compartida oculta referencias internas del proveedor', async () => {
   const payload = {
@@ -174,7 +176,6 @@ test('oferta compartida oculta referencias internas del proveedor', async () => 
   assert.match(res.body, /reconfirmaci[oó]n|reconfirmamos|reconfirmar/i);
 });
 
-
 test('Trhoncal Travel no publica el número de Homes', async () => {
   const files = [
     '../api/offer.js',
@@ -189,7 +190,6 @@ test('Trhoncal Travel no publica el número de Homes', async () => {
     assert.doesNotMatch(source, /33\s*2933\s*5952|523329335952/, path + ' no debe contener el WhatsApp de Trhoncal Homes');
   }
 });
-
 
 test('oferta no repite el hotel cuando ya viene en el título', async () => {
   const payload = {
@@ -217,7 +217,6 @@ test('oferta no repite el hotel cuando ya viene en el título', async () => {
   assert.doesNotMatch(res.body, /class="offer-hotel"[^>]*><strong>Hotel:/);
 });
 
-
 test('promo maker usa cuatro CTA simétricos y sin flechas ambiguas', async () => {
   const source = await fs.readFile(new URL('../assets/js/promo-maker-v1.js', import.meta.url), 'utf8');
   assert.match(source, />Ver promoción</);
@@ -229,14 +228,12 @@ test('promo maker usa cuatro CTA simétricos y sin flechas ambiguas', async () =
   assert.match(source, /promo-maker-whatsapp/);
 });
 
-
 test('offer-share no inyecta hotel duplicado', async () => {
   const source = await fs.readFile(new URL('../assets/js/offer-share-v1.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /createElement\(['"]p['"]\)[\s\S]{0,600}Hotel:/);
   assert.doesNotMatch(source, /dataset\.hotelBrand/);
   assert.match(source, /no debe crear subtítulos ni filas nuevas/i);
 });
-
 
 test('api master oculta datos internos de proveedor', async () => {
   const payload = {
@@ -278,7 +275,6 @@ test('api master oculta datos internos de proveedor', async () => {
   assert.equal(res.body.sources[0].id,'SRC-2');
 });
 
-
 test('pagos y total del viaje quedan claros sin prometer MSI', async () => {
   const offer = await fs.readFile(new URL('../api/offer.js', import.meta.url), 'utf8');
   const promo = await fs.readFile(new URL('../assets/js/promo-maker-v1.js', import.meta.url), 'utf8');
@@ -297,7 +293,7 @@ test('pagos y total del viaje quedan claros sin prometer MSI', async () => {
 
 test('Decameron calcula total de 18,044 para 2 habitaciones y 2 noches', async () => {
   const source = await fs.readFile(new URL('../api/offer.js', import.meta.url), 'utf8');
-  assert.match(source, /price \* rooms \* nights/);
+  assert.match(source, /assets\/js\/commercial\.js/);
   const price = 4511, rooms = 2, nights = 2;
   assert.equal(price * rooms * nights, 18044);
 });
@@ -307,7 +303,6 @@ test('abonos quedan opt-in por oferta', async () => {
   assert.match(apps, /allowsDeposits: yes_\(row\.Permite_Abonos\)/);
   assert.match(apps, /depositText:/);
 });
-
 
 test('total de viaje no inventa multiplicadores faltantes', async () => {
   const sources = [
@@ -323,7 +318,6 @@ test('total de viaje no inventa multiplicadores faltantes', async () => {
   }
 });
 
-
 test('muestra total por persona para dividir gastos', async () => {
   const offer = await fs.readFile(new URL('../api/offer.js', import.meta.url), 'utf8');
   const promo = await fs.readFile(new URL('../assets/js/promo-maker-v1.js', import.meta.url), 'utf8');
@@ -331,13 +325,12 @@ test('muestra total por persona para dividir gastos', async () => {
 
   for (const source of [offer, promo, pdf]) {
     assert.match(source, /Por persona|POR PERSONA/);
-    assert.match(source, /totalValue\s*\/\s*personsCount|totalValue\/personsCount/);
+    assert.match(source, /commercialPerPerson/);
   }
 
   assert.equal(18044 / 2, 9022);
   assert.equal(11714 / 2, 5857);
 });
-
 
 test('feed Meta usa precio por persona y no expone proveedor', async () => {
   const payload = {
@@ -396,7 +389,6 @@ test('feed Meta usa precio por persona y no expone proveedor', async () => {
   assert.doesNotMatch(res.body, /PriceAgencies|proveedor/i);
 });
 
-
 test('ofertas vencidas quedan fuera de web y catálogo Meta', async () => {
   const apps = await fs.readFile(new URL('../apps-script/Code.gs', import.meta.url), 'utf8');
   const site = await fs.readFile(new URL('../assets/js/site.js', import.meta.url), 'utf8');
@@ -404,8 +396,7 @@ test('ofertas vencidas quedan fuera de web y catálogo Meta', async () => {
 
   assert.match(apps, /Fecha_Expiracion_Web/);
   assert.match(apps, /expiry\.getTime\(\)\s*<\s*startToday_\(\)\.getTime\(\)/);
-  assert.match(site, /expiresAt\|\|o\.fechaExpiracionWeb/);
-  assert.match(site, /expiry\s*&&\s*expiry\s*<\s*new Date\(\)/);
+  assert.match(site, /TravelCommercial\.visible\(o\)/);
   assert.match(master, /const offers = Array\.isArray\(payload\.offers\)/);
   assert.doesNotMatch(master, /expired.*in stock/i);
 });

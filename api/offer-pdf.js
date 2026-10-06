@@ -1,4 +1,6 @@
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import '../assets/js/commercial.js';
+const { tripTotal, perPerson: commercialPerPerson, visible: publicOfferVisible, deposits: allowsDeposits } = globalThis.TravelCommercial;
+import { PDFDocument, StandardFonts, rgb, pushGraphicsState, popGraphicsState, rectangle, clip, endPath } from 'pdf-lib';
 import * as QRCode from 'qrcode';
 
 const PUBLIC_HOST = 'viajes.trhoncalhomes.com.mx';
@@ -16,12 +18,7 @@ function clean(value = '') {
     .trim();
 }
 
-function money(value) {
-  const n = Number(String(value ?? '').replace(/[^0-9.-]/g, ''));
-  return Number.isFinite(n)
-    ? new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n)
-    : clean(value);
-}
+function money(value) { return globalThis.TravelCommercial.money(value); }
 
 function publicNote(value = '') {
   const raw = clean(value);
@@ -39,21 +36,10 @@ function priceUnitLabel(offer = {}) {
   if (/por\s*persona/i.test(low)) return prefix ? `${prefix} - por persona` : 'Por persona';
   if (/noche|promedio/i.test(low)) return prefix ? `${prefix} - por habitación por noche` : 'Por habitación por noche';
   if (/total/i.test(low)) return prefix ? `${prefix} - total` : 'Total publicado';
-  if (/desde/i.test(low)) return 'Desde';
+  if (/desde/i.test(low)) return prefix || 'Precio publicado';
   return prefix || raw || 'Precio publicado';
 }
 
-function tripTotal(offer = {}) {
-  const price = Number(String(offer.price ?? '').replace(/[^0-9.-]/g, ''));
-  if (!Number.isFinite(price) || price <= 0) return null;
-  const unit = String(offer.priceUnit || '').toLowerCase();
-  const nights = Number(offer.nights), rooms = Number(offer.rooms), persons = Number(offer.persons);
-  if (/por\s*habitaci[oó]n.*noche/.test(unit)) return nights > 0 && rooms > 0 ? price * rooms * nights : null;
-  if (/por\s*persona.*noche/.test(unit)) return nights > 0 && persons > 0 ? price * persons * nights : null;
-  if (/por\s*persona.*estancia/.test(unit)) return persons > 0 ? price * persons : null;
-  if (/total\s+por\s+estancia|por\s+paquete/.test(unit)) return price;
-  return null;
-}
 function dateMx(value = '') {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return clean(value);
   const d = new Date(`${value}T12:00:00`);
@@ -144,7 +130,7 @@ export default async function handler(req, res) {
   const offers = Array.isArray(payload.offers) ? payload.offers : [];
   const destinations = Array.isArray(payload.destinations) ? payload.destinations : [];
   const offer = offers.find(x => x && x.id === id);
-  if (!offer) return res.status(404).send('Oferta no disponible');
+  if (!publicOfferVisible(offer)) return res.status(404).send('Oferta no disponible');
 
   const destination = destinations.find(d => d && d.id === offer.destinationId) || null;
   const destinationName = clean(destination?.name || offer.leadDestinationVerified || 'Viaje especial');
@@ -156,7 +142,7 @@ export default async function handler(req, res) {
   const totalValue = tripTotal(offer);
   const total = totalValue ? money(totalValue) : '';
   const personsCount = Number(offer.persons);
-  const perPersonValue = totalValue && personsCount > 0 ? totalValue / personsCount : null;
+  const perPersonValue = commercialPerPerson(offer);
   const perPerson = perPersonValue ? money(perPersonValue) : '';
   const unitIsTotal = /total\s+por\s+estancia|por\s+paquete/i.test(String(offer.priceUnit || ''));
   const dates = [offer.travelStart ? dateMx(offer.travelStart) : '', offer.travelEnd ? dateMx(offer.travelEnd) : ''].filter(Boolean).join(' - ');
@@ -194,12 +180,14 @@ export default async function handler(req, res) {
     const scale = Math.max(targetW / image.width, targetH / image.height);
     const drawW = image.width * scale;
     const drawH = image.height * scale;
+    page.pushOperators(pushGraphicsState(), rectangle(42, y - targetH, targetW, targetH), clip(), endPath());
     page.drawImage(image, {
       x: 42 + (targetW - drawW) / 2,
       y: y - targetH,
       width: drawW,
       height: drawH
     });
+    page.pushOperators(popGraphicsState());
     page.drawRectangle({ x: 42, y: y - targetH, width: targetW, height: targetH, borderColor: rgb(.86,.82,.72), borderWidth: 1 });
     y -= targetH + 24;
   }
@@ -217,24 +205,18 @@ export default async function handler(req, res) {
     y = drawWrapped(page, meta, { x: 42, y, font: regular, size: 10.5, maxWidth: width - 84, color: gray, lineHeight: 14, maxLines: 3 }) - 8;
   }
 
-  if (price) {
-    page.drawText(priceUnitLabel(offer).toUpperCase(), { x: 42, y, font: bold, size: 9, color: gold });
-    page.drawText(price, { x: 42, y: y - 30, font: bold, size: 28, color: navy });
-    page.drawText('MXN', { x: 170, y: y - 25, font: bold, size: 10, color: navy });
+  if (total) {
+    page.drawText(globalThis.TravelCommercial.prefix(offer) ? 'DESDE - TOTAL DEL VIAJE' : 'TOTAL DEL VIAJE', { x: 42, y, font: bold, size: 9, color: gold });
+    page.drawText(total + ' MXN', { x: 42, y: y - 30, font: bold, size: 28, color: navy });
     y -= 52;
-    if (total && !unitIsTotal) {
-      page.drawText('TOTAL DEL VIAJE', { x: 42, y, font: bold, size: 8.8, color: gold });
-      page.drawText(`${total} MXN`, { x: 42, y: y - 22, font: bold, size: 18, color: navy });
-      y -= 39;
-    }
-    if (perPerson) {
-      page.drawText('POR PERSONA', { x: 42, y, font: bold, size: 8.8, color: gold });
-      page.drawText(`${perPerson} MXN`, { x: 42, y: y - 22, font: bold, size: 18, color: navy });
-      y -= 39;
-    }
-    page.drawText('Hasta 18 meses con tarjetas participantes', { x: 42, y, font: bold, size: 9, color: navy });
-    y -= 18;
   }
+  if (perPerson) {
+    page.drawText('POR PERSONA', { x: 42, y, font: bold, size: 9, color: gold });
+    page.drawText(perPerson + ' MXN', { x: 42, y: y - 22, font: bold, size: 18, color: navy });
+    y -= 39;
+  }
+  page.drawText('Hasta 18 meses con tarjetas participantes', { x: 42, y, font: bold, size: 9, color: navy });
+  y -= 18;
 
   if (includes.length) {
     page.drawText('INCLUYE', { x: 42, y, font: bold, size: 10, color: navy });
@@ -265,7 +247,7 @@ export default async function handler(req, res) {
   page.drawText('Trhoncal Travel', { x: 42, y: 55, font: bold, size: 10, color: navy });
   page.drawText('WhatsApp 33 2927 9412  |  viajestroncal@gmail.com', { x: 42, y: 40, font: regular, size: 8.8, color: gray });
   page.drawText('Sujeto a disponibilidad y cambios sin previo aviso. Reconfirma antes de reservar.', { x: 42, y: 26, font: regular, size: 8.3, color: gray });
-  page.drawText('El QR abre la versión vigente de esta promoción en Trhoncal Travel.', { x: 312, y: 26, font: regular, size: 7.3, color: gray });
+  page.drawText('El QR abre la versión vigente de esta promoción en Trhoncal Travel.', { x: 42, y: 14, font: regular, size: 7.3, color: gray });
 
   const bytes = await pdfDoc.save();
   const safeName = clean(hotel || destinationName).replace(/[^A-Za-z0-9áéíóúÁÉÍÓÚñÑ]+/g, '-').replace(/^-|-$/g, '') || 'oferta';
