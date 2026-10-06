@@ -337,3 +337,61 @@ test('muestra total por persona para dividir gastos', async () => {
   assert.equal(18044 / 2, 9022);
   assert.equal(11714 / 2, 5857);
 });
+
+
+test('feed Meta usa precio por persona y no expone proveedor', async () => {
+  const payload = {
+    destinations: [
+      { id: 'MX-JAL-PVR-001', name: 'Puerto Vallarta' },
+      { id: 'MX-NAY-NN-001', name: 'Bucerías' }
+    ],
+    offers: [
+      {
+        id: 'OF-FRIENDLY',
+        destinationId: 'MX-JAL-PVR-001',
+        title: 'Friendly Fun Vallarta · Todo incluido',
+        hotel: 'Friendly Fun Vallarta',
+        plan: 'Todo incluido',
+        price: 11714,
+        priceUnit: 'total por estancia',
+        persons: 2,
+        image: 'https://viajes.trhoncalhomes.com.mx/assets/friendly.jpg'
+      },
+      {
+        id: 'OF-DECAMERON',
+        destinationId: 'MX-NAY-NN-001',
+        title: 'Grand Decameron · Todo incluido',
+        hotel: 'Grand Decameron Complex',
+        plan: 'Todo incluido',
+        price: 4511,
+        priceUnit: 'por habitación por noche',
+        nights: 2,
+        rooms: 2,
+        persons: 2,
+        image: 'https://viajes.trhoncalhomes.com.mx/assets/decameron.jpg',
+        note: 'Captura directa de PriceAgencies'
+      }
+    ]
+  };
+  const handler = await loadHandler('api/master.js', async () => ({
+    ok: true,
+    status: 200,
+    async text() { return JSON.stringify(payload); }
+  }));
+  const req = { method: 'GET', query: { format: 'meta' }, headers: {} };
+  const res = {
+    statusCode: 200, headers: {}, body: '',
+    setHeader(k,v){ this.headers[k]=v; },
+    status(code){ this.statusCode=code; return this; },
+    send(body){ this.body=String(body); return this; },
+    json(value){ this.body=value; return this; }
+  };
+  await handler(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.match(res.headers['Content-Type'] || res.headers['content-type'], /text\/csv/);
+  assert.match(res.body, /5857\.00 MXN/);
+  assert.match(res.body, /9022\.00 MXN/);
+  assert.match(res.body, /Trhoncal Travel/);
+  assert.doesNotMatch(res.body, /PriceAgencies|proveedor/i);
+});

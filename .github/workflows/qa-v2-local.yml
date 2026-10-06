@@ -6,6 +6,7 @@ on:
       - feature/destination-hubs-v2-2026-08-29
       - codex/cierre-funcional-mvp-2026-09
       - codex/pagos-total-viaje-2026-10-05
+      - codex/travel-meta-feed-captura-rapida-2026-10-06
   workflow_dispatch:
 
 jobs:

@@ -1,3 +1,89 @@
+function metaNumeric(value) {
+  const n = Number(String(value ?? '').replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(n) ? n : null;
+}
+
+function metaTripTotal(offer = {}) {
+  const price = metaNumeric(offer.price);
+  if (!price || price <= 0) return null;
+  const unit = String(offer.priceUnit || '').toLowerCase();
+  const nights = Number(offer.nights);
+  const rooms = Number(offer.rooms);
+  const persons = Number(offer.persons);
+  if (/por\s*habitaci[oó]n.*noche/.test(unit)) return nights > 0 && rooms > 0 ? price * rooms * nights : null;
+  if (/por\s*persona.*noche/.test(unit)) return nights > 0 && persons > 0 ? price * persons * nights : null;
+  if (/por\s*persona.*estancia/.test(unit)) return persons > 0 ? price * persons : null;
+  if (/total\s+por\s+estancia|por\s+paquete/.test(unit)) return price;
+  return null;
+}
+
+function metaCatalogPrice(offer = {}) {
+  const total = metaTripTotal(offer);
+  const persons = Number(offer.persons);
+  if (total && persons > 0) return total / persons;
+  return metaNumeric(offer.price);
+}
+
+function metaCleanText(value = '') {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .replace(/priceagencies|travel\s*promo\s*maker|proveedor/ig, '')
+    .trim();
+}
+
+function metaCsvCell(value = '') {
+  const text = String(value ?? '');
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+
+function buildMetaFeed(payload = {}) {
+  const publicHost = 'viajes.trhoncalhomes.com.mx';
+  const destinations = Array.isArray(payload.destinations) ? payload.destinations : [];
+  const offers = Array.isArray(payload.offers) ? payload.offers : [];
+  const headers = [
+    'id','title','description','availability','condition','price','link','image_link',
+    'brand','product_type','custom_label_0','custom_label_1','custom_label_2',
+    'custom_label_3','custom_label_4'
+  ];
+
+  const rows = offers
+    .filter(offer => offer && offer.id && offer.price && offer.image)
+    .map(offer => {
+      const destination = destinations.find(d => d && d.id === offer.destinationId) || null;
+      const destinationName = metaCleanText(destination?.name || offer.leadDestinationVerified || 'Viaje');
+      const price = metaCatalogPrice(offer);
+      if (!price || price <= 0) return null;
+      const people = Number(offer.persons);
+      const priceText = people > 0
+        ? `Precio por persona para ${people} viajero${people === 1 ? '' : 's'}.`
+        : 'Precio publicado sujeto a reconfirmación.';
+      const description = metaCleanText(
+        `${offer.hotel || offer.title || destinationName}. ${offer.plan || ''}. ${priceText} Precio, disponibilidad y condiciones sujetos a reconfirmación antes de reservar.`
+      );
+      return [
+        offer.id,
+        metaCleanText(offer.title || `${destinationName} · Trhoncal Travel`),
+        description,
+        'in stock',
+        'new',
+        `${price.toFixed(2)} MXN`,
+        `https://${publicHost}/oferta/${encodeURIComponent(offer.id)}`,
+        metaCleanText(offer.image),
+        'Trhoncal Travel',
+        'Viajes > Hotel',
+        destinationName,
+        metaCleanText(offer.hotel || ''),
+        metaCleanText(offer.plan || ''),
+        metaCleanText(offer.occasionId || ''),
+        metaCleanText(offer.commercialType || 'TARIFA_DINAMICA')
+      ];
+    })
+    .filter(Boolean);
+
+  return [headers, ...rows].map(values => values.map(metaCsvCell).join(',')).join('\n') + '\n';
+}
+
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -69,6 +155,14 @@ export default async function handler(req, res) {
         const haystack = [item.level, item.type, item.organization, item.title].filter(Boolean).join(' ');
         return !/\binterna\b|priceagencies|travel\s*promo\s*maker/i.test(haystack);
       });
+    }
+
+    if (String(req.query?.format || '').toLowerCase() === 'meta') {
+      const csv = buildMetaFeed(safePayload);
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'inline; filename="trhoncal-travel-meta-feed.csv"');
+      res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+      return res.status(200).send(csv);
     }
 
     res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate');
