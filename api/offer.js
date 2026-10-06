@@ -127,7 +127,7 @@ export default async function handler(req, res) {
   const customQuoteParams = new URLSearchParams({ travelQuote: '1', cta: 'arma_tu_viaje_oferta' });
   if (destinationName) customQuoteParams.set('destino', destinationName);
   const customQuoteUrl = `https://${PUBLIC_HOST}/?${customQuoteParams.toString()}`;
-  const pdfUrl = `https://${PUBLIC_HOST}/oferta/${encodeURIComponent(offer.id)}.pdf`;
+  const pdfUrl = `/oferta/${encodeURIComponent(offer.id)}.pdf`;
   const waShare = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${canonical}`)}`;
   const mailShare = `mailto:?subject=${encodeURIComponent(`Mira esta opción de ${destinationName}`)}&body=${encodeURIComponent(`${shareText}\n\n${canonical}`)}`;
   const dates = [offer.travelStart ? dateMx(offer.travelStart) : '', offer.travelEnd ? dateMx(offer.travelEnd) : ''].filter(Boolean);
