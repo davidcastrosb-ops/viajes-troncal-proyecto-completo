@@ -1,6 +1,8 @@
 name: QA local V2 bloqueadores
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches:
       - feature/destination-hubs-v2-2026-08-29
@@ -8,6 +10,7 @@ on:
       - codex/pagos-total-viaje-2026-10-05
       - codex/travel-meta-feed-captura-rapida-2026-10-06
       - codex/expiry-regression-2026-10-06
+      - audit/public-commercial-consistency
   workflow_dispatch:
 
 jobs:
@@ -29,4 +32,4 @@ jobs:
           cp apps-script/Code.gs /tmp/Trhoncal-Code.js
           node --check /tmp/Trhoncal-Code.js
       - name: Regresiones P1 XSS, galerias y precios
-        run: node --experimental-vm-modules --test tests/v2-blockers.test.mjs
+        run: node --experimental-vm-modules --test tests/*.test.mjs

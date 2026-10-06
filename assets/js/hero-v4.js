@@ -12,16 +12,7 @@
     if(document.querySelector('script[data-when-travel-v1]'))return;
     const script=document.createElement('script');script.src='/assets/js/when-to-travel-v1.js';script.dataset.whenTravelV1='';document.head.appendChild(script);
   }
-  function loadPromoMakerAssets(){
-    if(!document.querySelector('link[data-promo-maker-v1]')){
-      const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/promo-maker-v1.css';link.dataset.promoMakerV1='';document.head.appendChild(link);
-    }
-    if(document.querySelector('script[data-promo-maker-v1]'))return;
-    const script=document.createElement('script');
-    script.src='/assets/js/promo-maker-v1.js';script.dataset.promoMakerV1='';
-    script.onload=()=>{try{if(typeof renderOffers==='function')renderOffers();}catch(_){/* datos aún cargando */}};
-    document.head.appendChild(script);
-  }
+
   function loadOfferLinksAssets(){
     if(document.querySelector('script[data-offer-links-v1],script[src="/assets/js/offer-links-v1.js"]'))return;
     const script=document.createElement('script');
@@ -132,7 +123,7 @@
   function boot(){
     loadHeroV5Assets();
     loadWhenTravelAssets();
-    loadPromoMakerAssets();
+
     loadOfferLinksAssets();
     let tries=0;
     const timer=setInterval(()=>{

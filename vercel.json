@@ -1,5 +1,8 @@
 {
   "functions": {
+    "api/offer.js": { "maxDuration": 60 },
+    "api/offer-pdf.js": { "maxDuration": 60 },
+    "api/offer-pdf-v2.js": { "maxDuration": 60 },
     "api/lead.js": {
       "maxDuration": 60
     }

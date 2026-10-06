@@ -27,15 +27,8 @@ function offerPriceText(o={}){
   const basis=[o.rooms?(Number(o.rooms)===1?'1 habitación':o.rooms+' habitaciones'):'',o.persons?o.persons+' persona'+(Number(o.persons)===1?'':'s'):''].filter(Boolean).join(' · ');
   return `${prefix}${o.price} MXN ${unit}${basis?' · '+basis:''}`;
 }
-function tripTotal(o={}){
-  const price=Number(String(o.price??'').replace(/[^0-9.-]/g,''));if(!Number.isFinite(price)||price<=0)return null;
-  const unit=String(o.priceUnit||'').toLowerCase(),nights=Number(o.nights),rooms=Number(o.rooms),persons=Number(o.persons);
-  if(/por\s*habitaci[oó]n.*noche/.test(unit))return nights>0&&rooms>0?price*rooms*nights:null;
-  if(/por\s*persona.*noche/.test(unit))return nights>0&&persons>0?price*persons*nights:null;
-  if(/por\s*persona.*estancia/.test(unit))return persons>0?price*persons:null;
-  if(/total\s+por\s+estancia|por\s+paquete/.test(unit))return price;
-  return null;
-}
+function tripTotal(o = {}) { return TravelCommercial.tripTotal(o); }
+
 function publicSafeText(text=''){
   const value=String(text||'').trim();
   if(!value)return '';
@@ -239,65 +232,13 @@ function toDate(value){
   return Number.isNaN(d.getTime())?null:d;
 }
 
-function isOfferVisible(o){
-  if(o && o._fromMaster===true) return true;
-  if(!o || o.mostrarWeb!==true || o.publicable!==true)return false;
-  if(!o.lastPriceConfirmation && !o.ultimaConfirmacionPrecio)return false;
-  const status=String(o.status||'').toLowerCase();
-  if(['expired','expirada','suspended','suspendida'].includes(status))return false;
-  const expiry=toDate(o.expiresAt||o.fechaExpiracionWeb);
-  if(expiry && expiry < new Date())return false;
-  return true;
+function isOfferVisible(o) {
+  if (!TravelCommercial.visible(o)) return false;
+  if (o._fromMaster === true) return true;
+  return o.mostrarWeb === true && o.publicable === true && !!(o.lastPriceConfirmation || o.ultimaConfirmacionPrecio);
 }
 
-function renderOffers(){
-  const grid=document.getElementById('promosCards');if(!grid)return;
-  const section=document.getElementById('promociones');
-  const navLink=document.querySelector('.nav a[href="#promociones"]');
-  const footerLink=document.querySelector('.footer a[href="#promociones"]');
-  const publishable=OFFERS.filter(isOfferVisible).sort((a,b)=>(a.ordenWeb??9999)-(b.ordenWeb??9999));
-  grid.innerHTML='';
-  if(!publishable.length){
-    if(section)section.hidden=true;
-    if(navLink)navLink.hidden=true;
-    if(footerLink)footerLink.closest('p')?.setAttribute('hidden','');
-    return;
-  }
-  if(section)section.hidden=false;
-  if(navLink)navLink.hidden=false;
-  if(footerLink)footerLink.closest('p')?.removeAttribute('hidden');
-  publishable.forEach(entry=>{
-    const title=escapeHTML(entry.title||'Promoción especial');
-    const desc=escapeHTML(ensurePriceDisclaimer(entry.description||entry.note||'Cotiza disponibilidad y condiciones vigentes.'));
-    const image=escapeHTML(entry.image||'');
-    const priceText=offerPriceText(entry);
-    const price=priceText?`<div class="promo-price">${escapeHTML(priceText)}</div>`:'';
-    const totalValue=tripTotal(entry),total=totalValue?new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(totalValue):'';
-    const personsCount=Number(entry.persons),perPersonValue=totalValue&&personsCount>0?totalValue/personsCount:null,perPerson=perPersonValue?new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(perPersonValue):'';
-    const showTripTotal=!!total&&!/total\s+por\s+estancia|por\s+paquete/i.test(String(entry.priceUnit||''));
-    const showPerPerson=!!perPerson&&personsCount>0;
-    const payment=`<div class="promo-payment"><span>Hasta 18 meses con tarjetas participantes</span>${entry.allowsDeposits?`<span>${escapeHTML(entry.depositText||'Pregunta por opción de apartar y abonar')}</span>`:''}</div>`;
-    const destination=DESTINATIONS.find(d=>d.id===entry.destinationId)?.name||entry.leadDestinationVerified||'';
-    const offerId=escapeHTML(entry.id||'');
-    const offerPath=entry.id?`/oferta/${encodeURIComponent(entry.id)}`:'#cotizar';
-    const offerUrl=entry.id?`${location.origin}/oferta/${encodeURIComponent(entry.id)}`:location.href;
-    const waText=`Hola, quiero información sobre esta promoción de Trhoncal Travel: ${entry.title||destination||'viaje'}. ${offerUrl}`;
-    const waHref=whatsappLink(waText);
-    grid.insertAdjacentHTML('beforeend',`<article class="promo-card">${image?`<img src="${image}" alt="${title}" loading="lazy">`:''}<h3>${title}</h3>${price}${showTripTotal?`<div class="promo-total"><span>Total del viaje</span><strong>${escapeHTML(total)}</strong></div>`:''}${showPerPerson?`<div class="promo-person"><span>Por persona</span><strong>${escapeHTML(perPerson)}</strong></div>`:''}${payment}<p>${desc}</p><div class="promo-actions promo-actions-grid"><a class="btn promo-cta promo-cta-view" href="${offerPath}">Ver promoción</a><a class="btn btn-primary promo-cta" href="#cotizar" data-quote-launch data-travel-quote data-destination="${escapeHTML(destination)}" data-offer="${offerId}" data-occasion="${escapeHTML(entry.occasionId||'')}" data-promo-url="${escapeHTML(entry.publicPromoUrl||entry.sharePromoUrl||'')}" data-start="${escapeHTML(entry.travelStart||'')}" data-end="${escapeHTML(entry.travelEnd||'')}" data-cta-origen="oferta_home">Quiero este viaje</a><button class="btn promo-cta promo-cta-share" type="button" data-share-offer data-share-title="${title}" data-share-url="${escapeHTML(offerUrl)}">Compartir promoción</button><a class="btn promo-cta promo-cta-whatsapp" href="${escapeHTML(waHref)}" target="_blank" rel="noopener noreferrer">Prefiero WhatsApp</a></div></article>`);
-  });
-  grid.querySelectorAll('[data-share-offer]').forEach(btn=>btn.addEventListener('click',async()=>{
-    const shareData={title:btn.dataset.shareTitle||'Trhoncal Travel',text:'Mira esta promoción de Trhoncal Travel.',url:btn.dataset.shareUrl||location.href};
-    try{
-      if(navigator.share)await navigator.share(shareData);
-      else{
-        await navigator.clipboard.writeText(shareData.url);
-        const original=btn.textContent;
-        btn.textContent='Enlace copiado';
-        setTimeout(()=>{btn.textContent=original;},1400);
-      }
-    }catch(_){}
-  }));
-}
+// The sole card renderer is assets/js/promo-maker-v1.js, loaded before init completes.
 
 async function init(){
   try{

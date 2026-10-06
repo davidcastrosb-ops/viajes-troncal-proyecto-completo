@@ -245,6 +245,7 @@ function publicOffer_(row) {
     nights: number_(row.Noches),
     plan: text_(row.Plan),
     price: text_(row.Precio_MXN),
+    priceValue: number_(row.Precio_MXN),
     currency: 'MXN',
     priceUnit: text_(row.Unidad_precio),
     commercialType: commercialType_(row.Tipo_comercial, row.Unidad_precio),
@@ -367,8 +368,6 @@ function publicOccasion_(row) {
 function commercialType_(value, unit) {
   const explicit = text_(value).toUpperCase();
   if (['PAQUETE_FIJO', 'TARIFA_DINAMICA', 'CAMPANA_DESDE'].indexOf(explicit) !== -1) return explicit;
-  const rawUnit = text_(unit).toLowerCase();
-  if (rawUnit.indexOf('desde') !== -1 || rawUnit.indexOf('promedio') !== -1 || rawUnit.indexOf('noche') !== -1) return 'CAMPANA_DESDE';
   return 'TARIFA_DINAMICA';
 }
 

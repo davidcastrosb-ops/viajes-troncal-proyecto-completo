@@ -1,3 +1,4 @@
+import '../assets/js/commercial.js';
 const PUBLIC_HOST = 'viajes.trhoncalhomes.com.mx';
 const SHARE_VERSION = 'wa-20260902b';
 const MASTER_ENDPOINT = process.env.TRHONCAL_MASTER_ENDPOINT ||
@@ -42,7 +43,7 @@ function numberMx(v=''){const n=Number(String(v).replace(/[^0-9.-]/g,''));return
 function dateMx(v=''){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return String(v||'');return new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric'}).format(new Date(`${v}T12:00:00`));}
 function requestHost(req){const raw=String(req.headers?.['x-forwarded-host']||req.headers?.host||PUBLIC_HOST).split(',')[0].trim();return /^[A-Za-z0-9.-]+(?::\d+)?$/.test(raw)?raw:PUBLIC_HOST;}
 function requestProto(req){return String(req.headers?.['x-forwarded-proto']||'https').split(',')[0].trim()==='http'?'http':'https';}
-function priceUnit(o){const raw=String(o?.priceUnit||'').trim(),type=String(o?.commercialType||'').toUpperCase(),low=raw.toLowerCase(),prefix=type==='PAQUETE_FIJO'?'':'Desde';let unit=raw||'Precio publicado';if(/total\s+por\s+estancia/.test(low))unit='Total por estancia';else if(/por\s*persona.*estancia/.test(low))unit='Por persona · estancia completa';else if(/por\s*habitaci[oó]n.*noche/.test(low)||/promedio.*noche/.test(low))unit='Por habitación · por noche';else if(/por\s*persona.*noche/.test(low))unit='Por persona · por noche';else if(/por\s+paquete/.test(low))unit='Por paquete';else if(/por\s*persona/.test(low))unit='Por persona';else if(/total/.test(low))unit='Total publicado';else if(/desde/.test(low))unit='';return prefix?(unit?prefix+' · '+unit:prefix):(unit||'Precio publicado');}
+function priceUnit(o){const raw=String(o?.priceUnit||'').trim(),type=String(o?.commercialType||'').toUpperCase(),low=raw.toLowerCase(),prefix=type==='CAMPANA_DESDE'?'Desde':'';let unit=raw||'Precio publicado';if(/total\s+por\s+estancia/.test(low))unit='Total por estancia';else if(/por\s*persona.*estancia/.test(low))unit='Por persona · estancia completa';else if(/por\s*habitaci[oó]n.*noche/.test(low)||/promedio.*noche/.test(low))unit='Por habitación · por noche';else if(/por\s*persona.*noche/.test(low))unit='Por persona · por noche';else if(/por\s+paquete/.test(low))unit='Por paquete';else if(/por\s*persona/.test(low))unit='Por persona';else if(/total/.test(low))unit='Total publicado';else if(/desde/.test(low))unit='';return prefix?(unit?prefix+' · '+unit:prefix):(unit||'Precio publicado');}
 function mobilePriceText(o,price){return price?`${priceUnit(o)} · ${price} MXN`:'Consultar';}
 function previewBanner(){return process.env.VERCEL_ENV==='production'?'':'<div class="hotel-v2-preview">VISTA PREVIA · MINI SITIO DE HOTEL V2 · producción actual sigue intacta</div>';}
 async function loadMaster(){const sep=MASTER_ENDPOINT.includes('?')?'&':'?';const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);try{const r=await fetch(`${MASTER_ENDPOINT}${sep}_ts=${Date.now()}`,{cache:'no-store',redirect:'follow',signal:controller.signal,headers:{'User-Agent':'TrhoncalTravel-HotelV2/2.0'}});if(!r.ok)throw new Error(`Master ${r.status}`);return await r.json();}finally{clearTimeout(timeout);}}
@@ -67,7 +68,7 @@ function approvedImages(hotelId,payload){
     .sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999))
     .map(x=>[normalizeHotelImageUrl(x.url),String(x.alt||'Fotografía del hotel')]);
 }
-function offerVisible(o){if(!o)return false;if(o.showWeb===false)return false;const exp=o.expirationDate||o.expiresAt||'';return !(/^\d{4}-\d{2}-\d{2}$/.test(String(exp))&&new Date(`${exp}T23:59:59`)<new Date());}
+function offerVisible(o) { return globalThis.TravelCommercial.visible(o); }
 
 export default async function handler(req,res){
   if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).send('Method not allowed');}
