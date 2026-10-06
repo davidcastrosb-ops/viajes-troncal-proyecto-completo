@@ -5,7 +5,7 @@
     "node": "24.x"
   },
   "scripts": {
-    "test:blockers": "node --experimental-vm-modules --test tests/v2-blockers.test.mjs"
+    "test:blockers": "node --experimental-vm-modules --test tests/*.test.mjs"
   },
   "dependencies": {
     "pdf-lib": "^1.17.1",

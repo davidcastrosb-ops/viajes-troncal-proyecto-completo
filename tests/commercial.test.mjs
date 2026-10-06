@@ -129,3 +129,11 @@ test('concise notes preserve taxes and dates after removing repeated price sente
   assert.match(note, /reconfirmación/);
   assert.match(commercial.shortNote(offer, 'Precio total incluye transportación y desayuno.'), /incluye transportación y desayuno/);
 });
+test('offer and PDF routes reserve enough time for observed Apps Script latency', async () => {
+  const config = JSON.parse(await fs.readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  for (const route of ['api/offer.js','api/offer-pdf.js','api/offer-pdf-v2.js']) {
+    const source = await fs.readFile(new URL('../' + route, import.meta.url), 'utf8');
+    assert.match(source, /setTimeout\([\s\S]{0,50}abort\(\),\s*30000\)/);
+    assert.ok(config.functions[route].maxDuration >= 60);
+  }
+});
