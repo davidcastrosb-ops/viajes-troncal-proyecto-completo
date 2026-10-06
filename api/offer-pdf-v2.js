@@ -46,6 +46,8 @@ export default async function handler(req,res){
   const approved=hotelImages.filter(img=>img&&img.hotelId===hotelId&&safe(img.url)).sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)).map(x=>x.url);
   const gallery=[];approved.forEach(u=>{const s=safe(u);if(s&&!gallery.includes(s))gallery.push(s);});
   if(gallery.length<2){localGallery(req,hotelSlug).forEach(u=>{if(!gallery.includes(u))gallery.push(u);});}
+  // New hotel offers can have an approved cover before their gallery is populated.
+  if(!gallery.length && safe(offer.image))gallery.push(safe(offer.image));
 
   const destinationName=clean(destination?.name||offer.leadDestinationVerified||'Viaje especial'),title=clean(offer.title||destinationName),hotel=clean(offer.hotel||hotelProfile?.name||''),price=numberMx(offer.price),totalValue=tripTotal(offer),total=totalValue?numberMx(totalValue):'',personsCount=Number(offer.persons),perPersonValue=commercialPerPerson(offer),perPerson=perPersonValue?numberMx(perPersonValue):'',unitIsTotal=/total\s+por\s+estancia|por\s+paquete/i.test(String(offer.priceUnit||''));
   const dates=[offer.travelStart?dateMx(offer.travelStart):'',offer.travelEnd?dateMx(offer.travelEnd):''].filter(Boolean).join(' - '),duration=[offer.days?`${offer.days} días`:'',offer.nights?`${offer.nights} noches`:''].filter(Boolean).join(' / '),includes=Array.isArray(offer.includes)?offer.includes.map(clean).filter(Boolean):[];
