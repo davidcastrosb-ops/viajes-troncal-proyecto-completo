@@ -373,9 +373,19 @@ test('feed Meta usa precio por persona y no expone proveedor', async () => {
       }
     ]
   };
-  const handler = await loadHandler('api/meta-feed.js', async () => jsonResponse(payload));
-  const req = { method: 'GET', query: {}, headers: {} };
-  const res = mockRes();
+  const handler = await loadHandler('api/master.js', async () => ({
+    ok: true,
+    status: 200,
+    async text() { return JSON.stringify(payload); }
+  }));
+  const req = { method: 'GET', query: { format: 'meta' }, headers: {} };
+  const res = {
+    statusCode: 200, headers: {}, body: '',
+    setHeader(k,v){ this.headers[k]=v; },
+    status(code){ this.statusCode=code; return this; },
+    send(body){ this.body=String(body); return this; },
+    json(value){ this.body=value; return this; }
+  };
   await handler(req, res);
 
   assert.equal(res.statusCode, 200);
