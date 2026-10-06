@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/destination-hubs-v2-2026-08-29
+      - codex/sunscape-promo-2026-10-06
     paths:
       - '.github/imports/hotel-images.json'
 
