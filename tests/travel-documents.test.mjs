@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import handler from '../api/travel-documents.js';
+import handler from '../lib/travel-documents.js';
 
 const USER='internal-preview';
 const PASS='test-only-passphrase-1234567';
