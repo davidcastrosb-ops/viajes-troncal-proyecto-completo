@@ -21,6 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Instalar dependencias del proyecto
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
       - name: Sintaxis JS modificada
         run: |
           node --check api/hotel-v2.js

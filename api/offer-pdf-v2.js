@@ -1,3 +1,4 @@
+import travelDocumentsHandler from '../lib/travel-documents.js';
 import '../assets/js/commercial.js';
 const { tripTotal, perPerson: commercialPerPerson, visible: publicOfferVisible, deposits: allowsDeposits } = globalThis.TravelCommercial;
 import { PDFDocument, StandardFonts, rgb, pushGraphicsState, popGraphicsState, rectangle, clip, endPath } from 'pdf-lib';
@@ -35,6 +36,7 @@ async function embedImage(pdf,url){if(!url)return null;try{const r=await fetch(u
 function cover(page,img,x,y,w,h){const scale=Math.max(w/img.width,h/img.height),dw=img.width*scale,dh=img.height*scale;page.pushOperators(pushGraphicsState(),rectangle(x,y,w,h),clip(),endPath());page.drawImage(img,{x:x+(w-dw)/2,y:y+(h-dh)/2,width:dw,height:dh});page.pushOperators(popGraphicsState());}
 
 export default async function handler(req,res){
+  if(req.query?.mode==='documents')return travelDocumentsHandler(req,res);
   if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).send('Method not allowed');}
   const id=String(req.query.id||'').trim();if(!id||!/^[A-Za-z0-9_-]+$/.test(id))return res.status(404).send('Oferta no disponible');
   let payload;try{payload=await master();}catch(_){return res.status(503).send('No pudimos generar el PDF.');}
