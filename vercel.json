@@ -1,13 +1,27 @@
 {
   "functions": {
-    "api/offer.js": { "maxDuration": 60 },
-    "api/offer-pdf.js": { "maxDuration": 60 },
-    "api/offer-pdf-v2.js": { "maxDuration": 60 },
+    "api/offer.js": {
+      "maxDuration": 60
+    },
+    "api/offer-pdf.js": {
+      "maxDuration": 60
+    },
+    "api/offer-pdf-v2.js": {
+      "maxDuration": 60
+    },
     "api/lead.js": {
       "maxDuration": 60
     }
   },
   "rewrites": [
+    {
+      "source": "/admin/documentos/",
+      "destination": "/api/offer-pdf-v2?mode=documents"
+    },
+    {
+      "source": "/admin/documentos",
+      "destination": "/api/offer-pdf-v2?mode=documents"
+    },
     {
       "source": "/meta-feed.csv",
       "destination": "/api/master?format=meta"
