@@ -1,0 +1,29 @@
+name: Travel documents prototype checks
+on:
+  push:
+    branches: [feature/travel-documents]
+    paths:
+      - 'api/offer-pdf-v2.js'
+      - 'lib/travel-documents.js'
+      - 'tests/travel-documents.test.mjs'
+      - '.github/workflows/travel-documents-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'api/offer-pdf-v2.js'
+      - 'lib/travel-documents.js'
+      - 'tests/travel-documents.test.mjs'
+      - '.github/workflows/travel-documents-ci.yml'
+permissions:
+  contents: read
+jobs:
+  document-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: node --experimental-vm-modules --test tests/travel-documents.test.mjs
