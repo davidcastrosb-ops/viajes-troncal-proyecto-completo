@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import handler from '../lib/travel-documents.js';
+import { PDFDocument } from 'pdf-lib';
 
 const USER='internal-preview';
 const PASS='test-only-passphrase-1234567';
@@ -68,4 +69,18 @@ test('generates PDF for bus itinerary',()=>withAuth(async()=>{
     backTo:'Zapopan',backDate:'2026-11-22',backTime:'16:45',backSeat:'8'
   }),res);
   assert.equal(res.code,200);assert.equal(res.body.subarray(0,4).toString(),'%PDF');
+}));
+
+test('combined package requires separate amounts and provider codes',()=>withAuth(async()=>{
+ const b={kind:'combinado',name:'Prueba de paquete',reservation:'PQT001',hotelReservation:'HOT001',
+   locator:'BUS001',payment:'PAGADO',amount:'10215.76',hotelAmount:'8925.76',busAmount:'1290.00',
+   hotel:'Hotel Ejemplo',room:'King vista al mar',arrival:'2026-11-20',departure:'2026-11-22',
+   provider:'Vallarta Plus',from:'Zapopan',to:'Puerto Vallarta',
+   backFrom:'Puerto Vallarta',backTo:'Zapopan',outDate:'2026-11-20',backDate:'2026-11-22',
+   outSeat:'8',backSeat:'8',lat:'20.65',lon:'-105.24'};
+ const bad=response();await handler(request('POST',{...b,busAmount:'1280.00'}),bad);
+ assert.equal(bad.code,400);assert.match(bad.body.error,/no coincide/);
+ const ok=response();await handler(request('POST',b),ok);
+ assert.equal(ok.code,200);
+ const doc=await PDFDocument.load(ok.body);assert.equal(doc.getPageCount(),3);
 }));
